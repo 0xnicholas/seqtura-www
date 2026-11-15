@@ -1,12 +1,26 @@
 ---
-import { architectureLayers, controlPlanes } from '../data/architecture';
+import {
+  architectureLayers,
+  controlPlanes,
+  overviewBoundary,
+  overviewZones,
+} from '../data/architecture';
+
+const usersZone = overviewZones.find((zone) => zone.id === 'users')!;
+const runtimeZone = overviewZones.find((zone) => zone.id === 'runtime')!;
+
+const markGlyphs = {
+  lock: '锁',
+  human: '人',
+  record: '记',
+} as const;
 ---
 
 <div
   class="arch-map"
   data-arch-diagram
   role="img"
-  aria-label="交付参考架构示意：五层能力栈横切三条控制面；虚线框内是 Seqtura 交付的组件与模式，框外是客户的系统、数据、身份与审批。"
+  aria-label="交付参考架构示意：左侧是用户 / 业务系统，中间虚线框是 Seqtura 交付边界，内含五层能力栈与三条控制面 C1 / C2 / C3，右侧是客户运行环境。实线表示请求 / 数据流，虚线表示控制 / 遥测，锁表示权限检查点，人表示 HITL gate，记录表示 audit，点线表示 trace。"
 >
   <div class="map-head">
     <span>REFERENCE ARCHITECTURE / 交付参考架构</span>
@@ -16,54 +30,127 @@ import { architectureLayers, controlPlanes } from '../data/architecture';
   </div>
 
   <div class="map-body">
-    <div class="client-rail" aria-hidden="true">
-      <span class="rail-title">客户环境</span>
-      <span>系统</span>
-      <span>数据</span>
-      <span>身份</span>
-      <span>审批</span>
+    <div class="zone zone-users" data-arch-zone="users">
+      <p class="zone-tag">{usersZone.tag}</p>
+      <p class="zone-title">{usersZone.title}</p>
+      <ul class="zone-items">
+        {usersZone.items.map((item) => (
+          <li>{item}</li>
+        ))}
+      </ul>
+      <p class="zone-note">{usersZone.note}</p>
     </div>
 
-    <div class="boundary-frame">
-      <div class="plane-guides" aria-hidden="true">
-        <i></i>
-        <i></i>
-        <i></i>
-      </div>
-      <span class="boundary-tag" aria-hidden="true">
-        SEQTURA 交付边界 / 组件与模式
+    <span class="zone-flow zone-flow-in" data-zone-flow aria-hidden="true">
+      <span class="flow-word">请求 / 数据</span>
+      <span class="flow-track">
+        <i class="flow-rule"></i>
+        <i class="flow-head"></i>
       </span>
+    </span>
 
-      <div class="planes" aria-hidden="true">
-        {controlPlanes.map((plane) => (
-          <span class="plane">
-            <b>{plane.short}</b>
-            {plane.name}
+    <div class="boundary" data-arch-zone="boundary">
+      <div class="boundary-frame" data-boundary-frame>
+        <div class="boundary-head">
+          <span class="boundary-tag">{overviewBoundary.tag}</span>
+          <span class="boundary-title">{overviewBoundary.title}</span>
+          <span class="boundary-sub">{overviewBoundary.sub}</span>
+        </div>
+
+        <div class="control-strip" aria-hidden="true">
+          <span class="strip-title">
+            <i></i>CONTROL PLANES / 控制面
           </span>
-        ))}
-      </div>
+          {controlPlanes.map((plane) => (
+            <span class="strip-code">{plane.short}</span>
+          ))}
+        </div>
 
-      <div class="layer-stack">
-        {architectureLayers.map((layer) => (
-          <div class="map-layer" data-map-layer={layer.id}>
-            <span class="map-no">{layer.no}</span>
-            <span class="map-name">
-              <b>{layer.name}</b>
-              <span>{layer.label}</span>
-            </span>
-            <span class="map-marks" aria-hidden="true">
-              {layer.id === 'ingress' && <span class="mark mark-human">人</span>}
-              {layer.id === 'tools' && <span class="mark mark-lock">锁</span>}
-              {layer.id === 'knowledge' && <span class="mark mark-lock">锁</span>}
-            </span>
+        <div class="layer-stack" data-layer-stack>
+          <div class="bands" aria-hidden="true">
+            <span class="band-spacer"></span>
+            {controlPlanes.map((plane) => (
+              <span class="band" data-control-band={plane.id} aria-hidden="true">
+                <span class="band-label">
+                  <b>{plane.short}</b>
+                  <em>{plane.name}</em>
+                </span>
+              </span>
+            ))}
           </div>
-        ))}
+
+          {architectureLayers.map((layer) => (
+            <div class="map-layer" data-map-layer={layer.id}>
+              <span class="map-no">{layer.no}</span>
+              <span class="trace-cell" aria-hidden="true">
+                <i></i>
+              </span>
+              <span class="map-name">
+                <b>{layer.name}</b>
+                <span>{layer.label}</span>
+              </span>
+              <span class="map-marks" aria-hidden="true">
+                {layer.marks.map((mark) => (
+                  <span class:list={['mark', `mark-${mark}`]} data-diagram-mark={mark}>
+                    {markGlyphs[mark]}
+                  </span>
+                ))}
+              </span>
+            </div>
+          ))}
+        </div>
+
+        <div class="boundary-foot" aria-hidden="true">
+          <span class="foot-item">
+            <i class="foot-line foot-solid"></i>请求 / 数据流
+          </span>
+          <span class="foot-item" data-map-trace>
+            <i class="foot-line foot-dotted"></i>TRACE
+          </span>
+          <span class="foot-item">
+            <i class="foot-line foot-dashed"></i>控制 / 遥测
+          </span>
+          <span class="foot-note">{overviewBoundary.flow}</span>
+        </div>
       </div>
 
-      <div class="flow-axis" aria-hidden="true">
-        <span>请求 / 数据流</span>
-        <span class="flow-line"></span>
-      </div>
+      <ul class="plane-list" data-control-plane-list>
+        {controlPlanes.map((plane) => (
+          <li>
+            <span class="plane-list-code">{plane.short}</span>
+            <span class="plane-list-name">{plane.name}</span>
+            <span class="plane-list-lands">{plane.lands}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+
+    <span class="zone-flow zone-flow-out" data-zone-flow aria-hidden="true">
+      <span class="flow-pair">
+        <span class="flow-word">数据</span>
+        <span class="flow-track">
+          <i class="flow-rule"></i>
+          <i class="flow-head"></i>
+        </span>
+      </span>
+      <span class="flow-pair">
+        <span class="flow-word">遥测</span>
+        <span class="flow-track">
+          <i class="flow-head flow-head-back"></i>
+          <i class="flow-rule flow-rule-dashed"></i>
+        </span>
+      </span>
+    </span>
+
+    <div class="zone zone-runtime" data-arch-zone="runtime">
+      <p class="zone-tag">{runtimeZone.tag}</p>
+      <p class="zone-title">{runtimeZone.title}</p>
+      <ul class="zone-items">
+        {runtimeZone.items.map((item) => (
+          <li>{item}</li>
+        ))}
+      </ul>
+      <p class="zone-note">{runtimeZone.note}</p>
     </div>
   </div>
 
@@ -82,21 +169,25 @@ import { architectureLayers, controlPlanes } from '../data/architecture';
     box-shadow: var(--shadow-site-xs);
   }
 
-  .map-head {
+  .map-head,
+  .map-foot {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
-    gap: 8px 16px;
-    padding: 13px 20px;
-    border-bottom: 1px solid var(--color-line);
-    background: var(--color-paper);
+    gap: 4px 16px;
+    padding: 12px 20px;
     font-family: var(--font-mono);
-    font-size: 10px;
+    font-size: 9px;
     line-height: 1.5;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.055em;
     color: var(--color-muted);
     text-transform: uppercase;
+  }
+
+  .map-head {
+    border-bottom: 1px solid var(--color-line);
+    background: var(--color-paper);
   }
 
   .map-status {
@@ -114,132 +205,332 @@ import { architectureLayers, controlPlanes } from '../data/architecture';
 
   .map-body {
     display: grid;
-    grid-template-columns: 108px minmax(0, 1fr);
-    gap: 18px;
-    padding: 24px 20px 20px;
+    grid-template-columns: 190px 38px minmax(0, 1fr) 38px 184px;
+    align-items: stretch;
+    padding: 24px 20px 22px;
   }
 
-  .client-rail {
+  .zone {
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    align-self: stretch;
-    padding-top: 104px;
+    min-width: 0;
+    padding: 15px 14px 14px;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-site);
+    background: var(--color-paper);
   }
 
-  .rail-title,
-  .client-rail span:not(.rail-title) {
+  .zone-users {
+    align-self: center;
+    border-top: 2px solid var(--color-ink);
+  }
+
+  .zone-runtime {
+    align-self: center;
+    border-top: 2px solid var(--color-line-strong);
+    background: var(--color-canvas);
+  }
+
+  .zone-tag {
     font-family: var(--font-mono);
-    font-size: 9px;
+    font-size: 8px;
     line-height: 1.5;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.07em;
+    color: var(--color-red-dark);
     text-transform: uppercase;
   }
 
-  .rail-title {
-    padding-bottom: 8px;
-    border-bottom: 1px solid var(--color-line);
-    color: var(--color-red-dark);
+  .zone-runtime .zone-tag {
+    color: var(--color-muted);
   }
 
-  .client-rail span:not(.rail-title) {
+  .zone-title {
+    margin-top: 6px;
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 1.4;
+    letter-spacing: -0.01em;
+  }
+
+  .zone-items {
+    display: grid;
+    gap: 5px;
+    margin-top: 12px;
+  }
+
+  .zone-items li {
     padding: 6px 8px;
     border: 1px solid var(--color-line);
     border-radius: 4px;
-    background: var(--color-paper);
+    background: var(--color-canvas);
+    font-family: var(--font-mono);
+    font-size: 9px;
+    line-height: 1.5;
+    letter-spacing: 0.02em;
     color: var(--color-muted);
+  }
+
+  .zone-note {
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px solid var(--color-line);
+    font-size: 10px;
+    line-height: 1.65;
+    color: var(--color-muted);
+  }
+
+  .zone-flow {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 16px;
+    min-width: 0;
+    padding: 0 6px;
+  }
+
+  .flow-word {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 7px;
+    line-height: 1.4;
+    letter-spacing: 0.04em;
+    color: var(--color-muted);
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  .flow-pair {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .flow-track {
+    display: flex;
+    align-items: center;
+  }
+
+  .flow-rule {
+    flex: 1;
+    height: 1px;
+    background: var(--color-ink);
+  }
+
+  .flow-rule-dashed {
+    height: 0;
+    border-top: 1px dashed var(--color-red-dark);
+    background: none;
+  }
+
+  .flow-head {
+    width: 0;
+    height: 0;
+    border-top: 4px solid transparent;
+    border-bottom: 4px solid transparent;
+    border-left: 5px solid var(--color-ink);
+  }
+
+  .flow-head-back {
+    border-right: 5px solid var(--color-red-dark);
+    border-left: 0;
+  }
+
+  .boundary {
+    min-width: 0;
   }
 
   .boundary-frame {
     position: relative;
-    display: flex;
-    flex-direction: column;
-    padding: 44px 18px 18px;
+    padding: 12px 14px 12px;
     border: 1px dashed var(--color-line-strong);
     border-radius: var(--radius-site);
-    background:
-      linear-gradient(var(--color-canvas), var(--color-canvas)) padding-box,
-      var(--color-paper);
+    background: var(--color-canvas);
   }
 
-  .plane-guides {
-    position: absolute;
-    inset: 36px 18px 18px;
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    pointer-events: none;
-  }
-
-  .plane-guides i {
-    margin-left: 50%;
-    border-left: 1px dashed rgb(245 48 3 / 18%);
+  .boundary-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 8px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--color-line);
   }
 
   .boundary-tag {
-    position: absolute;
-    top: 12px;
-    right: 18px;
     font-family: var(--font-mono);
     font-size: 8px;
     line-height: 1.5;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.06em;
+    color: var(--color-red-dark);
+    text-transform: uppercase;
+  }
+
+  .boundary-title {
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.4;
+    letter-spacing: -0.01em;
+  }
+
+  .boundary-sub {
+    margin-left: auto;
+    font-family: var(--font-mono);
+    font-size: 8px;
+    line-height: 1.5;
+    letter-spacing: 0.04em;
+    color: var(--color-muted);
+  }
+
+  .control-strip {
+    display: grid;
+    grid-template-columns: 42% repeat(3, minmax(0, 1fr));
+    align-items: center;
+    padding: 9px 0 7px;
+  }
+
+  .strip-title {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-mono);
+    font-size: 7px;
+    line-height: 1.5;
+    letter-spacing: 0.07em;
     color: var(--color-muted);
     text-transform: uppercase;
   }
 
-  .planes {
-    position: relative;
-    z-index: 2;
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 8px;
-    margin-bottom: 14px;
+  .strip-title i {
+    width: 4px;
+    height: 4px;
+    background: var(--color-red);
   }
 
-  .plane {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 5px;
+  .strip-code {
     font-family: var(--font-mono);
-    font-size: 9px;
-    line-height: 1.4;
-    letter-spacing: 0.03em;
+    font-size: 8px;
+    line-height: 1.5;
+    letter-spacing: 0.06em;
     color: var(--color-red-dark);
     text-align: center;
-    text-transform: uppercase;
-  }
-
-  .plane b {
-    font-weight: 500;
   }
 
   .layer-stack {
     position: relative;
-    z-index: 2;
     border-top: 1px solid var(--color-line);
     border-left: 1px solid var(--color-line);
     background: var(--color-canvas);
   }
 
-  .map-layer {
+  .bands {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
     display: grid;
-    grid-template-columns: 34px minmax(0, 1fr) auto;
-    gap: 10px;
+    grid-template-columns: 42% repeat(3, minmax(0, 1fr));
+    pointer-events: none;
+  }
+
+  .band-spacer {
+    display: block;
+  }
+
+  .band {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    margin-inline: 14%;
+    border-right: 1px dashed rgb(245 48 3 / 18%);
+    border-left: 1px dashed rgb(245 48 3 / 18%);
+    background: linear-gradient(180deg, rgb(245 48 3 / 6%), rgb(245 48 3 / 1.5%));
+  }
+
+  .band[data-control-band='evaluation'] {
+    border-color: rgb(23 23 23 / 12%);
+    background: linear-gradient(180deg, rgb(23 23 23 / 4%), rgb(23 23 23 / 1%));
+  }
+
+  .band[data-control-band='policy'] {
+    border-color: rgb(245 48 3 / 13%);
+    background: linear-gradient(180deg, rgb(255 138 101 / 10%), rgb(255 138 101 / 2.5%));
+  }
+
+  .band-label {
+    display: flex;
     align-items: center;
-    min-height: 54px;
-    padding: 9px 12px;
+    gap: 7px;
+    padding-top: 8px;
+    font-family: var(--font-mono);
+    font-size: 8px;
+    line-height: 1.4;
+    letter-spacing: 0.08em;
+    color: var(--color-red-dark);
+    text-transform: uppercase;
+    writing-mode: vertical-rl;
+  }
+
+  .band-label b {
+    font-weight: 500;
+  }
+
+  .band-label em {
+    font-style: normal;
+    letter-spacing: 0.04em;
+    color: var(--color-muted);
+  }
+
+  .map-layer {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: 28px 14px minmax(0, 1fr) auto;
+    gap: 8px;
+    align-items: center;
+    min-height: 58px;
+    padding: 9px 12px 9px 10px;
     border-right: 1px solid var(--color-line);
     border-bottom: 1px solid var(--color-line);
-    background: rgb(255 255 255 / 88%);
   }
 
   .map-no {
     font-family: var(--font-mono);
-    font-size: 10px;
+    font-size: 9px;
     line-height: 1.5;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.05em;
     color: var(--color-muted);
+  }
+
+  .trace-cell {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    align-self: stretch;
+  }
+
+  .trace-cell::before {
+    content: '';
+    position: absolute;
+    top: -10px;
+    bottom: -10px;
+    left: 50%;
+    border-left: 1px dotted var(--color-ink-2);
+  }
+
+  .map-layer:first-child .trace-cell::before {
+    top: 50%;
+  }
+
+  .map-layer:last-child .trace-cell::before {
+    bottom: 50%;
+  }
+
+  .trace-cell i {
+    position: relative;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--color-ink-2);
   }
 
   .map-name b {
@@ -247,13 +538,14 @@ import { architectureLayers, controlPlanes } from '../data/architecture';
     font-size: 14px;
     font-weight: 500;
     line-height: 1.4;
+    letter-spacing: -0.01em;
   }
 
   .map-name span {
     display: block;
     margin-top: 1px;
     font-family: var(--font-mono);
-    font-size: 9px;
+    font-size: 8px;
     line-height: 1.5;
     letter-spacing: 0.03em;
     color: var(--color-muted);
@@ -268,11 +560,12 @@ import { architectureLayers, controlPlanes } from '../data/architecture';
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-width: 18px;
-    height: 18px;
+    min-width: 19px;
+    height: 19px;
     padding: 0 4px;
     border: 1px solid var(--color-line);
     border-radius: 3px;
+    background: var(--color-canvas);
     font-size: 9px;
     line-height: 1;
     color: var(--color-muted);
@@ -280,115 +573,262 @@ import { architectureLayers, controlPlanes } from '../data/architecture';
 
   .mark-human {
     border-color: rgb(245 48 3 / 35%);
+    background: var(--color-red-wash);
     color: var(--color-red-dark);
   }
 
   .mark-lock {
+    border-color: var(--color-line-strong);
+    color: var(--color-ink-2);
+  }
+
+  .mark-record {
     background: var(--color-paper);
   }
 
-  .flow-axis {
-    position: relative;
-    z-index: 2;
+  .boundary-foot {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
-    gap: 8px;
-    margin-top: 10px;
+    gap: 6px 14px;
+    padding-top: 10px;
     font-family: var(--font-mono);
-    font-size: 8px;
+    font-size: 7px;
     line-height: 1.5;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.045em;
     color: var(--color-muted);
     text-transform: uppercase;
   }
 
-  .flow-line {
-    flex: 1;
-    height: 1px;
-    background: var(--color-line-strong);
+  .foot-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .foot-line {
+    display: inline-block;
+    width: 18px;
+  }
+
+  .foot-solid {
+    border-top: 1px solid var(--color-ink);
+  }
+
+  .foot-dashed {
+    border-top: 1px dashed var(--color-red-dark);
+  }
+
+  .foot-dotted {
+    border-top: 1px dotted var(--color-ink);
+  }
+
+  .foot-note {
+    margin-left: auto;
+    color: var(--color-red-dark);
+  }
+
+  .plane-list {
+    display: none;
   }
 
   .map-foot {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    gap: 4px 16px;
-    padding: 11px 20px;
     border-top: 1px dashed var(--color-line-strong);
     background: var(--color-paper);
-    font-family: var(--font-mono);
-    font-size: 8px;
-    line-height: 1.6;
-    letter-spacing: 0.04em;
-    color: var(--color-muted);
-    text-transform: uppercase;
   }
 
-  @media (max-width: 767px) {
+  @media (max-width: 1099px) {
     .map-body {
-      display: block;
-      padding: 16px 14px 14px;
-    }
-
-    .client-rail {
-      flex-direction: row;
-      flex-wrap: wrap;
-      gap: 6px;
-      padding: 0 0 12px;
-    }
-
-    .rail-title {
-      flex: 1 1 100%;
-      padding-bottom: 0;
-      border-bottom: 0;
-    }
-
-    .boundary-frame {
-      padding: 34px 12px 12px;
-    }
-
-    .boundary-tag {
-      top: 10px;
-      right: 12px;
-      left: 12px;
-      text-align: left;
-    }
-
-    .plane-guides {
-      display: none;
-    }
-
-    .planes {
-      order: 2;
       grid-template-columns: 1fr;
-      gap: 4px;
-      margin: 12px 0 0;
-      padding-top: 10px;
-      border-top: 1px solid var(--color-line);
+      padding: 18px 16px 16px;
     }
 
-    .plane {
-      justify-content: flex-start;
+    .zone {
+      padding: 14px 16px;
+    }
+
+    .zone-users,
+    .zone-runtime {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+      align-items: start;
+      gap: 6px 18px;
+    }
+
+    .zone-users .zone-tag,
+    .zone-runtime .zone-tag,
+    .zone-users .zone-title,
+    .zone-runtime .zone-title {
+      grid-column: 1;
+    }
+
+    .zone-users .zone-items,
+    .zone-runtime .zone-items {
+      grid-row: 1 / span 2;
+      grid-column: 2;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      align-self: end;
+      margin-top: 0;
+    }
+
+    .zone-users .zone-note,
+    .zone-runtime .zone-note {
+      grid-column: 1 / -1;
+      margin-top: 4px;
+    }
+
+    .zone-flow {
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 9px 0;
+    }
+
+    .zone-flow-out {
+      gap: 22px;
+    }
+
+    .flow-pair {
+      flex-direction: row;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .flow-word {
       font-size: 8px;
     }
 
-    .layer-stack {
-      order: 1;
+    .flow-track {
+      width: 54px;
+    }
+  }
+
+  @media (max-width: 767px) {
+    .map-head,
+    .map-foot {
+      padding: 10px 14px;
+    }
+
+    .map-body {
+      padding: 14px 12px 12px;
+    }
+
+    .zone-users,
+    .zone-runtime {
+      display: flex;
+      padding: 12px;
+    }
+
+    .zone-users .zone-items,
+    .zone-runtime .zone-items {
+      display: grid;
+      gap: 4px;
+      margin-top: 10px;
+    }
+
+    .zone-items li {
+      padding: 5px 7px;
+      font-size: 8px;
+    }
+
+    .zone-note {
+      margin-top: 10px;
+    }
+
+    .boundary-frame {
+      padding: 10px 10px 10px;
+    }
+
+    .boundary-head {
+      padding-bottom: 8px;
+    }
+
+    .boundary-sub {
+      display: none;
+    }
+
+    .control-strip,
+    .bands {
+      display: none;
     }
 
     .map-layer {
-      grid-template-columns: 28px minmax(0, 1fr) auto;
-      min-height: 48px;
-      padding: 8px 9px;
+      grid-template-columns: 24px 12px minmax(0, 1fr) auto;
+      gap: 6px;
+      min-height: 50px;
+      padding: 8px 9px 8px 8px;
     }
 
     .map-name b {
       font-size: 13px;
     }
 
-    .map-foot {
-      flex-direction: column;
-      padding: 10px 14px;
+    .map-name span {
+      font-size: 7px;
+    }
+
+    .mark {
+      min-width: 17px;
+      height: 17px;
+      font-size: 8px;
+    }
+
+    .boundary-foot {
+      gap: 5px 10px;
+    }
+
+    .foot-note {
+      flex: 1 1 100%;
+      margin-left: 0;
+    }
+
+    .plane-list {
+      display: grid;
+      margin-top: 10px;
+      border-top: 1px solid var(--color-line);
+      border-left: 1px solid var(--color-line);
+    }
+
+    .plane-list li {
+      display: grid;
+      grid-template-columns: 24px 88px minmax(0, 1fr);
+      gap: 6px;
+      align-items: baseline;
+      padding: 9px 10px;
+      border-right: 1px solid var(--color-line);
+      border-bottom: 1px solid var(--color-line);
+      background: var(--color-paper);
+    }
+
+    .plane-list-code {
+      font-family: var(--font-mono);
+      font-size: 8px;
+      line-height: 1.5;
+      letter-spacing: 0.05em;
+      color: var(--color-red-dark);
+    }
+
+    .plane-list-name {
+      font-size: 12px;
+      font-weight: 500;
+      line-height: 1.5;
+    }
+
+    .plane-list-lands {
+      font-size: 10px;
+      line-height: 1.6;
+      color: var(--color-muted);
+    }
+  }
+
+  @media (max-width: 359px) {
+    .plane-list li {
+      grid-template-columns: 22px minmax(0, 1fr);
+    }
+
+    .plane-list-lands {
+      grid-column: 2;
     }
   }
 </style>
