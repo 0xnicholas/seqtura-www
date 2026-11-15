@@ -10,7 +10,8 @@ export async function getStaticPaths() {
       !data.draft &&
       data.slug !== 'home' &&
       data.slug !== 'methodology' &&
-      data.slug !== 'architecture',
+      data.slug !== 'architecture' &&
+      data.slug !== 'contact',
   );
 
   return pages.map((entry) => ({
