@@ -1,0 +1,88 @@
+---
+import ArrowIcon from './ArrowIcon.astro';
+import ArrowUpRightIcon from './ArrowUpRightIcon.astro';
+import { architectureCopy } from '../data/architecture';
+import { site } from '../config/site';
+
+const { closing } = architectureCopy;
+---
+
+<section class="section arch-cta" id="next-step" data-arch-closing aria-labelledby="arch-cta-title">
+  <div class="container-site">
+    <div class="cta-inner reveal">
+      <p class="kicker">{closing.kicker}</p>
+      <h2 id="arch-cta-title" class="type-h2 cta-title">
+        {closing.title}
+      </h2>
+      <p class="type-lead cta-lead">{closing.lead}</p>
+      <div class="cta-row cta-actions">
+        <a class="btn btn-primary" href={site.bookingPath} data-primary-cta>
+          {closing.primaryCta}
+          <ArrowIcon />
+        </a>
+        <a class="btn btn-ghost" href="/methodology">
+          {closing.secondaryCta}
+        </a>
+        <a class="text-link cta-process" href="/process">
+          {closing.processCta}
+          <ArrowUpRightIcon />
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .arch-cta {
+    overflow: hidden;
+    padding-block: 128px 136px;
+    border-bottom: 0;
+    background:
+      radial-gradient(54% 70% at 50% 78%, rgb(245 48 3 / 14%), transparent 72%), var(--color-canvas);
+    text-align: center;
+  }
+
+  .cta-inner {
+    max-width: 900px;
+    margin-inline: auto;
+  }
+
+  .cta-title {
+    margin-top: 18px;
+  }
+
+  .cta-lead {
+    max-width: 680px;
+    margin: 22px auto 0;
+    color: var(--color-muted);
+  }
+
+  .cta-actions {
+    justify-content: center;
+    margin-top: 34px;
+  }
+
+  .cta-process {
+    margin-left: 4px;
+  }
+
+  @media (max-width: 767px) {
+    .arch-cta {
+      padding-block: 88px 96px;
+    }
+
+    .cta-actions {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .cta-actions .btn {
+      width: 100%;
+    }
+
+    .cta-process {
+      align-self: center;
+      margin-left: 0;
+    }
+  }
+</style>
