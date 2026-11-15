@@ -222,3 +222,329 @@ test.describe('POST /api/contact contract', () => {
     );
   });
 });
+
+const needText = '我们有一条客服工单流程，希望评估 Agent 是否适合接入，并给出第一步建议。';
+
+async function setStartedAt(page: Page, millisecondsAgo = 10_000): Promise<void> {
+  await page.evaluate((ago) => {
+    const input = document.querySelector<HTMLInputElement>('input[name="startedAt"]');
+    if (input) input.value = String(Date.now() - ago);
+  }, millisecondsAgo);
+}
+
+async function fillValidForm(page: Page, { consent = true } = {}): Promise<void> {
+  const form = page.locator('[data-contact-form]');
+  await form.getByLabel('姓名', { exact: true }).fill('张明');
+  await form.getByLabel('公司', { exact: true }).fill('序构测试制造有限公司');
+  await form.getByLabel('邮箱', { exact: true }).fill('zhangming@example.com');
+  await form.getByLabel('需求描述', { exact: true }).fill(needText);
+  if (consent) await form.getByRole('checkbox').check();
+  await setStartedAt(page);
+}
+
+test.describe('contact form validation and consent', () => {
+  test('renders the exact consent copy with a new-tab privacy link, unchecked by default', async ({
+    page,
+  }) => {
+    await page.goto('/contact');
+
+    const form = page.locator('[data-contact-form]');
+    const checkbox = form.getByRole('checkbox');
+    await expect(checkbox).not.toBeChecked();
+
+    const note = form.locator('#contact-consent-note');
+    await expect(note).toHaveText('你的信息仅用于回复咨询，不会用于营销推送。');
+
+    const label = form.locator('.consent-label');
+    await expect(label).toContainText(
+      '我已阅读并同意《隐私政策》，同意 Seqtura 为回复我的咨询处理上述信息。',
+    );
+
+    const link = label.getByRole('link', { name: '《隐私政策》' });
+    await expect(link).toHaveAttribute('href', '/legal/privacy');
+    await expect(link).toHaveAttribute('target', '_blank');
+    await expect(link).toHaveAttribute('rel', 'noopener');
+
+    const notePrecedesLabel = await note.evaluate((element) => {
+      const next = element.nextElementSibling;
+      return next?.classList.contains('consent-label') ?? false;
+    });
+    expect(notePrecedesLabel).toBe(true);
+  });
+
+  test('blocks an empty submission, shows a summary and focuses the first invalid field', async ({
+    page,
+  }) => {
+    await page.goto('/contact');
+    let requests = 0;
+    page.on('request', (request) => {
+      if (request.url().includes('/api/contact')) requests += 1;
+    });
+
+    await page.locator('[data-contact-submit]').click();
+
+    const summary = page.locator('[data-form-summary]');
+    await expect(summary).toBeVisible();
+    await expect(summary).toContainText('请检查以下内容：');
+
+    const name = page.getByLabel('姓名', { exact: true });
+    await expect(name).toBeFocused();
+    await expect(name).toHaveAttribute('aria-invalid', 'true');
+    await expect(name).toHaveAttribute('aria-describedby', 'contact-name-error');
+    await expect(page.locator('#contact-name-error')).toHaveText('请输入姓名。');
+    await expect(page.locator('#contact-company-error')).toHaveText('请输入公司名称。');
+    await expect(page.locator('#contact-email-error')).toHaveText('请输入邮箱。');
+    await expect(page.locator('#contact-need-error')).toHaveText('需求描述至少 10 个字符。');
+    await expect(page.locator('#contact-consent-error')).toHaveText('请阅读并同意隐私政策。');
+    await expect(page.getByRole('checkbox')).toHaveAttribute('aria-invalid', 'true');
+
+    await expect(summary.getByRole('link')).toHaveCount(5);
+    await expect(summary).toContainText('姓名：请输入姓名。');
+    expect(requests).toBe(0);
+    expect(page.url()).toMatch(/\/contact$/);
+  });
+
+  test('validates email format, need length and field maximums inline', async ({ page }) => {
+    await page.goto('/contact');
+
+    const form = page.locator('[data-contact-form]');
+    await expect(form.getByLabel('姓名', { exact: true })).toHaveAttribute('maxlength', '40');
+    await expect(form.getByLabel('公司', { exact: true })).toHaveAttribute('maxlength', '80');
+    await expect(form.getByLabel('邮箱', { exact: true })).toHaveAttribute('maxlength', '254');
+    await expect(form.getByLabel('微信 / 电话（选填）', { exact: true })).toHaveAttribute(
+      'maxlength',
+      '40',
+    );
+
+    await form.getByLabel('姓名', { exact: true }).fill('张明');
+    await form.getByLabel('公司', { exact: true }).fill('序构测试制造有限公司');
+    await form.getByLabel('邮箱', { exact: true }).fill('not-an-email');
+    await form.getByLabel('需求描述', { exact: true }).fill('太短');
+    await form.getByRole('checkbox').check();
+    await setStartedAt(page);
+
+    await page.locator('[data-contact-submit]').click();
+
+    await expect(form.getByLabel('邮箱', { exact: true })).toHaveAttribute(
+      'aria-invalid',
+      'true',
+    );
+    await expect(page.locator('#contact-email-error')).toHaveText('请输入有效的邮箱地址。');
+    await expect(page.locator('#contact-need-error')).toHaveText('需求描述至少 10 个字符。');
+    await expect(form.getByLabel('邮箱', { exact: true })).toBeFocused();
+
+    await form.getByLabel('邮箱', { exact: true }).fill('zhangming@example.com');
+    await form
+      .getByLabel('需求描述', { exact: true })
+      .evaluate((element) => element.removeAttribute('maxlength'));
+    await form.getByLabel('需求描述', { exact: true }).fill('x'.repeat(2001));
+    await page.locator('[data-contact-submit]').click();
+    await expect(page.locator('#contact-need-error')).toHaveText('需求描述不超过 2000 个字符。');
+  });
+
+  test('blocks submission until consent is checked and keeps the error inline', async ({
+    page,
+  }) => {
+    await page.goto('/contact');
+    await fillValidForm(page, { consent: false });
+
+    await page.locator('[data-contact-submit]').click();
+
+    const checkbox = page.getByRole('checkbox');
+    await expect(checkbox).toHaveAttribute('aria-invalid', 'true');
+    await expect(checkbox).toHaveAttribute(
+      'aria-describedby',
+      'contact-consent-note contact-consent-error',
+    );
+    await expect(page.locator('#contact-consent-error')).toHaveText('请阅读并同意隐私政策。');
+    await expect(page.locator('[data-contact-success]')).toBeHidden();
+    expect(page.url()).toMatch(/\/contact$/);
+  });
+
+  test('submits with the keyboard and replaces the form with the success state', async ({
+    page,
+  }) => {
+    await page.goto('/contact');
+    await setStartedAt(page);
+
+    await page.getByLabel('姓名', { exact: true }).focus();
+    await page.keyboard.type('张明');
+    await page.keyboard.press('Tab');
+    await page.keyboard.type('序构测试制造有限公司');
+    await page.keyboard.press('Tab');
+    await page.keyboard.type('zhangming@example.com');
+    await page.keyboard.press('Tab');
+    await page.keyboard.type('微信：zhangming-work');
+    await page.keyboard.press('Tab');
+    await page.keyboard.type(needText);
+    await page.keyboard.press('Tab');
+    await expect(page.getByRole('checkbox')).toBeFocused();
+    await page.keyboard.press('Space');
+    await page.keyboard.press('Tab');
+    await expect(page.getByRole('link', { name: '《隐私政策》' })).toBeFocused();
+    await page.keyboard.press('Tab');
+    await expect(page.locator('[data-contact-submit]')).toBeFocused();
+    await page.keyboard.press('Enter');
+
+    const success = page.locator('[data-contact-success]');
+    await expect(success).toBeVisible();
+    await expect(success.locator('.success-title')).toHaveText(
+      '已收到。我们会通过你留下的邮箱或微信联系你。',
+    );
+    await expect(success).toBeFocused();
+    await expect(page.locator('[data-contact-form]')).toBeHidden();
+    expect(page.url()).toMatch(/\/contact$/);
+  });
+
+  test('fills the form and submits successfully without navigation', async ({ page }) => {
+    await page.goto('/contact');
+    await fillValidForm(page);
+
+    const responsePromise = page.waitForResponse(
+      (response) => response.url().endsWith('/api/contact') && response.request().method() === 'POST',
+    );
+    await page.locator('[data-contact-submit]').click();
+    const response = await responsePromise;
+    expect(response.status()).toBe(200);
+
+    await expect(page.locator('[data-contact-success] .success-title')).toHaveText(
+      '已收到。我们会通过你留下的邮箱或微信联系你。',
+    );
+    await expect(page.locator('[data-contact-form]')).toBeHidden();
+    expect(page.url()).toMatch(/\/contact$/);
+  });
+});
+
+test.describe('contact form submission states', () => {
+  test('disables the button and shows progress while the request is pending', async ({ page }) => {
+    await page.route('**/api/contact', async (route) => {
+      await new Promise((resolve) => setTimeout(resolve, 700));
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ ok: true }),
+      });
+    });
+
+    await page.goto('/contact');
+    await fillValidForm(page);
+
+    const submit = page.locator('[data-contact-submit]');
+    await submit.click();
+
+    await expect(submit).toBeDisabled();
+    await expect(submit).toHaveAttribute('aria-busy', 'true');
+    await expect(submit).toContainText('提交中…');
+    await expect(page.locator('[data-contact-success]')).toBeVisible();
+    await expect(submit).toBeEnabled();
+  });
+
+  test('keeps the form in place and shows the email fallback when delivery fails', async ({
+    page,
+  }) => {
+    await page.route('**/api/contact', (route) =>
+      route.fulfill({
+        status: 502,
+        contentType: 'application/json',
+        body: JSON.stringify({ ok: false, error: 'delivery_failed' }),
+      }),
+    );
+
+    await page.goto('/contact');
+    await fillValidForm(page);
+    await page.locator('[data-contact-submit]').click();
+
+    const failure = page.locator('[data-form-failure]');
+    await expect(failure).toBeVisible();
+    await expect(failure).toBeFocused();
+    await expect(failure.locator('p')).toHaveText(
+      '提交失败。请重试，或直接发邮件至 hello@seqtura.ai。',
+    );
+    await expect(failure.getByRole('link', { name: 'hello@seqtura.ai' })).toHaveAttribute(
+      'href',
+      'mailto:hello@seqtura.ai',
+    );
+    await expect(page.locator('[data-contact-form]')).toBeVisible();
+    await expect(page.locator('[data-contact-submit]')).toBeEnabled();
+    expect(page.url()).toMatch(/\/contact$/);
+  });
+
+  test('renders field errors returned by the server with the summary and focus', async ({
+    page,
+  }) => {
+    await page.route('**/api/contact', (route) =>
+      route.fulfill({
+        status: 400,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          ok: false,
+          error: 'validation',
+          fields: { email: '服务端校验：请使用公司邮箱。' },
+        }),
+      }),
+    );
+
+    await page.goto('/contact');
+    await fillValidForm(page);
+    await page.locator('[data-contact-submit]').click();
+
+    await expect(page.locator('[data-form-summary]')).toBeVisible();
+    await expect(page.locator('[data-form-summary]')).toContainText(
+      '邮箱：服务端校验：请使用公司邮箱。',
+    );
+    await expect(page.getByLabel('邮箱', { exact: true })).toHaveAttribute(
+      'aria-invalid',
+      'true',
+    );
+    await expect(page.locator('#contact-email-error')).toHaveText('服务端校验：请使用公司邮箱。');
+    await expect(page.getByLabel('邮箱', { exact: true })).toBeFocused();
+  });
+});
+
+test.describe('contact page without JavaScript', () => {
+  test.use({ javaScriptEnabled: false });
+
+  test('shows the email fallback instead of leaving the form as the only path', async ({
+    page,
+  }) => {
+    await page.goto('/contact');
+
+    const fallback = page.locator('[data-noscript]');
+    await expect(fallback).toBeVisible();
+    await expect(fallback.locator('p')).toHaveText(
+      'JavaScript 未启用，表单无法提交。请直接发邮件至 hello@seqtura.ai。',
+    );
+    await expect(fallback.getByRole('link', { name: 'hello@seqtura.ai' })).toHaveAttribute(
+      'href',
+      'mailto:hello@seqtura.ai',
+    );
+  });
+});
+
+test.describe('contact form mobile layout', () => {
+  for (const width of [320, 390]) {
+    test(`uses full-width controls at ${width}px`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 900 });
+      await page.goto('/contact');
+
+      const form = page.locator('[data-contact-form]');
+      const name = form.getByLabel('姓名', { exact: true });
+      const submit = page.locator('[data-contact-submit]');
+      const formBox = await form.boundingBox();
+      const nameBox = await name.boundingBox();
+      const submitBox = await submit.boundingBox();
+
+      expect(formBox).not.toBeNull();
+      expect(nameBox).not.toBeNull();
+      expect(submitBox).not.toBeNull();
+      expect(nameBox!.width).toBeGreaterThanOrEqual(formBox!.width - 46);
+      expect(submitBox!.width).toBeGreaterThanOrEqual(formBox!.width - 46);
+      expect(Math.abs(nameBox!.width - submitBox!.width)).toBeLessThanOrEqual(1);
+
+      const overflow = await page.evaluate(
+        () => document.documentElement.scrollWidth - window.innerWidth,
+      );
+      expect(overflow).toBeLessThanOrEqual(0);
+    });
+  }
+});
