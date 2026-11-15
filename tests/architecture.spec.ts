@@ -574,3 +574,307 @@ test.describe('architecture at 390px', () => {
     expect(columns).toHaveLength(1);
   });
 });
+
+test.describe('reference architecture overview diagram', () => {
+  test.use({ viewport: { width: 1440, height: 1000 } });
+
+  test('draws users, delivery boundary and customer runtime as three connected zones', async ({
+    page,
+  }) => {
+    await page.goto('/architecture');
+
+    const section = page.locator('section#overview');
+    const diagram = section.locator('[data-arch-diagram]');
+
+    const zones = diagram.locator('[data-arch-zone]');
+    await expect(zones).toHaveCount(3);
+    expect(
+      await zones.evaluateAll((elements) =>
+        elements.map((element) => element.getAttribute('data-arch-zone')),
+      ),
+    ).toEqual(['users', 'boundary', 'runtime']);
+
+    await expect(diagram.locator('[data-arch-zone="users"]')).toContainText('用户 / 业务系统');
+    const runtime = diagram.locator('[data-arch-zone="runtime"]');
+    await expect(runtime).toContainText('客户运行环境');
+    for (const retained of ['客户系统', '数据与存储', '身份源', '审批流程']) {
+      await expect(runtime).toContainText(retained);
+    }
+
+    const boundary = diagram.locator('[data-boundary-frame]');
+    await expect(boundary).toContainText('Seqtura 交付边界');
+    await expect(boundary).toContainText('组件与模式');
+    expect(await boundary.evaluate((element) => getComputedStyle(element).borderTopStyle)).toBe(
+      'dashed',
+    );
+
+    const layers = diagram.locator('[data-map-layer]');
+    await expect(layers).toHaveCount(5);
+    expect(
+      await layers.evaluateAll((elements) =>
+        elements.map((element) => element.getAttribute('data-map-layer')),
+      ),
+    ).toEqual(['ingress', 'models', 'tools', 'knowledge', 'runtime']);
+
+    const bands = diagram.locator('[data-control-band]');
+    await expect(bands).toHaveCount(3);
+    expect(
+      await bands.evaluateAll((elements) =>
+        elements.map((element) => element.getAttribute('data-control-band')),
+      ),
+    ).toEqual(['identity', 'evaluation', 'policy']);
+    for (const [id, code, name] of [
+      ['identity', 'C1', '身份与权限'],
+      ['evaluation', 'C2', '评测与可观测'],
+      ['policy', 'C3', '策略与审计'],
+    ] as const) {
+      const band = diagram.locator(`[data-control-band="${id}"]`);
+      await expect(band).toContainText(code);
+      await expect(band).toContainText(name);
+      await expect(band).toHaveAttribute('aria-hidden', 'true');
+    }
+
+    const stack = await diagram.locator('[data-layer-stack]').boundingBox();
+    for (const band of await bands.all()) {
+      const box = await band.boundingBox();
+      expect(box!.height).toBeGreaterThan(box!.width * 2);
+      expect(box!.height).toBeGreaterThan(stack!.height * 0.8);
+    }
+
+    await expect(diagram.locator('[data-map-trace]')).toBeVisible();
+    const markKinds = await diagram
+      .locator('[data-diagram-mark]')
+      .evaluateAll((elements) =>
+        elements.map((element) => element.getAttribute('data-diagram-mark')),
+      );
+    expect([...new Set(markKinds)].sort()).toEqual(['human', 'lock', 'record']);
+
+    const legendMarkers = section.locator('[data-legend-marker]');
+    await expect(legendMarkers).toHaveCount(7);
+    expect(
+      await legendMarkers.evaluateAll((elements) =>
+        elements.map((element) => element.getAttribute('data-legend-marker')),
+      ),
+    ).toEqual(['solid', 'dashed', 'lock', 'human', 'dotted', 'record', 'boundary']);
+
+    const flows = diagram.locator('[data-zone-flow]');
+    await expect(flows).toHaveCount(2);
+    for (const flow of await flows.all()) {
+      await expect(flow).toHaveAttribute('aria-hidden', 'true');
+    }
+
+    await expect(diagram).toHaveAttribute('role', 'img');
+    for (const phrase of [
+      '用户 / 业务系统',
+      'Seqtura 交付边界',
+      '客户运行环境',
+      '五层能力栈',
+      '三条控制面',
+    ]) {
+      await expect(diagram).toHaveAccessibleName(new RegExp(phrase));
+    }
+  });
+});
+
+test('lifecycle diagram is a connected timeline with a trace, audit marks and a dashed loop', async ({
+  page,
+}) => {
+  await page.goto('/architecture');
+
+  const section = page.locator('section#lifecycle');
+  const figure = section.locator('[data-lifecycle-diagram]');
+  await expect(figure).toHaveAccessibleName(/请求生命周期示意/);
+  await expect(figure).toHaveAccessibleDescription(/任务进入.*人工审批.*输出与评测/);
+
+  await expect(section.locator('[data-lifecycle-link]')).toHaveCount(5);
+  for (const link of await section.locator('[data-lifecycle-link]').all()) {
+    await expect(link).toHaveAttribute('aria-hidden', 'true');
+  }
+
+  await expect(section.locator('[data-trace-span] [data-trace-dot]')).toHaveCount(6);
+  await expect(section.locator('[data-trace-span]')).toContainText('贯穿全部节点');
+
+  const toolsNode = section.locator('[data-lifecycle-node="tools-knowledge"]');
+  await expect(toolsNode.locator('[data-audit-mark]')).toHaveCount(2);
+  await expect(toolsNode).toContainText('工具调用');
+  await expect(toolsNode).toContainText('数据变更');
+
+  const hitlNode = section.locator('[data-lifecycle-node="hitl-gate"]');
+  await expect(hitlNode.locator('[data-audit-mark]')).toHaveCount(1);
+  await expect(hitlNode.locator('[data-audit-mark]')).toContainText('人工审批');
+
+  const loop = section.locator('[data-iteration-loop]');
+  await expect(loop).toContainText('评测结果 → 编排 / 知识迭代');
+  await expect(loop).toContainText('迭代不等于自动改生产');
+  const rail = loop.locator('[data-loop-rail]');
+  await expect(rail).toHaveAttribute('aria-hidden', 'true');
+  expect(await rail.evaluate((element) => getComputedStyle(element).borderTopStyle)).toBe('dashed');
+
+  const micro = section.locator('[data-lifecycle-scenario]');
+  await expect(micro).toContainText('示意');
+  await expect(micro).toContainText('非客户案例');
+});
+
+test.describe('scenario mini diagrams', () => {
+  test.use({ viewport: { width: 1440, height: 1000 } });
+
+  test('draw four to five nodes, the layers in use and one human intervention each', async ({
+    page,
+  }) => {
+    await page.goto('/architecture');
+
+    const section = page.locator('section#scenarios');
+    for (const [id, title] of [
+      ['support', '客服与售后工单'],
+      ['knowledge-base', '企业知识库问答'],
+      ['process-automation', '流程自动化（审批 / 录入 / 对账）'],
+    ] as const) {
+      const card = section.locator(`[data-scenario="${id}"]`);
+      const diagram = card.locator('[data-scenario-diagram]');
+      await expect(diagram, `${id}: diagram`).toBeVisible();
+      await expect(diagram, `${id}: accessible name`).toHaveAccessibleName(/场景示意/);
+
+      const nodes = diagram.locator('[data-scenario-flow-node]');
+      const nodeCount = await nodes.count();
+      expect(nodeCount, `${id}: node count`).toBeGreaterThanOrEqual(4);
+      expect(nodeCount, `${id}: node count`).toBeLessThanOrEqual(5);
+
+      const layerTags = diagram.locator('[data-scenario-flow-layer]');
+      await expect(layerTags, `${id}: layer tags`).toHaveCount(nodeCount);
+      const layerNames = await layerTags.evaluateAll((elements) =>
+        elements.map((element) => element.getAttribute('data-scenario-flow-layer')),
+      );
+      for (const layerName of layerNames) {
+        expect(layerName, `${id}: layer name`).toBeTruthy();
+      }
+
+      const human = diagram.locator('[data-scenario-human]');
+      await expect(human, `${id}: one human gate`).toHaveCount(1);
+      await expect(card.getByText('典型场景示意，非客户案例。'), `${id}: note`).toBeVisible();
+      await expect(card.getByRole('heading', { name: title })).toBeVisible();
+    }
+  });
+});
+
+test.describe('deployment comparison bar', () => {
+  test.use({ viewport: { width: 1440, height: 1000 } });
+
+  test('compares SaaS, dedicated and self-hosted across the three responsibility rows', async ({
+    page,
+  }) => {
+    await page.goto('/architecture');
+
+    const bar = page.locator('[data-deployment-bar]');
+    await expect(bar).toBeVisible();
+
+    const tiers = bar.locator('[data-deployment-tier]');
+    await expect(tiers).toHaveCount(3);
+    await expect(tiers.getByRole('heading', { level: 4 })).toHaveText([
+      'SaaS',
+      '专属实例',
+      '自托管',
+    ]);
+
+    const tops = await tiers.evaluateAll((elements) =>
+      elements.map((element) => Math.round(element.getBoundingClientRect().top)),
+    );
+    expect(new Set(tops).size).toBe(1);
+
+    for (const id of ['saas', 'dedicated', 'self-hosted']) {
+      const tier = bar.locator(`[data-deployment-tier="${id}"]`);
+      const facts = tier.locator('[data-deployment-fact]');
+      await expect(facts, `${id}: three rows`).toHaveCount(3);
+      const rows = await facts.evaluateAll((elements) =>
+        elements.map((element) => element.querySelector('dt')?.textContent?.trim()),
+      );
+      expect(rows, `${id}: row labels`).toEqual(['谁运维', '数据在哪', '模型能否离线']);
+    }
+
+    await expect(
+      bar.locator('button, select, input, textarea, [role="tab"], [role="radio"]'),
+    ).toHaveCount(0);
+    await expect(bar).toContainText('具体档位、运维分工与合同条款在方案阶段确认');
+  });
+});
+
+test.describe('architecture diagrams at 390px', () => {
+  test.use({ viewport: { width: 390, height: 844 } });
+
+  test('stacks the five layers and moves control planes into a list below them', async ({
+    page,
+  }) => {
+    await page.goto('/architecture');
+
+    const layers = page.locator('[data-map-layer]');
+    const firstLayer = await layers.nth(0).boundingBox();
+    const secondLayer = await layers.nth(1).boundingBox();
+    expect(secondLayer!.y).toBeGreaterThan(firstLayer!.y + firstLayer!.height / 2);
+
+    await expect(page.locator('[data-control-band]').first()).toBeHidden();
+    const planeList = page.locator('[data-control-plane-list]');
+    await expect(planeList).toBeVisible();
+    await expect(planeList).toContainText('C1');
+    await expect(planeList).toContainText('身份与权限');
+    await expect(planeList).toContainText('C2');
+    await expect(planeList).toContainText('评测与可观测');
+    await expect(planeList).toContainText('C3');
+    await expect(planeList).toContainText('策略与审计');
+
+    const lastLayer = layers.last();
+    const lastLayerBox = await lastLayer.boundingBox();
+    const listBox = await planeList.boundingBox();
+    expect(listBox!.y).toBeGreaterThan(lastLayerBox!.y + lastLayerBox!.height - 2);
+
+    const cards = page.locator('[data-scenario]');
+    const firstCard = await cards.nth(0).boundingBox();
+    const secondCard = await cards.nth(1).boundingBox();
+    expect(secondCard!.y).toBeGreaterThan(firstCard!.y + firstCard!.height / 2);
+    for (const diagram of await page.locator('[data-scenario-diagram]').all()) {
+      const box = await diagram.boundingBox();
+      expect(box!.width).toBeLessThanOrEqual(390);
+    }
+
+    for (const tier of await page.locator('[data-deployment-tier]').all()) {
+      const facts = tier.locator('[data-deployment-fact]');
+      await expect(facts).toHaveCount(3);
+      for (const label of ['谁运维', '数据在哪', '模型能否离线']) {
+        await expect(tier.getByText(label, { exact: true })).toBeVisible();
+      }
+    }
+
+    expect(
+      await page
+        .locator('[data-arch-diagram]')
+        .evaluate((element) => element.scrollWidth - element.clientWidth),
+    ).toBeLessThanOrEqual(1);
+  });
+});
+
+test('diagram interaction never depends on the keyboard and decoration stays hidden', async ({
+  page,
+}) => {
+  await page.goto('/architecture');
+
+  for (const selector of [
+    '[data-arch-diagram]',
+    '[data-lifecycle-diagram]',
+    '[data-scenario-diagram]',
+  ]) {
+    const diagrams = page.locator(selector);
+    expect(await diagrams.count(), `${selector}: present`).toBeGreaterThan(0);
+    expect(
+      await diagrams
+        .locator('a, button, input, select, textarea, [tabindex], [role="button"]')
+        .count(),
+      `${selector}: no interactive controls`,
+    ).toBe(0);
+  }
+
+  for (const selector of ['[data-zone-flow]', '[data-control-band]', '[data-lifecycle-link]']) {
+    const decorations = page.locator(selector);
+    expect(await decorations.count(), `${selector}: present`).toBeGreaterThan(0);
+    for (const decoration of await decorations.all()) {
+      await expect(decoration, `${selector}: aria-hidden`).toHaveAttribute('aria-hidden', 'true');
+    }
+  }
+});
