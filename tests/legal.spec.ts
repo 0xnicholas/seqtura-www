@@ -146,6 +146,13 @@ test('privacy policy table of contents collapses to one column on mobile', async
   expect(tops[0]).toBeLessThan(tops[1]);
   expect(tops[1]).toBeLessThan(tops[2]);
 
+  const main = page.getByRole('main');
+  const h1Type = await main.getByRole('heading', { level: 1 }).evaluate((element) => {
+    const style = getComputedStyle(element);
+    return { size: style.fontSize, line: style.lineHeight, weight: style.fontWeight };
+  });
+  expect(h1Type).toEqual({ size: '40px', line: '48px', weight: '400' });
+
   const overflow = await page.evaluate(
     () => document.documentElement.scrollWidth - window.innerWidth,
   );
