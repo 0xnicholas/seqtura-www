@@ -47,7 +47,7 @@ export const missingLegalPlaceholders: readonly string[] = [
   !placeholders.operatorName.value && '运营主体名称',
   !placeholders.registeredAddress.value && '注册地址',
   !placeholders.siteDomain.value && '官网域名',
-  !placeholders.launchDate.value && '上线日期',
+  !launchDate && '上线日期',
   !placeholders.emailProvider.value && '邮件服务商',
   !placeholders.hostingProvider.value && '托管服务商',
   !placeholders.hostingLocation.value && '托管所在地',
