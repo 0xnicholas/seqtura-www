@@ -50,7 +50,7 @@ for lead delivery.
 
 ## Tests
 
-`tests/contact-delivery.spec.ts` starts real `dist/server/entry.mjs` processes
+`tests/contact-delivery.spec.ts` starts real `node server.mjs` processes
 with live-mode env, a local Feishu HTTP stub and an `smtp-server` sink. It covers
 success on either channel, both-channel failure, test mode, the 5/hour 429,
 envelope headers, the signed card payload, PII-free logs and the 5 second

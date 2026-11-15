@@ -44,7 +44,7 @@ export async function startTestServer(
     else childEnv[key] = value;
   }
 
-  const child = spawn(process.execPath, ['dist/server/entry.mjs'], {
+  const child = spawn(process.execPath, ['server.mjs'], {
     cwd: process.cwd(),
     env: childEnv,
     stdio: ['ignore', 'pipe', 'pipe'],

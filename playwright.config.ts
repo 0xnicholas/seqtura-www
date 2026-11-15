@@ -15,10 +15,10 @@ export default defineConfig({
   },
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'], channel: 'chrome' } }],
   webServer: {
-    command: `pnpm build && pnpm preview --host 127.0.0.1 --port ${port}`,
+    command: `pnpm build && node server.mjs`,
     url: baseURL,
     reuseExistingServer: !process.env.CI && !process.env.PORT,
     timeout: 120_000,
-    env: { FORM_MODE: 'test' },
+    env: { FORM_MODE: 'test', HOST: '127.0.0.1', PORT: String(port) },
   },
 });

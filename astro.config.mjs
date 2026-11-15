@@ -8,7 +8,7 @@ export default defineConfig({
   site: process.env.SITE_URL ?? 'https://seqtura.ai',
   trailingSlash: 'never',
   output: 'static',
-  adapter: node({ mode: 'standalone' }),
+  adapter: node({ mode: 'middleware' }),
   session: false,
   integrations: [
     mdx(),

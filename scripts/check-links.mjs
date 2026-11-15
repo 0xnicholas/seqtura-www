@@ -111,19 +111,15 @@ async function waitForServer() {
 }
 
 if (!process.env.LINK_CHECK_BASE_URL) {
-  server = spawn(
-    process.execPath,
-    [
-      'node_modules/astro/bin/astro.mjs',
-      'preview',
-      '--ignore-lock',
-      '--host',
-      '127.0.0.1',
-      '--port',
-      port,
-    ],
-    { stdio: 'ignore' },
-  );
+  server = spawn(process.execPath, ['server.mjs'], {
+    env: {
+      ...process.env,
+      HOST: '127.0.0.1',
+      PORT: port,
+      FORM_MODE: 'test',
+    },
+    stdio: 'ignore',
+  });
 }
 
 try {

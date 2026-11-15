@@ -12,12 +12,12 @@
 
 /sitemap-index.xml
   ! Cache-Control
-  Cache-Control: public, max-age=3600
+  Cache-Control: public, max-age=600
 
 /sitemap-0.xml
   ! Cache-Control
-  Cache-Control: public, max-age=3600
+  Cache-Control: public, max-age=600
 
 /robots.txt
   ! Cache-Control
-  Cache-Control: public, max-age=3600
+  Cache-Control: public, max-age=600
