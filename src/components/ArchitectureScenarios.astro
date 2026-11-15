@@ -28,22 +28,57 @@ const scenarioFields = [
     </p>
 
     <div class="scenario-grid reveal">
-      {architectureScenarios.map((scenario) => (
-        <article class="scenario" data-scenario={scenario.id}>
-          <div class="scenario-head">
-            <span class="scenario-no">{scenario.no}</span>
-            <h3 class="scenario-title">{scenario.title}</h3>
-          </div>
-          <dl class="scenario-facts">
-            {scenarioFields.map((field) => (
-              <div class="scenario-row" data-scenario-field={field.id}>
-                <dt>{field.label}</dt>
-                <dd>{scenario[field.id]}</dd>
-              </div>
-            ))}
-          </dl>
-        </article>
-      ))}
+      {architectureScenarios.map((scenario) => {
+        const humanNode = scenario.flow.find((node) => node.human);
+        return (
+          <article class="scenario" data-scenario={scenario.id}>
+            <div class="scenario-head">
+              <span class="scenario-no">{scenario.no}</span>
+              <h3 class="scenario-title">{scenario.title}</h3>
+            </div>
+
+            <ol
+              class="scenario-flow"
+              data-scenario-diagram
+              aria-label={`${scenario.title}场景示意：${scenario.flow
+                .map((node) => node.label)
+                .join(' → ')}；人工介入点：${humanNode?.label ?? '无'}。`}
+            >
+              {scenario.flow.map((node, index) => (
+                <li
+                  class:list={['flow-node', { 'flow-node-human': node.human }]}
+                  data-scenario-flow-node
+                  data-scenario-human={node.human ? '' : undefined}
+                >
+                  <span class="flow-node-no">{String(index + 1).padStart(2, '0')}</span>
+                  <span class="flow-node-label">{node.label}</span>
+                  <span class="flow-node-layer" data-scenario-flow-layer={node.layer}>
+                    {node.human && (
+                      <i class="flow-human" aria-hidden="true">
+                        人
+                      </i>
+                    )}
+                    {node.layer}
+                  </span>
+                </li>
+              ))}
+            </ol>
+            <p class="scenario-flow-note">
+              <span class="tick" aria-hidden="true"></span>
+              {scenarios.note}
+            </p>
+
+            <dl class="scenario-facts">
+              {scenarioFields.map((field) => (
+                <div class="scenario-row" data-scenario-field={field.id}>
+                  <dt>{field.label}</dt>
+                  <dd>{scenario[field.id]}</dd>
+                </div>
+              ))}
+            </dl>
+          </article>
+        );
+      })}
     </div>
   </div>
 </section>
@@ -121,6 +156,119 @@ const scenarioFields = [
   .scenario-facts {
     display: grid;
     gap: 0;
+  }
+
+  .scenario-flow {
+    display: grid;
+    margin-top: 18px;
+    border-top: 1px solid var(--color-line);
+    border-left: 1px solid var(--color-line);
+  }
+
+  .flow-node {
+    position: relative;
+    display: grid;
+    grid-template-columns: 22px minmax(0, 1fr) auto;
+    gap: 8px;
+    align-items: baseline;
+    min-width: 0;
+    padding: 9px 10px;
+    border-right: 1px solid var(--color-line);
+    border-bottom: 1px solid var(--color-line);
+    background: var(--color-canvas);
+  }
+
+  .flow-node:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 20px;
+    z-index: 1;
+    width: 5px;
+    height: 5px;
+    border-right: 1px solid var(--color-red-dark);
+    border-bottom: 1px solid var(--color-red-dark);
+    background: var(--color-canvas);
+    transform: rotate(45deg);
+  }
+
+  .flow-node-human {
+    background: var(--color-red-wash);
+  }
+
+  .flow-node-human::before {
+    content: '';
+    position: absolute;
+    inset: -1px auto -1px -1px;
+    width: 2px;
+    background: var(--color-red);
+  }
+
+  .flow-node-no {
+    font-family: var(--font-mono);
+    font-size: 8px;
+    line-height: 1.6;
+    letter-spacing: 0.04em;
+    color: var(--color-muted);
+  }
+
+  .flow-node-human .flow-node-no {
+    color: var(--color-red-dark);
+  }
+
+  .flow-node-label {
+    font-size: 12px;
+    line-height: 1.6;
+    color: var(--color-ink-2);
+  }
+
+  .flow-node-human .flow-node-label {
+    color: var(--color-ink);
+  }
+
+  .flow-node-layer {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 4px;
+    font-family: var(--font-mono);
+    font-size: 8px;
+    line-height: 1.5;
+    letter-spacing: 0.02em;
+    color: var(--color-muted);
+    text-align: right;
+  }
+
+  .flow-human {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 14px;
+    height: 14px;
+    border: 1px solid rgb(245 48 3 / 35%);
+    border-radius: 3px;
+    background: var(--color-canvas);
+    font-style: normal;
+    font-size: 8px;
+    line-height: 1;
+    color: var(--color-red-dark);
+  }
+
+  .scenario-flow-note {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 8px;
+    font-family: var(--font-mono);
+    font-size: 8px;
+    line-height: 1.5;
+    letter-spacing: 0.03em;
+    color: var(--color-muted);
+  }
+
+  .scenario-flow-note .tick {
+    width: 5px;
+    height: 5px;
   }
 
   .scenario-row {
