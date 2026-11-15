@@ -1,4 +1,8 @@
+import { EmailProvider } from './providers/email';
+import { FeishuProvider } from './providers/feishu';
 import type { ContactPayload } from './schema';
+
+export const deliveryTimeoutMs = 5000;
 
 export type NotifyChannel = 'feishu' | 'email';
 export type NotifyFailureReason =
@@ -29,8 +33,14 @@ export interface NotifyResult {
 
 export interface NotifyConfig {
   readonly feishuWebhookUrl?: string;
+  readonly feishuWebhookSecret?: string;
   readonly emailProvider?: string;
   readonly emailApiKey?: string;
+  readonly smtpHost?: string;
+  readonly smtpPort?: string;
+  readonly smtpSecure?: string;
+  readonly smtpUser?: string;
+  readonly smtpPass?: string;
   readonly contactToEmail?: string;
   readonly contactFromEmail?: string;
 }
@@ -45,8 +55,14 @@ export function notifyConfigFromEnv(
 ): NotifyConfig {
   return {
     feishuWebhookUrl: env.FEISHU_WEBHOOK_URL,
+    feishuWebhookSecret: env.FEISHU_WEBHOOK_SECRET,
     emailProvider: env.EMAIL_PROVIDER,
     emailApiKey: env.EMAIL_API_KEY,
+    smtpHost: env.SMTP_HOST,
+    smtpPort: env.SMTP_PORT,
+    smtpSecure: env.SMTP_SECURE,
+    smtpUser: env.SMTP_USER,
+    smtpPass: env.SMTP_PASS,
     contactToEmail: env.CONTACT_TO_EMAIL,
     contactFromEmail: env.CONTACT_FROM_EMAIL,
   };
@@ -65,13 +81,41 @@ export function toContactLead(payload: ContactPayload): ContactLead {
   };
 }
 
+function runProvider(provider: LeadProvider, lead: ContactLead): Promise<ChannelResult> {
+  return new Promise((resolve) => {
+    let settled = false;
+    const timer = setTimeout(() => {
+      if (settled) return;
+      settled = true;
+      resolve({ channel: provider.channel, ok: false, reason: 'timeout' });
+    }, deliveryTimeoutMs);
+
+    provider.notify(lead).then(
+      (result) => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timer);
+        resolve(result);
+      },
+      () => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timer);
+        resolve({ channel: provider.channel, ok: false, reason: 'delivery_error' });
+      },
+    );
+  });
+}
+
 export async function notifyLead(
   lead: ContactLead,
   config: NotifyConfig = notifyConfigFromEnv(),
 ): Promise<NotifyResult> {
-  // Feishu and email providers implement LeadProvider and are wired in #23.
-  const providers: readonly LeadProvider[] = [];
-  const results = await Promise.all(providers.map((provider) => provider.notify(lead)));
+  const providers: readonly LeadProvider[] = [
+    new FeishuProvider(config),
+    new EmailProvider(config),
+  ];
+  const results = await Promise.all(providers.map((provider) => runProvider(provider, lead)));
 
   const channels: ChannelResult[] = (['feishu', 'email'] as const).map((channel) => {
     const delivered = results.find((result) => result.channel === channel);
