@@ -1,0 +1,17 @@
+---
+import { getEntry } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ProcessHero from '../components/ProcessHero.astro';
+
+const entry = await getEntry('pages', 'process');
+
+if (!entry || entry.data.draft) {
+  throw new Error('Missing published content entry: pages/process');
+}
+
+const { title, description } = entry.data;
+---
+
+<BaseLayout title={title} description={description}>
+  <ProcessHero />
+</BaseLayout>

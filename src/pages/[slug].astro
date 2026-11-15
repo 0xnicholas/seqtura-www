@@ -6,7 +6,8 @@ import { pageAnchors, type AnchoredPage } from '../config/site';
 export async function getStaticPaths() {
   const pages = await getCollection(
     'pages',
-    ({ data }) => !data.draft && data.slug !== 'home' && data.slug !== 'methodology',
+    ({ data }) =>
+      !data.draft && !['home', 'methodology', 'process'].includes(data.slug),
   );
 
   return pages.map((entry) => ({
