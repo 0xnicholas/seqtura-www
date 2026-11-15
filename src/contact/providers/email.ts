@@ -7,7 +7,6 @@ function timeoutReason(error: unknown): 'timeout' | 'delivery_error' {
   if (!error || typeof error !== 'object') return 'delivery_error';
   const record = error as { name?: unknown; code?: unknown };
   return record.code === 'ETIMEDOUT' ||
-    record.code === 'ESOCKET' ||
     record.name === 'TimeoutError' ||
     record.name === 'AbortError'
     ? 'timeout'
@@ -65,7 +64,7 @@ export class EmailProvider implements LeadProvider {
       const transport = nodemailer.createTransport({
         host: this.config.smtpHost,
         port,
-        secure: this.config.smtpSecure === 'true',
+        secure: this.config.smtpSecure?.trim().toLowerCase() === 'true',
         auth: this.config.smtpUser
           ? { user: this.config.smtpUser, pass: this.config.smtpPass ?? '' }
           : undefined,
