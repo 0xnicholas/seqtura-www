@@ -28,7 +28,7 @@ import { structuralNote } from '../data/architecture';
         {homeHero.facts.map((fact, index) => (
           <>
             {index > 0 && <span class="sep" aria-hidden="true"></span>}
-            <span>{fact}</span>
+            <span data-hero-fact>{fact}</span>
           </>
         ))}
       </p>

@@ -15,6 +15,11 @@ test('home states the positioning and routes both hero actions', async ({ page }
     'href',
     '/methodology',
   );
+
+  const facts = page.locator('[data-hero-fact]');
+  await expect(facts).toHaveCount(3);
+  await expect(facts).toHaveText(['8 个交付阶段', '5 层能力栈', '3 条控制面']);
+  await expect(page.getByRole('img', { name: /五层能力栈的等距示意图/ })).toBeVisible();
 });
 
 test('home shows the four delivery facts in the proof strip', async ({ page }) => {
@@ -65,11 +70,19 @@ test('methodology preview states the method, its checkpoints and every stage gro
     await expect(section.getByRole('heading', { name: heading })).toBeVisible();
   }
 
-  const groups = section.locator('[data-method-group]');
-  await expect(groups).toHaveCount(4);
-  for (const group of await groups.all()) {
+  await expect(section.locator('[data-method-group]')).toHaveCount(4);
+  for (const [title, label] of [
+    ['Discover / Diagnose', '看阶段 01–02'],
+    ['Define / Design', '看阶段 03–04'],
+    ['Build / Validate', '看阶段 05–06'],
+    ['Deploy / Optimize', '看阶段 07–08'],
+  ] as const) {
+    const group = section.locator('[data-method-group]', {
+      has: page.getByRole('heading', { name: title }),
+    });
+    await expect(group).toHaveCount(1);
     await expect(group).toHaveAttribute('href', '/methodology#stages');
-    await expect(group.getByText(/看阶段 0[1-7]–0[2-8]/)).toBeVisible();
+    await expect(group.getByText(label, { exact: true })).toBeVisible();
   }
 });
 
@@ -80,6 +93,12 @@ test('methodology code panel switches files by click and arrow keys', async ({ p
   const tablist = section.getByRole('tablist', { name: '方法论文件' });
   const delivery = tablist.getByRole('tab', { name: 'delivery.yml' });
   const validate = tablist.getByRole('tab', { name: 'gate-validate.md' });
+
+  const tablistChildren = await tablist.evaluate((element) =>
+    Array.from(element.children).map((child) => child.getAttribute('role')),
+  );
+  expect(tablistChildren).toEqual(['tab', 'tab']);
+  await expect(section.getByText('READ ONLY')).toBeVisible();
 
   await expect(delivery).toHaveAttribute('aria-selected', 'true');
   await expect(section.getByRole('tabpanel')).toContainText('8 阶段 / 3 个门禁');
@@ -93,6 +112,13 @@ test('methodology code panel switches files by click and arrow keys', async ({ p
   await expect(delivery).toBeFocused();
   await expect(delivery).toHaveAttribute('aria-selected', 'true');
   await expect(section.getByRole('tabpanel')).toContainText('8 阶段 / 3 个门禁');
+
+  const focusRing = await delivery.evaluate((element) => {
+    const style = getComputedStyle(element);
+    return { style: style.outlineStyle, width: style.outlineWidth };
+  });
+  expect(focusRing.style).toBe('solid');
+  expect(Number.parseFloat(focusRing.width)).toBeGreaterThan(0);
 
   await delivery.press('ArrowRight');
   await expect(validate).toBeFocused();
@@ -347,6 +373,28 @@ test.describe('home at 390px', () => {
 
     expect(traceCard!.y).toBeGreaterThanOrEqual(archCard!.y + archCard!.height - 1);
     expect(firstControl!.y).toBeGreaterThanOrEqual(traceCard!.y + traceCard!.height - 1);
+  });
+
+  test('delivery, fit and closing CTA stack in one column', async ({ page }) => {
+    await page.goto('/');
+
+    for (const selector of [
+      'section#delivery .commit-grid',
+      'section#delivery .process-list',
+      'section#fit .fit-grid',
+    ]) {
+      const columns = await page.locator(selector).evaluate((element) =>
+        getComputedStyle(element)
+          .gridTemplateColumns.split(' ')
+          .filter((value) => value.length > 0),
+      );
+      expect(columns, selector).toHaveLength(1);
+    }
+
+    await expect(page.locator('section#next-step .cta-actions')).toHaveCSS(
+      'flex-direction',
+      'column',
+    );
   });
 });
 
