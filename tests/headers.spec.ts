@@ -29,12 +29,14 @@ function parseHeaders(source: string): HeaderRule[] {
   return rules;
 }
 
-const builtHeaders = readFileSync('dist/client/_headers', 'utf8');
-const rules = parseHeaders(builtHeaders);
-const globalRule = rules.find((rule) => rule.pattern === '/*');
-const astroRule = rules.find((rule) => rule.pattern === '/_astro/*');
+function builtHeaderRules(): HeaderRule[] {
+  return parseHeaders(readFileSync('dist/client/_headers', 'utf8'));
+}
 
 test('the built output ships the security and cache header contract', () => {
+  const rules = builtHeaderRules();
+  const globalRule = rules.find((rule) => rule.pattern === '/*');
+
   expect(globalRule, 'missing /* rule').toBeTruthy();
   expect(globalRule?.headers['Strict-Transport-Security']).toBe(
     'max-age=31536000; includeSubDomains; preload',
@@ -51,6 +53,9 @@ test('the built output ships the security and cache header contract', () => {
 });
 
 test('immutable hashed assets and short-lived discovery files keep their own cache rules', () => {
+  const rules = builtHeaderRules();
+  const astroRule = rules.find((rule) => rule.pattern === '/_astro/*');
+
   expect(astroRule?.headers['Cache-Control']).toBe('public, max-age=31536000, immutable');
 
   for (const pattern of ['/sitemap-index.xml', '/sitemap-0.xml', '/robots.txt']) {

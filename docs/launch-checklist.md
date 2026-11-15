@@ -69,20 +69,20 @@
 
 生产构建不得出现占位标记。逐项通过环境变量注入，或在缺失时使用中性措辞 / 整项隐藏。
 
-| 环境变量                    | 当前缺失时的行为                | owner 提供             |
-| --------------------------- | ------------------------------- | ---------------------- |
-| `PUBLIC_OPERATOR_NAME`      | 法务页回退为 `Seqtura AI`       | 运营主体全称           |
-| `PUBLIC_REGISTERED_ADDRESS` | 省略注册地址条款                | 注册地址               |
-| `PUBLIC_SITE_DOMAIN`        | 省略官网域名                    | 官网域名               |
-| `PUBLIC_LAUNCH_DATE`        | 生效日期使用构建默认值          | 上线日期（YYYY-MM-DD） |
-| `PUBLIC_LEGAL_UPDATED_AT`   | 回退到上线日期                  | 法务最后更新日期       |
-| `PUBLIC_OPERATOR_LOCATION`  | 回退为“运营主体所在地”          | 运营主体所在地         |
-| `PUBLIC_EMAIL_PROVIDER`     | 回退为“境内企业邮箱 / 邮件服务” | 邮件服务商             |
-| `PUBLIC_HOSTING_PROVIDER`   | 回退为“站点托管服务商”          | 托管服务商             |
-| `PUBLIC_HOSTING_LOCATION`   | 省略托管所在地                  | 托管所在地             |
-| `PUBLIC_ICP_NUMBER`         | 页脚不显示 ICP 项               | ICP 备案号             |
-| `PUBLIC_PSB_NUMBER`         | 页脚不显示公安备案项            | 公安备案号             |
-| `PUBLIC_PRIVACY_VERSION`    | 默认 `1.0`                      | 隐私政策版本号         |
+| 环境变量                    | 当前缺失时的行为                    | owner 提供             |
+| --------------------------- | ----------------------------------- | ---------------------- |
+| `PUBLIC_OPERATOR_NAME`      | 法务页回退为 `Seqtura AI`           | 运营主体全称           |
+| `PUBLIC_REGISTERED_ADDRESS` | 省略注册地址条款                    | 注册地址               |
+| `PUBLIC_SITE_DOMAIN`        | 省略官网域名                        | 官网域名               |
+| `PUBLIC_LAUNCH_DATE`        | 生效日期回退到内容 frontmatter 日期 | 上线日期（YYYY-MM-DD） |
+| `PUBLIC_LEGAL_UPDATED_AT`   | 回退到上线日期或内容更新日期        | 法务最后更新日期       |
+| `PUBLIC_OPERATOR_LOCATION`  | 回退为“运营主体所在地”              | 运营主体所在地         |
+| `PUBLIC_EMAIL_PROVIDER`     | 回退为“境内企业邮箱 / 邮件服务”     | 邮件服务商             |
+| `PUBLIC_HOSTING_PROVIDER`   | 回退为“站点托管服务商”              | 托管服务商             |
+| `PUBLIC_HOSTING_LOCATION`   | 省略托管所在地                      | 托管所在地             |
+| `PUBLIC_ICP_NUMBER`         | 页脚不显示 ICP 项                   | ICP 备案号             |
+| `PUBLIC_PSB_NUMBER`         | 页脚不显示公安备案项                | 公安备案号             |
+| `PUBLIC_PRIVACY_VERSION`    | 默认 `1.0`                          | 隐私政策版本号         |
 
 同时确认：
 
@@ -103,7 +103,7 @@
 - [ ] 微信二维码已上传或配置（`PUBLIC_WECHAT_QR`），移动端可打开。
 - [ ] 境内邮件服务凭证已配置：`EMAIL_PROVIDER=smtp` + `SMTP_*`、`CONTACT_TO_EMAIL`、`CONTACT_FROM_EMAIL`。
 - [ ] 发信域名 SPF / DKIM / DMARC 已配置并通过验证。
-- [ ] 生产提交一次真实测试线索：飞书或邮件至少一路成功；两路都检查；失败时页面显示邮件兜底。
+- [ ] 生产提交一次真实测试线索：飞书与邮件分别检查，至少一路成功；失败时页面显示邮件兜底。
 - [ ] 密钥只放在服务端环境变量；没有任何 secret 进入 `PUBLIC_*`。
 - [ ] 若表单端点与静态站不同域：`PUBLIC_CONTACT_ENDPOINT` 指向境内端点，CSP `connect-src` 与 CORS 白名单同步放行。
 
@@ -118,6 +118,7 @@
 - [ ] 预览环境保持 `FORM_MODE=test`（或 `off`）；生产 `FORM_MODE=live` 仅在凭证就绪后设置。
 - [ ] 生产限流由宿主 WAF 或共享 KV 执行；仓库内的内存限流只作为本地回退。
 - [ ] `FORM_MODE=off` 时返回 503 并显示邮件兜底；`live` 两路失败返回 502。
+- [ ] 自动化已用本地飞书 / SMTP 桩验证 `live` 模式至少一路成功与两路失败；测试不投递真实消息。
 
 ## 7. 占位哨兵
 
