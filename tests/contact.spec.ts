@@ -99,6 +99,28 @@ test.describe('contact page structure', () => {
     }
   });
 
+  test('ships scripts and styles without preview sentinels', async ({ page, request }) => {
+    await page.goto('/contact');
+
+    const assets = await page
+      .locator('script[src], link[rel="stylesheet"]')
+      .evaluateAll((elements) =>
+        elements
+          .map((element) => element.getAttribute('src') ?? element.getAttribute('href'))
+          .filter((value): value is string => Boolean(value)),
+      );
+
+    expect(assets.length).toBeGreaterThan(0);
+    for (const asset of assets) {
+      const response = await request.get(asset);
+      expect(response.ok(), asset).toBe(true);
+      const body = await response.text();
+      for (const sentinel of ['【', '待补', '占位', 'example']) {
+        expect(body, `${asset} contains ${sentinel}`).not.toContain(sentinel);
+      }
+    }
+  });
+
   test('ships external scripts so the strict CSP can keep script-src self', async ({ page }) => {
     await page.goto('/contact');
 
