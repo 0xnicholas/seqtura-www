@@ -1,0 +1,168 @@
+---
+import SectionHeading from './SectionHeading.astro';
+import { architectureCopy, architectureScenarios } from '../data/architecture';
+
+const { scenarios } = architectureCopy;
+
+const scenarioFields = [
+  { id: 'scene', label: '场景' },
+  { id: 'role', label: 'Agent 做什么' },
+  { id: 'layers', label: '用到哪几层' },
+  { id: 'human', label: '人在哪里介入' },
+  { id: 'evaluation', label: '怎么评测' },
+] as const;
+---
+
+<section class="section scenarios-section" id="scenarios" aria-labelledby="scenarios-title">
+  <div class="container-site">
+    <SectionHeading
+      id="scenarios-title"
+      kicker={scenarios.kicker}
+      title={scenarios.title}
+      lead={scenarios.lead}
+    />
+
+    <p class="scenario-note" data-scenario-note>
+      <span class="tick" aria-hidden="true"></span>
+      {scenarios.note}
+    </p>
+
+    <div class="scenario-grid reveal">
+      {architectureScenarios.map((scenario) => (
+        <article class="scenario" data-scenario={scenario.id}>
+          <div class="scenario-head">
+            <span class="scenario-no">{scenario.no}</span>
+            <h3 class="scenario-title">{scenario.title}</h3>
+          </div>
+          <dl class="scenario-facts">
+            {scenarioFields.map((field) => (
+              <div class="scenario-row" data-scenario-field={field.id}>
+                <dt>{field.label}</dt>
+                <dd>{scenario[field.id]}</dd>
+              </div>
+            ))}
+          </dl>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .scenarios-section {
+    background: var(--color-paper);
+  }
+
+  .scenario-note {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin: -40px auto 40px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    line-height: 1.5;
+    letter-spacing: 0.04em;
+    color: var(--color-muted);
+    text-align: center;
+  }
+
+  .scenario-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    border-top: 1px solid var(--color-line);
+    border-left: 1px solid var(--color-line);
+  }
+
+  .scenario {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    padding: 28px 26px 24px;
+    border-right: 1px solid var(--color-line);
+    border-bottom: 1px solid var(--color-line);
+    background: var(--color-canvas);
+  }
+
+  .scenario:first-child::before {
+    content: '';
+    position: absolute;
+    top: -4px;
+    left: -4px;
+    width: 7px;
+    height: 7px;
+    background: var(--color-red);
+  }
+
+  .scenario-head {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--color-line);
+  }
+
+  .scenario-no {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    line-height: 1.5;
+    letter-spacing: 0.05em;
+    color: var(--color-red-dark);
+  }
+
+  .scenario-title {
+    font-size: 21px;
+    font-weight: 500;
+    line-height: 1.35;
+    letter-spacing: -0.015em;
+  }
+
+  .scenario-facts {
+    display: grid;
+    gap: 0;
+  }
+
+  .scenario-row {
+    padding: 12px 0;
+    border-bottom: 1px solid var(--color-line);
+  }
+
+  .scenario-row:last-child {
+    padding-bottom: 0;
+    border-bottom: 0;
+  }
+
+  .scenario-row dt {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    line-height: 1.5;
+    letter-spacing: 0.04em;
+    color: var(--color-muted);
+    text-transform: uppercase;
+  }
+
+  .scenario-row dd {
+    margin-top: 4px;
+    font-size: 13px;
+    line-height: 1.8;
+    color: var(--color-ink-2);
+  }
+
+  @media (max-width: 1023px) {
+    .scenario-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 767px) {
+    .scenario-note {
+      margin: -22px auto 28px;
+      font-size: 9px;
+    }
+
+    .scenario {
+      padding: 24px 20px 22px;
+    }
+  }
+</style>
