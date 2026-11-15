@@ -1,11 +1,12 @@
 import { expect, test } from '@playwright/test';
 
-test('home states the promise and routes both hero actions', async ({ page }) => {
+test('home states the positioning and routes both hero actions', async ({ page }) => {
   const response = await page.goto('/');
 
   expect(response?.status()).toBe(200);
   await expect(page.locator('h1')).toHaveCount(1);
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText('把 AI Agent 从演示做到上线。');
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('企业 AI Agent 的工程化交付');
+  await expect(page.getByText('把业务场景做成可验收、可私有化、可维护的 AI Agent。')).toBeVisible();
   await expect(page.getByRole('link', { name: '预约 30 分钟沟通' }).first()).toHaveAttribute(
     'href',
     '/contact#book',
@@ -24,7 +25,7 @@ test('home shows the four delivery facts in the proof strip', async ({ page }) =
   await expect(facts).toContainText(['8 个交付阶段', '5 层能力栈', '3 条控制面', '1 个主转化']);
 });
 
-test('methodology preview states the method, its principles and every stage group', async ({
+test('methodology preview states the method, its checkpoints and every stage group', async ({
   page,
 }) => {
   await page.goto('/');
@@ -33,8 +34,26 @@ test('methodology preview states the method, its principles and every stage grou
   await expect(section.getByRole('heading', { level: 2 })).toHaveText(
     '从业务结果出发，而不是从技术方案出发。',
   );
-  for (const name of ['结果导向', '共同构建', '产品化沉淀']) {
-    await expect(section.getByRole('heading', { name })).toBeVisible();
+  await expect(
+    section.getByText(
+      '8 个交付阶段，4 组推进。Define / Validate / Deploy 不可跳过；每个阶段都有产出物和过关条件。',
+    ),
+  ).toBeVisible();
+  for (const checkpoint of ['问题定义：', '验收标准：', '评测集：', '生产上线：']) {
+    await expect(section.getByText(checkpoint).first()).toBeVisible();
+  }
+  await expect(section.getByRole('link', { name: '看完整方法论' })).toHaveAttribute(
+    'href',
+    '/methodology',
+  );
+
+  for (const phrase of [
+    '问题定义不是需求清单',
+    'Agent 规格卡写清职责',
+    '在沙箱或预发环境跑真实任务',
+    '接入生产系统，完成权限',
+  ]) {
+    await expect(section.getByText(phrase)).toBeVisible();
   }
 
   for (const heading of [
@@ -50,6 +69,7 @@ test('methodology preview states the method, its principles and every stage grou
   await expect(groups).toHaveCount(4);
   for (const group of await groups.all()) {
     await expect(group).toHaveAttribute('href', '/methodology#stages');
+    await expect(group.getByText(/看阶段 0[1-7]–0[2-8]/)).toBeVisible();
   }
 });
 
@@ -94,7 +114,8 @@ test('architecture bento shows the capability stack, trace and control planes', 
   }
 
   await expect(section.getByRole('img', { name: /5 层能力栈.*3 条控制面.*客户/ })).toBeVisible();
-  await expect(section.getByText(/客户环境/)).toBeVisible();
+  await expect(section.getByText(/客户环境：系统/)).toBeVisible();
+  await expect(section.getByText(/我们交付组件与模式/)).toBeVisible();
 
   await expect(
     section.getByRole('heading', { name: /一条任务，\s*从进入到留下什么。/ }),
@@ -140,7 +161,7 @@ test('delivery section states four conditional commitments and the first three p
   const commitments = section.locator('[data-commitment]');
   await expect(commitments).toHaveCount(4);
   for (const [name, detail] of [
-    ['源码交付', '合同中写明'],
+    ['源码交付（按合同）', '以合同为准'],
     ['私有化', '按项目评估'],
     ['验收标准前置', 'Define 阶段'],
     ['支持范围先说清', '按次或按项目'],
@@ -186,6 +207,7 @@ test('closing CTA sends visitors to the booking form with an email fallback', as
 
   const section = page.locator('section#next-step');
   await expect(section.getByRole('heading', { level: 2 })).toHaveText('先聊一个具体场景。');
+  await expect(section.getByText(/带一个真实的业务流程来/)).toBeVisible();
   await expect(section.getByRole('link', { name: '预约 30 分钟沟通' })).toHaveAttribute(
     'href',
     '/contact#book',

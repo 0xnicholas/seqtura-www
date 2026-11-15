@@ -3,7 +3,7 @@ import ArrowIcon from './ArrowIcon.astro';
 import ArrowUpRightIcon from './ArrowUpRightIcon.astro';
 import CodePanel from './CodePanel.astro';
 import SectionHeading from './SectionHeading.astro';
-import { deliveryGroups, methodologyPrinciples } from '../data/delivery';
+import { deliveryGroups } from '../data/delivery';
 import { codeFiles } from '../data/methodologyCode';
 import { homeSections } from '../data/homepage';
 import { structuralNote } from '../data/architecture';
@@ -25,17 +25,16 @@ const { methodology } = homeSections;
         <h3 class="type-h3">{methodology.introTitle}</h3>
         <p class="method-body">{methodology.introBody}</p>
 
-        <ul class="principle-list">
-          {methodologyPrinciples.map((principle) => (
+        <ul class="check-list">
+          {methodology.checks.map((check) => (
             <li>
-              <span class="principle-mark" aria-hidden="true"></span>
-              <div>
-                <div class="principle-head">
-                  <h4 class="principle-title">{principle.title}</h4>
-                  <span class="principle-label">{principle.label}</span>
-                </div>
-                <p class="principle-text">{principle.summary}</p>
-              </div>
+              <span class="check-mark" aria-hidden="true">
+                ✓
+              </span>
+              <span>
+                <b>{check.label}：</b>
+                {check.text}
+              </span>
             </li>
           ))}
         </ul>
@@ -57,8 +56,18 @@ const { methodology } = homeSections;
           <span class="method-range">{group.range}</span>
           <h3 class="type-h3 method-group-title">{group.title}</h3>
           <p class="method-group-summary">{group.summary}</p>
+          <ul class="check-list check-list-compact">
+            {group.checks.map((check) => (
+              <li>
+                <span class="check-mark" aria-hidden="true">
+                  ✓
+                </span>
+                <span>{check}</span>
+              </li>
+            ))}
+          </ul>
           <span class="method-group-link">
-            {methodology.groupLinkLabel}
+            {group.linkLabel}
             <ArrowUpRightIcon />
           </span>
         </a>
@@ -89,53 +98,41 @@ const { methodology } = homeSections;
     color: var(--color-muted);
   }
 
-  .principle-list {
-    margin-top: 28px;
+  .check-list {
+    margin-top: 24px;
     border-top: 1px solid var(--color-line);
   }
 
-  .principle-list li {
+  .check-list li {
     display: grid;
-    grid-template-columns: 18px minmax(0, 1fr);
-    gap: 10px;
-    padding: 13px 0;
+    grid-template-columns: 12px minmax(0, 1fr);
+    gap: 8px;
+    padding: 10px 0;
     border-bottom: 1px solid var(--color-line);
-  }
-
-  .principle-mark {
-    width: 7px;
-    height: 7px;
-    margin-top: 7px;
-    background: var(--color-red);
-  }
-
-  .principle-head {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    gap: 4px 8px;
-  }
-
-  .principle-title {
-    font-size: 15px;
-    font-weight: 500;
-    line-height: 1.5;
-  }
-
-  .principle-label {
-    font-family: var(--font-mono);
-    font-size: 9px;
-    font-weight: 400;
-    letter-spacing: 0.04em;
-    color: var(--color-muted);
-    text-transform: uppercase;
-  }
-
-  .principle-text {
-    margin-top: 3px;
     font-size: 14px;
     line-height: 1.6;
     color: var(--color-muted);
+  }
+
+  .check-mark {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    line-height: 1.6;
+    color: var(--color-red);
+  }
+
+  .check-list b {
+    font-weight: 500;
+    color: var(--color-ink-2);
+  }
+
+  .check-list-compact {
+    margin-top: 16px;
+  }
+
+  .check-list-compact li {
+    padding: 7px 0;
+    font-size: 13px;
   }
 
   .method-link {

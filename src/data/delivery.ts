@@ -21,6 +21,8 @@ export interface DeliveryGroup {
   readonly title: string;
   readonly range: string;
   readonly summary: string;
+  readonly checks: readonly string[];
+  readonly linkLabel: string;
 }
 
 export const deliveryGroups: readonly DeliveryGroup[] = [
@@ -28,25 +30,37 @@ export const deliveryGroups: readonly DeliveryGroup[] = [
     id: 'discover-diagnose',
     title: 'Discover / Diagnose',
     range: '阶段 01–02',
-    summary: '先把业务和问题看清楚，不急着讲方案。',
+    summary:
+      '先把业务、组织、系统、数据与约束盘点清楚，再判断值不值得做。问题定义不是需求清单，而是带 ROI 假设、可行性与风险的结论。',
+    checks: ['客户业务画像', '问题定义与 ROI 假设'],
+    linkLabel: '看阶段 01–02',
   },
   {
     id: 'define-design',
     title: 'Define / Design',
     range: '阶段 03–04',
-    summary: '把职责、验收标准和方案定死，再动手。',
+    summary:
+      '先把验收标准与评测集定下来，再动手构建。Agent 规格卡写清职责、目标、非目标、权限与成功指标；方案架构写到可施工。',
+    checks: ['Agent 规格卡与验收标准', '评测集 v0 与方案架构'],
+    linkLabel: '看阶段 03–04',
   },
   {
     id: 'build-validate',
     title: 'Build / Validate',
     range: '阶段 05–06',
-    summary: '按规格构建，用真实业务人员和评测集验证。',
+    summary:
+      '在沙箱或预发环境跑真实任务，按规格构建可运行原型；再用同一套锁定评测集与验收标准逐项打分，产出可复核的评测报告。',
+    checks: ['可运行原型', '评测报告与失败案例'],
+    linkLabel: '看阶段 05–06',
   },
   {
     id: 'deploy-optimize',
     title: 'Deploy / Optimize',
     range: '阶段 07–08',
-    summary: '接进生产系统，用真实数据持续迭代。',
+    summary:
+      '接入生产系统，完成权限、监控、告警与回滚配置；上线后用使用数据、失败案例与成本持续迭代 Agent、Skills、Knowledge 与 Workflow。',
+    checks: ['生产 Agent 与上线检查清单', '运营报告与下一轮迭代计划'],
+    linkLabel: '看阶段 07–08',
   },
 ];
 

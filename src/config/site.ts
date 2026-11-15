@@ -35,6 +35,7 @@ export const footerColumns: readonly FooterColumn[] = [
     title: '联系',
     links: [
       { href: '/contact#book', label: '预约 30 分钟' },
+      { href: '/contact#about', label: '关于我们' },
       { href: '/contact#channels', label: '飞书 / 微信' },
       { href: `mailto:${placeholders.contactEmail.value}`, label: '邮箱' },
     ],

@@ -48,6 +48,10 @@ test('footer provides site, delivery and contact columns plus legal links', asyn
     'href',
     '/methodology#stages',
   );
+  await expect(footer.getByRole('link', { name: '关于我们' })).toHaveAttribute(
+    'href',
+    '/contact#about',
+  );
   await expect(footer.getByRole('link', { name: '参考架构' })).toHaveAttribute(
     'href',
     '/architecture#overview',

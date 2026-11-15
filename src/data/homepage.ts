@@ -8,9 +8,9 @@ export interface Commitment {
 
 export const homeHero = {
   kicker: '企业 AI Agent 定制交付',
-  titleLead: '把 AI Agent',
-  titleTail: '从演示做到上线。',
-  lead: '从业务问题出发，用 8 阶段交付方法把 Agent 接进真实流程。可私有化、可审计、模型可替换。',
+  titleLead: '企业 AI Agent 的',
+  titleTail: '工程化交付',
+  lead: '把业务场景做成可验收、可私有化、可维护的 AI Agent。',
   primaryCta: '预约 30 分钟沟通',
   secondaryCta: '看工作方法论',
   facts: ['8 个交付阶段', '5 层能力栈', '3 条控制面'],
@@ -21,17 +21,22 @@ export const homeSections = {
   methodology: {
     kicker: '工作方法论',
     title: '从业务结果出发，而不是从技术方案出发。',
-    lead: '8 个交付阶段，3 条原则；把 Agent 从业务问题做到生产上线。',
+    lead: '8 个交付阶段，4 组推进。Define / Validate / Deploy 不可跳过；每个阶段都有产出物和过关条件。',
     introTitle: '每个阶段都有可检查的产出物。',
     introBody:
       '先把问题定义清楚，再定验收标准与评测集，然后才进入构建。Agent 不是一次模型调用，而是一条有状态的执行链；每一环都要能被验证、被审计、被接手。',
-    linkLabel: '看工作方法论',
-    groupLinkLabel: '看阶段详情',
+    checks: [
+      { label: '问题定义', text: '值得做、不值得做，或先做哪一步，给出结论。' },
+      { label: '验收标准', text: 'Define 阶段前置，逐项可量化、可复核。' },
+      { label: '评测集', text: 'Build 之前锁定，正常 / 边界 / 失败样本齐全。' },
+      { label: '生产上线', text: '权限、监控、告警与回滚配置完成才算交付。' },
+    ],
+    linkLabel: '看完整方法论',
   },
   architecture: {
     kicker: '技术架构',
     title: '一个能上生产的 Agent 系统，由什么构成。',
-    lead: '5 层能力栈 + 3 条控制面；可私有化、可审计、模型可替换。',
+    lead: '5 层能力栈，3 条横切控制面。我们交付组件与模式；系统、数据、身份与审批权留在客户环境。',
     footnote: '参考架构描述可复用的能力模型；具体部署形态与实现范围在方案阶段按项目确认。',
   },
   delivery: {
@@ -50,7 +55,7 @@ export const homeSections = {
   cta: {
     kicker: '下一步',
     title: '先聊一个具体场景。',
-    lead: '30 分钟，围绕一个具体业务场景，给出值不值得做、下一步是什么的判断。',
+    lead: '30 分钟，带一个真实的业务流程来。我们一起判断值不值得做、先做哪一步，以及第一个验证切片长什么样。',
     primaryCta: '预约 30 分钟沟通',
     secondaryCta: '写邮件给我们',
     note: '30 分钟 · 不收费 · 不推销',
@@ -61,8 +66,8 @@ export const commitments: readonly Commitment[] = [
   {
     id: 'source',
     code: '01 / SOURCE',
-    title: '源码交付',
-    summary: '交付范围与 License 在合同中写明；合同未约定的部分不作为承诺。',
+    title: '源码交付（按合同）',
+    summary: '是否交付源码、交付范围与 License 以合同为准；未约定部分不作为承诺。',
     tag: '合同约定',
   },
   {
