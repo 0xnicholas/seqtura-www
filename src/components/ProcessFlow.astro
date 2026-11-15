@@ -1,9 +1,5 @@
 ---
-import {
-  processBranches,
-  processStages,
-  processStagesCopy,
-} from '../data/process';
+import { processBranches, processStages, processStagesCopy } from '../data/process';
 ---
 
 <figure class="process-flow" data-process-flow aria-labelledby="flow-caption">
@@ -12,14 +8,18 @@ import {
     <span class="flow-caption-count">{processStagesCopy.flowCount}</span>
   </figcaption>
 
-  <ol class="flow-track">
+  <ol class="flow-track" data-flow-track>
     {processStages.map((stage, index) => (
       <li class="flow-cell" data-flow-node={stage.id}>
-        <p class="flow-duration" data-flow-duration>{stage.duration}</p>
+        <p class="flow-duration" data-flow-duration>
+          {stage.duration}
+        </p>
 
         <div class="flow-node">
           <span class="flow-no">{stage.no}</span>
-          <p class="flow-name" data-flow-name>{stage.name}</p>
+          <p class="flow-name" data-flow-name>
+            {stage.name}
+          </p>
         </div>
 
         <p class="flow-role">
@@ -27,14 +27,12 @@ import {
           <span data-flow-role>{stage.customerRole}</span>
         </p>
 
-        {index < processStages.length - 1 && (
-          <span class="flow-link" aria-hidden="true"></span>
-        )}
+        {index < processStages.length - 1 && <span class="flow-link" aria-hidden="true"></span>}
       </li>
     ))}
   </ol>
 
-  <div class="flow-returns" aria-hidden="true">
+  <div class="flow-returns" data-flow-returns aria-hidden="true">
     <svg class="flow-return-svg" viewBox="0 0 1200 132" preserveAspectRatio="none">
       <defs>
         <marker
@@ -71,7 +69,7 @@ import {
     </ol>
   </div>
 
-  <div class="flow-legend">
+  <div class="flow-legend" data-flow-legend>
     <span class="legend-item">
       <span class="legend-line" aria-hidden="true"></span>
       {processStagesCopy.legendSolid}
@@ -361,6 +359,7 @@ import {
 
     .flow-cell {
       grid-template-columns: 76px minmax(0, 1fr);
+      grid-template-rows: auto auto;
       grid-template-areas:
         'duration node'
         'role role';
@@ -432,17 +431,8 @@ import {
   }
 
   @media (max-width: 359px) {
-    .flow-cell {
-      grid-template-columns: 66px minmax(0, 1fr);
-      column-gap: 10px;
-    }
-
     .flow-name {
       font-size: 17px;
-    }
-
-    .flow-role {
-      padding-left: 76px;
     }
   }
 </style>

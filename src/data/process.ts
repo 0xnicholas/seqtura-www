@@ -1,6 +1,7 @@
 export const processHero = {
   kicker: '合作流程',
-  title: '从第一次沟通，到上线之后',
+  titleLead: '从第一次沟通，',
+  titleTail: '到上线之后',
   lead: '六个合作阶段：每段做什么、需要你投入什么、到哪里为止。',
   primaryCta: '开始第一次沟通',
   secondaryCta: '看技术架构',
@@ -11,7 +12,7 @@ export interface ProcessStage {
   readonly no: string;
   readonly name: string;
   readonly duration: string;
-  readonly durationDetail: string | null;
+  readonly cycle: string;
   readonly customerRole: string;
   readonly ourParticipants: string;
   readonly clientParticipants: string;
@@ -27,7 +28,7 @@ export const processStages: readonly ProcessStage[] = [
     no: '01',
     name: '初次沟通',
     duration: '30 分钟',
-    durationDetail: '1 次',
+    cycle: '30 分钟，1 次',
     customerRole: '业务发起人',
     ourParticipants: '技术负责人 + 业务负责人',
     clientParticipants: '业务发起人，技术对接人可同来',
@@ -41,7 +42,7 @@ export const processStages: readonly ProcessStage[] = [
     no: '02',
     name: '需求与可行性评估',
     duration: '1–2 周',
-    durationDetail: null,
+    cycle: '1–2 周',
     customerRole: '业务专家 + IT + sponsor',
     ourParticipants: '前置交付工程师 + 方案 / 架构',
     clientParticipants: '业务专家 + IT / 数据对接人 + 业务 sponsor',
@@ -55,7 +56,7 @@ export const processStages: readonly ProcessStage[] = [
     no: '03',
     name: '方案与报价',
     duration: '3–5 个工作日',
-    durationDetail: null,
+    cycle: '3–5 个工作日',
     customerRole: 'sponsor',
     ourParticipants: '方案 + 商务',
     clientParticipants: '业务 sponsor，采购 / 法务按需',
@@ -70,7 +71,7 @@ export const processStages: readonly ProcessStage[] = [
     no: '04',
     name: '合同与启动',
     duration: '1–2 周',
-    durationDetail: '取决于采购流程',
+    cycle: '1–2 周，取决于采购流程',
     customerRole: '采购 + 对接人',
     ourParticipants: '商务 + 项目负责人',
     clientParticipants: '采购 / 法务 + 业务 sponsor + 项目对接人',
@@ -84,7 +85,7 @@ export const processStages: readonly ProcessStage[] = [
     no: '05',
     name: '交付与验收',
     duration: '4–12 周',
-    durationDetail: '视范围，以报价排期为基准',
+    cycle: '4–12 周，视范围，以报价排期为基准',
     customerRole: '业务专家 + IT + 验收人',
     ourParticipants: '前置交付工程师 + 工程 / 架构',
     clientParticipants: '业务专家 + IT（环境与权限）+ 验收人',
@@ -100,7 +101,7 @@ export const processStages: readonly ProcessStage[] = [
     no: '06',
     name: '上线后支持',
     duration: '按合同',
-    durationDetail: '按次或按项目，不做年度订阅',
+    cycle: '按合同约定，按次或按项目，不做年度订阅',
     customerRole: '运维 + 业务负责人',
     ourParticipants: '交付工程师',
     clientParticipants: '运维对接人 + 业务负责人',
@@ -113,7 +114,7 @@ export const processStages: readonly ProcessStage[] = [
 
 export const processStagesCopy = {
   kicker: '六段合作阶段',
-  title: '六个阶段，每一步都有边界。',
+  title: '六个阶段，各有边界。',
   lead: '主干六段合作阶段，含典型周期与客户侧角色；虚线标出可能的分支。',
   flowLabel: '典型路径',
   flowCount: '6 个合作阶段',
@@ -123,7 +124,7 @@ export const processStagesCopy = {
   note: '典型路径，实际以合同为准。',
   tableKicker: '阶段明细',
   tableTitle: '每段做什么、需要你投入什么、到哪里为止。',
-  tableLead: '桌面端按阶段横向对照；移动端折叠为卡片，逐段展开。',
+  tableLead: '周期、参与人、客户投入、产出与边界，逐项写清。',
   methodologyRef: '交付期内部的工程阶段、产出物与过关条件，见',
   methodologyLink: '工作方法论',
 } as const;
@@ -155,3 +156,66 @@ export const processBranches: readonly ProcessBranch[] = [
     detail: '回到“方案与报价”，按新项目走。',
   },
 ];
+
+export interface PricingPrinciple {
+  readonly id: string;
+  readonly no: string;
+  readonly title: string;
+  readonly label: string;
+  readonly summary: string;
+}
+
+export const pricingPrinciples: readonly PricingPrinciple[] = [
+  {
+    id: 'project',
+    no: '01',
+    title: '项目制',
+    label: '按场景与交付范围报价',
+    summary: '按场景与交付范围报价；不做订阅制。',
+  },
+  {
+    id: 'milestones',
+    no: '02',
+    title: '按里程碑付款',
+    label: '启动款 + 里程碑 + 验收尾款',
+    summary: '启动款 + 里程碑 + 验收尾款；比例与节点写进合同。',
+  },
+  {
+    id: 'change',
+    no: '03',
+    title: '范围变更重新报价',
+    label: '不按人天追加',
+    summary: '范围变了重新报价，不按人天追加；范围未定不报固定总价、不报固定工期。',
+  },
+  {
+    id: 'minimum',
+    no: '04',
+    title: '最小项目规模',
+    label: '一个能真正上线的 Agent 场景',
+    summary: '一个能真正上线的 Agent 场景。不接只做演示、只评估不上线、或纯人力外包的项目。',
+  },
+  {
+    id: 'support',
+    no: '05',
+    title: '上线后支持',
+    label: '按次或按项目',
+    summary: '按次或按项目另行约定，不做年度订阅。',
+  },
+  {
+    id: 'public-pricing',
+    no: '06',
+    title: '价格不公开',
+    label: '报价随方案给',
+    summary: '不公开起步价、区间与套餐；报价随方案给。',
+  },
+];
+
+export const pricingCopy = {
+  kicker: '计价原则',
+  title: '项目制，按范围报价。',
+  lead: '付款、变更、最小项目规模与支持边界都写清楚；不公开价格，报价随方案给。',
+  supportKicker: '支持边界',
+  supportTitle: '上线后支持，按约定范围处理。',
+  supportLead: '支持期按次或按项目另行约定，不做年度订阅。',
+  supportBoundaries: ['不含新场景开发，按新项目走。', '不含 7×24 值守。', '响应与范围逐次约定。'],
+} as const;

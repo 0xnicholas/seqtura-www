@@ -5,6 +5,7 @@ import SectionHeading from '../components/SectionHeading.astro';
 import ProcessHero from '../components/ProcessHero.astro';
 import ProcessFlow from '../components/ProcessFlow.astro';
 import ProcessStageTable from '../components/ProcessStageTable.astro';
+import PricingPrinciples from '../components/PricingPrinciples.astro';
 import { processStagesCopy } from '../data/process';
 
 const entry = await getEntry('pages', 'process');
@@ -31,4 +32,12 @@ const { title, description } = entry.data;
       <ProcessStageTable />
     </div>
   </section>
+
+  <PricingPrinciples />
 </BaseLayout>
+
+<style>
+  .process-stages {
+    scroll-margin-top: var(--header-h);
+  }
+</style>

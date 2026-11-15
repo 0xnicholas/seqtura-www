@@ -11,9 +11,7 @@ import { processStages, processStagesCopy } from '../data/process';
 
 <div class="stage-table-wrap" data-stage-table>
   <table class="stage-table">
-    <caption class="visually-hidden">
-      六个合作阶段的周期、参与人、客户投入、产出与边界
-    </caption>
+    <caption class="visually-hidden">六个合作阶段的周期、参与人、客户投入、产出与边界</caption>
     <thead>
       <tr>
         <th scope="col">阶段</th>
@@ -29,35 +27,42 @@ import { processStages, processStagesCopy } from '../data/process';
         <tr data-stage-row={stage.id}>
           <th scope="row">
             <span class="stage-no">{stage.no}</span>
-            <span class="stage-name" data-stage-name>{stage.name}</span>
-            <span class="stage-copy" data-stage-copy>{stage.copy}</span>
+            <span class="stage-name" data-stage-name>
+              {stage.name}
+            </span>
+            <span class="stage-copy" data-stage-copy>
+              {stage.copy}
+            </span>
           </th>
           <td>
-            <span class="stage-duration" data-stage-duration>{stage.duration}</span>
-            {stage.durationDetail && (
-              <span class="stage-duration-detail" data-stage-duration-detail>
-                {stage.durationDetail}
-              </span>
-            )}
+            <span class="stage-duration" data-stage-duration>
+              {stage.cycle}
+            </span>
           </td>
           <td>
             <p class="stage-party">
-              <span class="party-label">我们</span>
+              <span class="party-label">我们：</span>
               {stage.ourParticipants}
             </p>
             <p class="stage-party">
-              <span class="party-label">客户</span>
+              <span class="party-label">客户：</span>
               <span data-stage-client>{stage.clientParticipants}</span>
             </p>
           </td>
           <td>
-            <span class="stage-cell-text" data-stage-investment>{stage.clientInvestment}</span>
+            <span class="stage-cell-text" data-stage-investment>
+              {stage.clientInvestment}
+            </span>
           </td>
           <td>
-            <span class="stage-cell-text" data-stage-outputs>{stage.outputs}</span>
+            <span class="stage-cell-text" data-stage-outputs>
+              {stage.outputs}
+            </span>
           </td>
           <td>
-            <span class="stage-cell-text" data-stage-boundary>{stage.boundary}</span>
+            <span class="stage-cell-text" data-stage-boundary>
+              {stage.boundary}
+            </span>
           </td>
         </tr>
       ))}
@@ -72,10 +77,7 @@ import { processStages, processStagesCopy } from '../data/process';
         <span class="card-no">{stage.no}</span>
         <span class="card-main">
           <h4 class="card-name">{stage.name}</h4>
-          <span class="card-duration">
-            {stage.duration}
-            {stage.durationDetail && <span class="card-duration-detail">{stage.durationDetail}</span>}
-          </span>
+          <span class="card-duration">{stage.cycle}</span>
         </span>
         <span class="card-toggle" aria-hidden="true"></span>
       </summary>
@@ -86,16 +88,19 @@ import { processStages, processStagesCopy } from '../data/process';
         <dl class="card-fields">
           <div class="card-field">
             <dt>周期</dt>
-            <dd>
-              {stage.duration}
-              {stage.durationDetail && <span class="card-field-note">{stage.durationDetail}</span>}
-            </dd>
+            <dd>{stage.cycle}</dd>
           </div>
           <div class="card-field">
             <dt>参与人</dt>
             <dd>
-              <span class="card-party"><span class="party-label">我们</span>{stage.ourParticipants}</span>
-              <span class="card-party"><span class="party-label">客户</span>{stage.clientParticipants}</span>
+              <span class="card-party">
+                <span class="party-label">我们：</span>
+                {stage.ourParticipants}
+              </span>
+              <span class="card-party">
+                <span class="party-label">客户：</span>
+                {stage.clientParticipants}
+              </span>
             </dd>
           </div>
           <div class="card-field">
@@ -258,14 +263,6 @@ import { processStages, processStagesCopy } from '../data/process';
     color: var(--color-ink);
   }
 
-  .stage-duration-detail {
-    display: block;
-    margin-top: 4px;
-    font-size: 11px;
-    line-height: 1.6;
-    color: var(--color-muted);
-  }
-
   .stage-party {
     font-size: 13px;
     line-height: 1.7;
@@ -370,10 +367,6 @@ import { processStages, processStagesCopy } from '../data/process';
     color: var(--color-muted);
   }
 
-  .card-duration-detail {
-    color: var(--color-faint);
-  }
-
   .card-toggle {
     position: relative;
     width: 12px;
@@ -455,13 +448,6 @@ import { processStages, processStagesCopy } from '../data/process';
     margin-top: 8px;
   }
 
-  .card-field-note {
-    display: block;
-    margin-top: 3px;
-    font-size: 12px;
-    color: var(--color-muted);
-  }
-
   .methodology-ref {
     display: flex;
     flex-wrap: wrap;
@@ -483,6 +469,12 @@ import { processStages, processStagesCopy } from '../data/process';
     clip: rect(0 0 0 0);
     white-space: nowrap;
     border: 0;
+  }
+
+  @media (max-width: 1199px) {
+    .stage-name {
+      font-size: 17px;
+    }
   }
 
   @media (max-width: 1023px) {

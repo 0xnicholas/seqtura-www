@@ -8,7 +8,8 @@ import { site } from '../config/site';
   <div class="container-site">
     <p class="kicker">{processHero.kicker}</p>
     <h1 id="process-hero-title" class="type-h1 hero-title">
-      {processHero.title}
+      <span class="hero-title-nowrap">{processHero.titleLead}</span>
+      {processHero.titleTail}
     </h1>
     <p class="type-lead hero-lead">{processHero.lead}</p>
 
@@ -65,6 +66,10 @@ import { site } from '../config/site';
   .hero-title {
     max-width: 920px;
     margin-top: 24px;
+  }
+
+  .hero-title-nowrap {
+    white-space: nowrap;
   }
 
   .hero-lead {
