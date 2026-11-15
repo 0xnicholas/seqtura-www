@@ -1,8 +1,10 @@
+import { existsSync } from 'node:fs';
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { extname, join } from 'node:path';
 
-const [root = 'dist', portArg = '4321'] = process.argv.slice(2);
+const [rootArg = 'dist', portArg = '4321'] = process.argv.slice(2);
+const root = existsSync(join(rootArg, 'client', 'index.html')) ? join(rootArg, 'client') : rootArg;
 const port = Number(portArg);
 const contentTypes = {
   '.css': 'text/css; charset=utf-8',

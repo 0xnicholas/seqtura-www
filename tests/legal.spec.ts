@@ -1,4 +1,7 @@
 import { execFile, spawn } from 'node:child_process';
+import { mkdtemp, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { promisify } from 'node:util';
 import { expect, test } from '@playwright/test';
 
@@ -283,38 +286,34 @@ test.describe('configured filing and operator values', () => {
   const port = 4461;
   const baseURL = `http://127.0.0.1:${port}`;
   let server: ReturnType<typeof spawn> | undefined;
+  let outputDir = '';
 
   test.beforeAll(async () => {
     test.setTimeout(180_000);
-    await execFileAsync(
-      'pnpm',
-      ['exec', 'astro', 'build', '--outDir', 'test-results/filing-dist'],
-      {
-        cwd: process.cwd(),
-        env: {
-          ...process.env,
-          SITE_URL: 'https://seqtura.ai',
-          PUBLIC_SHOW_PLACEHOLDERS: 'false',
-          PUBLIC_ICP_NUMBER: '京ICP备12345678号-1',
-          PUBLIC_PSB_NUMBER: '京公网安备 11010502030143号',
-          PUBLIC_OPERATOR_NAME: '北京序构科技有限公司',
-          PUBLIC_REGISTERED_ADDRESS: '北京市朝阳区测试路 1 号',
-          PUBLIC_SITE_DOMAIN: 'seqtura.ai',
-          PUBLIC_LAUNCH_DATE: '2026-12-01',
-          PUBLIC_EMAIL_PROVIDER: '邮件服务（测试）',
-          PUBLIC_HOSTING_PROVIDER: '境内托管服务（测试）',
-          PUBLIC_HOSTING_LOCATION: '北京',
-          PUBLIC_OPERATOR_LOCATION: '北京市',
-          PUBLIC_PRIVACY_VERSION: '1.1',
-        },
+    outputDir = await mkdtemp(join(tmpdir(), 'seqtura-legal-filing-'));
+    await execFileAsync('pnpm', ['exec', 'astro', 'build', '--outDir', outputDir], {
+      cwd: process.cwd(),
+      env: {
+        ...process.env,
+        SITE_URL: 'https://seqtura.ai',
+        PUBLIC_SHOW_PLACEHOLDERS: 'false',
+        PUBLIC_ICP_NUMBER: '京ICP备12345678号-1',
+        PUBLIC_PSB_NUMBER: '京公网安备 11010502030143号',
+        PUBLIC_OPERATOR_NAME: '北京序构科技有限公司',
+        PUBLIC_REGISTERED_ADDRESS: '北京市朝阳区测试路 1 号',
+        PUBLIC_SITE_DOMAIN: 'seqtura.ai',
+        PUBLIC_LAUNCH_DATE: '2026-12-01',
+        PUBLIC_EMAIL_PROVIDER: '邮件服务（测试）',
+        PUBLIC_HOSTING_PROVIDER: '境内托管服务（测试）',
+        PUBLIC_HOSTING_LOCATION: '北京',
+        PUBLIC_OPERATOR_LOCATION: '北京市',
+        PUBLIC_PRIVACY_VERSION: '1.1',
       },
-    );
+    });
 
-    server = spawn(
-      process.execPath,
-      ['tests/support/serve-static.mjs', 'test-results/filing-dist', String(port)],
-      { stdio: 'ignore' },
-    );
+    server = spawn(process.execPath, ['tests/support/serve-static.mjs', outputDir, String(port)], {
+      stdio: 'ignore',
+    });
 
     for (let attempt = 0; attempt < 80; attempt += 1) {
       try {
@@ -328,8 +327,14 @@ test.describe('configured filing and operator values', () => {
     throw new Error(`Static server did not start at ${baseURL}`);
   });
 
-  test.afterAll(() => {
-    server?.kill('SIGTERM');
+  test.afterAll(async () => {
+    if (server && server.exitCode === null) {
+      await new Promise<void>((resolve) => {
+        server!.once('exit', () => resolve());
+        server!.kill('SIGTERM');
+      });
+    }
+    if (outputDir) await rm(outputDir, { recursive: true, force: true });
   });
 
   test('shows filings, operator details, dates and version from configuration', async ({
