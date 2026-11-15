@@ -1,34 +1,6 @@
-import { spawn, type ChildProcess } from 'node:child_process';
-import { once } from 'node:events';
-import { existsSync } from 'node:fs';
-import { expect, test, type APIRequestContext, type Page } from '@playwright/test';
-
-const origin = `http://127.0.0.1:${Number(process.env.PORT ?? 4321)}`;
-
-const validPayload = (overrides: Record<string, unknown> = {}) => ({
-  name: '张明',
-  company: '序构测试制造有限公司',
-  email: 'zhangming@example.com',
-  need: '我们有一条客服工单流程，希望评估 Agent 是否适合接入，并给出第一步建议。',
-  wechatPhone: '微信：zhangming-work',
-  consent: true,
-  consentAt: '2026-11-16T08:00:00.000Z',
-  privacyVersion: '1.0',
-  website: '',
-  startedAt: Date.now() - 10_000,
-  ...overrides,
-});
-
-async function postContact(
-  request: APIRequestContext,
-  overrides: Record<string, unknown> = {},
-  headers: Record<string, string> = {},
-) {
-  return request.post('/api/contact', {
-    data: validPayload(overrides),
-    headers: { origin, 'content-type': 'application/json', ...headers },
-  });
-}
+import { expect, test, type Page } from '@playwright/test';
+import { defaultOrigin, postContact, validPayload } from './support/contact';
+import { startTestServer, type TestServer } from './support/server';
 
 test.describe('contact page structure', () => {
   test('has the hero, booking form, channels and about sections', async ({ page }) => {
@@ -81,6 +53,10 @@ test.describe('contact page structure', () => {
       'href',
       'mailto:hello@seqtura.ai',
     );
+    const channelText = await channels.innerText();
+    expect(channelText).not.toContain('获取微信二维码');
+    expect(channelText).not.toContain('获取飞书入口');
+    expect(channelText.match(/暂未公开，请先通过邮箱联系/g)).toHaveLength(2);
 
     const about = page.locator('#about');
     await expect(about.getByRole('heading', { level: 2 })).toHaveText('关于我们');
@@ -89,7 +65,7 @@ test.describe('contact page structure', () => {
     );
     await expect(about).toContainText('我们相信：先把验收标准定下来，再开始构建。');
     await expect(about.getByText('运营主体', { exact: true })).toBeVisible();
-    await expect(about.getByText('所在地', { exact: true })).toBeVisible();
+    await expect(about.getByText('所在地', { exact: true })).toHaveCount(0);
     await expect(about.locator('img')).toHaveCount(0);
     const aboutText = await about.innerText();
     expect(aboutText).not.toContain('团队规模');
@@ -128,15 +104,25 @@ test.describe('contact page structure', () => {
   });
 
   test('ships external scripts so the strict CSP can keep script-src self', async ({ page }) => {
-    await page.goto('/contact');
+    for (const route of [
+      '/',
+      '/methodology',
+      '/architecture',
+      '/process',
+      '/contact',
+      '/legal/privacy',
+      '/legal/terms',
+    ]) {
+      await page.goto(route);
 
-    const inlineExecutable = await page.evaluate(() =>
-      Array.from(document.querySelectorAll('script'))
-        .filter((script) => !script.src)
-        .filter((script) => (script.type || 'text/javascript') === 'text/javascript')
-        .map((script) => script.textContent?.slice(0, 80) ?? ''),
-    );
-    expect(inlineExecutable).toEqual([]);
+      const inlineExecutable = await page.evaluate(() =>
+        Array.from(document.querySelectorAll('script'))
+          .filter((script) => !script.src)
+          .filter((script) => script.type !== 'application/ld+json')
+          .map((script) => script.textContent?.slice(0, 80) ?? ''),
+      );
+      expect(inlineExecutable, route).toEqual([]);
+    }
   });
 });
 
@@ -151,12 +137,14 @@ test.describe('POST /api/contact contract', () => {
 
   test('returns field errors for invalid values', async ({ request }) => {
     const response = await postContact(request, {
-      name: '',
-      company: 'x'.repeat(81),
-      email: 'not-an-email',
-      need: '太短',
-      wechatPhone: 'x'.repeat(41),
-      consent: false,
+      overrides: {
+        name: '',
+        company: 'x'.repeat(81),
+        email: 'not-an-email',
+        need: '太短',
+        wechatPhone: 'x'.repeat(41),
+        consent: false,
+      },
     });
 
     expect(response.status()).toBe(400);
@@ -170,10 +158,12 @@ test.describe('POST /api/contact contract', () => {
 
   test('returns 200 without validation when the honeypot is filled', async ({ request }) => {
     const response = await postContact(request, {
-      website: 'https://spam.example',
-      name: '',
-      email: '',
-      consent: false,
+      overrides: {
+        website: 'https://spam.example',
+        name: '',
+        email: '',
+        consent: false,
+      },
     });
 
     expect(response.status()).toBe(200);
@@ -183,7 +173,7 @@ test.describe('POST /api/contact contract', () => {
   test('rejects a submission faster than three seconds with a generic error', async ({
     request,
   }) => {
-    const response = await postContact(request, { startedAt: Date.now() });
+    const response = await postContact(request, { overrides: { startedAt: Date.now() } });
 
     expect(response.status()).toBe(400);
     const body = await response.json();
@@ -195,14 +185,16 @@ test.describe('POST /api/contact contract', () => {
   });
 
   test('rejects bodies over 16 KB with 413', async ({ request }) => {
-    const response = await postContact(request, { need: 'x'.repeat(17_000) });
+    const response = await postContact(request, { overrides: { need: 'x'.repeat(17_000) } });
 
     expect(response.status()).toBe(413);
     expect(await response.json()).toEqual({ ok: false, error: 'payload_too_large' });
   });
 
   test('rejects a foreign origin with 403', async ({ request }) => {
-    const response = await postContact(request, {}, { origin: 'https://evil.example' });
+    const response = await postContact(request, {
+      headers: { origin: 'https://evil.example' },
+    });
 
     expect(response.status()).toBe(403);
     expect(await response.json()).toEqual({ ok: false, error: 'origin' });
@@ -220,7 +212,7 @@ test.describe('POST /api/contact contract', () => {
   test('rejects malformed JSON as a validation error', async ({ request }) => {
     const response = await request.post('/api/contact', {
       data: '{"name":',
-      headers: { origin, 'content-type': 'application/json' },
+      headers: { origin: defaultOrigin, 'content-type': 'application/json' },
     });
 
     expect(response.status()).toBe(400);
@@ -239,7 +231,7 @@ test.describe('POST /api/contact contract', () => {
         consent: true,
         website: '',
       },
-      headers: { origin, 'content-type': 'application/json' },
+      headers: { origin: defaultOrigin, 'content-type': 'application/json' },
     });
 
     expect(response.status()).toBe(400);
@@ -286,7 +278,7 @@ test.describe('contact form validation and consent', () => {
     const note = form.locator('#contact-consent-note');
     await expect(note).toHaveText('你的信息仅用于回复咨询，不会用于营销推送。');
 
-    const label = form.locator('.consent-label');
+    const label = form.locator('[data-consent-label]');
     await expect(label).toContainText(
       '我已阅读并同意《隐私政策》，同意 Seqtura 为回复我的咨询处理上述信息。',
     );
@@ -298,7 +290,7 @@ test.describe('contact form validation and consent', () => {
 
     const notePrecedesLabel = await note.evaluate((element) => {
       const next = element.nextElementSibling;
-      return next?.classList.contains('consent-label') ?? false;
+      return next?.hasAttribute('data-consent-label') ?? false;
     });
     expect(notePrecedesLabel).toBe(true);
   });
@@ -416,9 +408,7 @@ test.describe('contact form validation and consent', () => {
 
     const success = page.locator('[data-contact-success]');
     await expect(success).toBeVisible();
-    await expect(success.locator('.success-title')).toHaveText(
-      '已收到。我们会通过你留下的邮箱或微信联系你。',
-    );
+    await expect(success.getByText('已收到。我们会通过你留下的邮箱或微信联系你。')).toBeVisible();
     await expect(success).toBeFocused();
     await expect(page.locator('[data-contact-form]')).toBeHidden();
     expect(page.url()).toMatch(/\/contact$/);
@@ -436,9 +426,7 @@ test.describe('contact form validation and consent', () => {
     const response = await responsePromise;
     expect(response.status()).toBe(200);
 
-    await expect(page.locator('[data-contact-success] .success-title')).toHaveText(
-      '已收到。我们会通过你留下的邮箱或微信联系你。',
-    );
+    await expect(page.getByText('已收到。我们会通过你留下的邮箱或微信联系你。')).toBeVisible();
     await expect(page.locator('[data-contact-form]')).toBeHidden();
     expect(page.url()).toMatch(/\/contact$/);
   });
@@ -575,75 +563,14 @@ test.describe('contact form mobile layout', () => {
   }
 });
 
-interface ContactTestServer {
-  readonly baseURL: string;
-  readonly child: ChildProcess;
-  output(): string;
-  stop(): Promise<void>;
-}
-
-async function waitForContactServer(baseURL: string, child: ChildProcess): Promise<void> {
-  for (let attempt = 0; attempt < 100; attempt += 1) {
-    if (child.exitCode !== null) {
-      throw new Error(`Contact server exited with code ${child.exitCode}`);
-    }
-    try {
-      const response = await fetch(baseURL);
-      if (response.ok) return;
-    } catch {
-      // Server not up yet.
-    }
-    await new Promise((resolve) => setTimeout(resolve, 100));
-  }
-  throw new Error(`Contact server did not start at ${baseURL}`);
-}
-
-async function startContactServer(
-  port: number,
-  env: Record<string, string>,
-): Promise<ContactTestServer> {
-  if (!existsSync('dist/server/entry.mjs')) {
-    throw new Error('Run pnpm build before starting a contact test server');
-  }
-
-  const child = spawn(process.execPath, ['dist/server/entry.mjs'], {
-    cwd: process.cwd(),
-    env: { ...process.env, HOST: '127.0.0.1', PORT: String(port), ...env },
-    stdio: ['ignore', 'pipe', 'pipe'],
-  });
-
-  let output = '';
-  child.stdout?.on('data', (chunk: Buffer) => {
-    output += chunk.toString();
-  });
-  child.stderr?.on('data', (chunk: Buffer) => {
-    output += chunk.toString();
-  });
-
-  const baseURL = `http://127.0.0.1:${port}`;
-  await waitForContactServer(baseURL, child);
-
-  return {
-    baseURL,
-    child,
-    output: () => output,
-    stop: async () => {
-      if (child.exitCode === null) {
-        child.kill('SIGTERM');
-        await once(child, 'exit');
-      }
-    },
-  };
-}
-
 test.describe('FORM_MODE=off', () => {
   test.describe.configure({ mode: 'serial' });
 
-  let server: ContactTestServer;
+  let server: TestServer;
 
   test.beforeAll(async () => {
     test.setTimeout(120_000);
-    server = await startContactServer(4462, {
+    server = await startTestServer(4462, {
       FORM_MODE: 'off',
       PUBLIC_CONTACT_ENDPOINT: 'https://forms.example',
     });
@@ -654,10 +581,7 @@ test.describe('FORM_MODE=off', () => {
   });
 
   test('returns 503 with the form_off contract', async ({ request }) => {
-    const response = await request.post(`${server.baseURL}/api/contact`, {
-      data: validPayload(),
-      headers: { origin: server.baseURL, 'content-type': 'application/json' },
-    });
+    const response = await postContact(request, { baseURL: server.baseURL });
 
     expect(response.status()).toBe(503);
     expect(await response.json()).toEqual({ ok: false, error: 'form_off' });
@@ -666,9 +590,9 @@ test.describe('FORM_MODE=off', () => {
   test('allows the configured public endpoint origin and answers its preflight', async ({
     request,
   }) => {
-    const response = await request.post(`${server.baseURL}/api/contact`, {
-      data: validPayload(),
-      headers: { origin: 'https://forms.example', 'content-type': 'application/json' },
+    const response = await postContact(request, {
+      baseURL: server.baseURL,
+      headers: { origin: 'https://forms.example' },
     });
     expect(response.status()).toBe(503);
     expect(response.headers()['access-control-allow-origin']).toBe('https://forms.example');
@@ -703,14 +627,47 @@ test.describe('FORM_MODE=off', () => {
   });
 });
 
-test.describe('FORM_MODE=live without providers', () => {
+test.describe('FORM_MODE fail-safe', () => {
   test.describe.configure({ mode: 'serial' });
 
-  let server: ContactTestServer;
+  let unset: TestServer;
+  let invalid: TestServer;
 
   test.beforeAll(async () => {
     test.setTimeout(120_000);
-    server = await startContactServer(4463, {
+    [unset, invalid] = await Promise.all([
+      startTestServer(4464, { FORM_MODE: undefined }),
+      startTestServer(4465, { FORM_MODE: 'production' }),
+    ]);
+  });
+
+  test.afterAll(async () => {
+    await Promise.all([unset?.stop(), invalid?.stop()]);
+  });
+
+  test('treats an unset FORM_MODE as off', async ({ request }) => {
+    const response = await postContact(request, { baseURL: unset.baseURL });
+
+    expect(response.status()).toBe(503);
+    expect(await response.json()).toEqual({ ok: false, error: 'form_off' });
+  });
+
+  test('treats an unrecognized FORM_MODE as off', async ({ request }) => {
+    const response = await postContact(request, { baseURL: invalid.baseURL });
+
+    expect(response.status()).toBe(503);
+    expect(await response.json()).toEqual({ ok: false, error: 'form_off' });
+  });
+});
+
+test.describe('FORM_MODE=live without providers', () => {
+  test.describe.configure({ mode: 'serial' });
+
+  let server: TestServer;
+
+  test.beforeAll(async () => {
+    test.setTimeout(120_000);
+    server = await startTestServer(4463, {
       FORM_MODE: 'live',
       CONTACT_RATE_LIMIT_MAX: '2',
       CONTACT_RATE_LIMIT_WINDOW_MS: '600000',
@@ -722,10 +679,7 @@ test.describe('FORM_MODE=live without providers', () => {
   });
 
   test('returns 502 and logs only non-PII failure metadata', async ({ request }) => {
-    const response = await request.post(`${server.baseURL}/api/contact`, {
-      data: validPayload(),
-      headers: { origin: server.baseURL, 'content-type': 'application/json' },
-    });
+    const response = await postContact(request, { baseURL: server.baseURL });
 
     expect(response.status()).toBe(502);
     expect(await response.json()).toEqual({ ok: false, error: 'delivery_failed' });
@@ -745,16 +699,10 @@ test.describe('FORM_MODE=live without providers', () => {
   });
 
   test('returns 429 after the configured per-IP limit', async ({ request }) => {
-    const next = await request.post(`${server.baseURL}/api/contact`, {
-      data: validPayload(),
-      headers: { origin: server.baseURL, 'content-type': 'application/json' },
-    });
+    const next = await postContact(request, { baseURL: server.baseURL });
     expect(next.status()).toBe(502);
 
-    const limited = await request.post(`${server.baseURL}/api/contact`, {
-      data: validPayload(),
-      headers: { origin: server.baseURL, 'content-type': 'application/json' },
-    });
+    const limited = await postContact(request, { baseURL: server.baseURL });
 
     expect(limited.status()).toBe(429);
     expect(await limited.json()).toEqual({ ok: false, error: 'rate_limited' });

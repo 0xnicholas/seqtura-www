@@ -1,17 +1,6 @@
 import { createHmac } from 'node:crypto';
 import type { ChannelResult, ContactLead, LeadProvider, NotifyConfig } from '../notify';
-
-const deliveryTimeoutMs = 5000;
-
-function timeoutReason(error: unknown): 'timeout' | 'delivery_error' {
-  if (!error || typeof error !== 'object') return 'delivery_error';
-  const record = error as { name?: unknown; code?: unknown };
-  return record.name === 'TimeoutError' ||
-    record.name === 'AbortError' ||
-    record.code === 'ETIMEDOUT'
-    ? 'timeout'
-    : 'delivery_error';
-}
+import { deliveryTimeoutMs, timeoutReason } from '../transport';
 
 function cardFor(lead: ContactLead): Record<string, unknown> {
   const wechatPhone = lead.wechatPhone ?? '未填写';

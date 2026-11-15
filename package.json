@@ -10,7 +10,7 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
-    "preview": "astro preview",
+    "preview": "node server.mjs",
     "check": "astro check",
     "lint": "eslint . && prettier --check .",
     "format": "prettier --write .",

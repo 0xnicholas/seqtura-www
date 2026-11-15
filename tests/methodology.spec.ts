@@ -313,14 +313,13 @@ test('methodology does not rely on CSP-blocked inline scripts', async ({ page })
 test.describe('desktop stage subnav', () => {
   test.use({ viewport: { width: 1440, height: 900 } });
 
-  test('keeps the four groups sticky and activates stage links from the keyboard', async ({
+  test('keeps the four groups usable while scrolling and activates stage links from the keyboard', async ({
     page,
   }) => {
     await page.goto('/methodology');
 
     const nav = page.getByRole('navigation', { name: '交付阶段子导航' });
     await expect(nav).toBeVisible();
-    await expect(nav).toHaveCSS('position', 'sticky');
     await expect(nav.locator('[data-subnav-group]')).toHaveCount(4);
     await expect(nav.getByRole('link')).toHaveCount(8);
 

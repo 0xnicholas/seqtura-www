@@ -11,7 +11,7 @@ export interface ProcessStage {
   readonly id: string;
   readonly no: string;
   readonly name: string;
-  readonly duration: string;
+  readonly flowDuration: string;
   readonly cycle: string;
   readonly customerRole: string;
   readonly ourParticipants: string;
@@ -27,7 +27,7 @@ export const processStages: readonly ProcessStage[] = [
     id: 'intro',
     no: '01',
     name: '初次沟通',
-    duration: '30 分钟',
+    flowDuration: '30 分钟',
     cycle: '30 分钟，1 次',
     customerRole: '业务发起人',
     ourParticipants: '技术负责人 + 业务负责人',
@@ -41,7 +41,7 @@ export const processStages: readonly ProcessStage[] = [
     id: 'assessment',
     no: '02',
     name: '需求与可行性评估',
-    duration: '1–2 周',
+    flowDuration: '1–2 周',
     cycle: '1–2 周',
     customerRole: '业务专家 + IT + sponsor',
     ourParticipants: '前置交付工程师 + 方案 / 架构',
@@ -55,7 +55,7 @@ export const processStages: readonly ProcessStage[] = [
     id: 'proposal',
     no: '03',
     name: '方案与报价',
-    duration: '3–5 个工作日',
+    flowDuration: '3–5 个工作日',
     cycle: '3–5 个工作日',
     customerRole: 'sponsor',
     ourParticipants: '方案 + 商务',
@@ -70,7 +70,7 @@ export const processStages: readonly ProcessStage[] = [
     id: 'contract',
     no: '04',
     name: '合同与启动',
-    duration: '1–2 周',
+    flowDuration: '1–2 周',
     cycle: '1–2 周，取决于采购流程',
     customerRole: '采购 + 对接人',
     ourParticipants: '商务 + 项目负责人',
@@ -84,7 +84,7 @@ export const processStages: readonly ProcessStage[] = [
     id: 'delivery',
     no: '05',
     name: '交付与验收',
-    duration: '4–12 周',
+    flowDuration: '4–12 周',
     cycle: '4–12 周，视范围，以报价排期为基准',
     customerRole: '业务专家 + IT + 验收人',
     ourParticipants: '前置交付工程师 + 工程 / 架构',
@@ -100,7 +100,7 @@ export const processStages: readonly ProcessStage[] = [
     id: 'support',
     no: '06',
     name: '上线后支持',
-    duration: '按合同',
+    flowDuration: '按合同',
     cycle: '按合同约定，按次或按项目，不做年度订阅',
     customerRole: '运维 + 业务负责人',
     ourParticipants: '交付工程师',

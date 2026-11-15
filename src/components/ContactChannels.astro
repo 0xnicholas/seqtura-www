@@ -54,7 +54,8 @@ const availability = {
                 </>
               ) : (
                 <p class="channel-note">
-                  发邮件至 <a href={`mailto:${email}`}>{email}</a>，{channel.fallbackNote}
+                  {channel.fallbackNote}
+                  <a href={`mailto:${email}`}>{email}</a>。
                 </p>
               ))}
 
@@ -69,7 +70,8 @@ const availability = {
                 </>
               ) : (
                 <p class="channel-note">
-                  发邮件至 <a href={`mailto:${email}`}>{email}</a>，{channel.fallbackNote}
+                  {channel.fallbackNote}
+                  <a href={`mailto:${email}`}>{email}</a>。
                 </p>
               ))}
 

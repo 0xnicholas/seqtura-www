@@ -1,10 +1,11 @@
 import { EmailProvider } from './providers/email';
 import { FeishuProvider } from './providers/feishu';
 import type { ContactPayload } from './schema';
+import { deliveryTimeoutMs } from './transport';
 
-export const deliveryTimeoutMs = 5000;
+export const notifyChannels = ['feishu', 'email'] as const;
 
-export type NotifyChannel = 'feishu' | 'email';
+export type NotifyChannel = (typeof notifyChannels)[number];
 export type NotifyFailureReason =
   'not_configured' | 'provider_not_available' | 'timeout' | 'delivery_error';
 
@@ -107,28 +108,24 @@ function runProvider(provider: LeadProvider, lead: ContactLead): Promise<Channel
   });
 }
 
+const providerFactories: Record<NotifyChannel, (config: NotifyConfig) => LeadProvider> = {
+  feishu: (config) => new FeishuProvider(config),
+  email: (config) => new EmailProvider(config),
+};
+
+export function failedNotifyResult(reason: NotifyFailureReason): NotifyResult {
+  return {
+    ok: false,
+    channels: notifyChannels.map((channel) => ({ channel, ok: false, reason })),
+  };
+}
+
 export async function notifyLead(
   lead: ContactLead,
   config: NotifyConfig = notifyConfigFromEnv(),
 ): Promise<NotifyResult> {
-  const providers: readonly LeadProvider[] = [
-    new FeishuProvider(config),
-    new EmailProvider(config),
-  ];
-  const results = await Promise.all(providers.map((provider) => runProvider(provider, lead)));
-
-  const channels: ChannelResult[] = (['feishu', 'email'] as const).map((channel) => {
-    const delivered = results.find((result) => result.channel === channel);
-    if (delivered) return delivered;
-
-    const configured =
-      channel === 'feishu' ? Boolean(config.feishuWebhookUrl) : Boolean(config.emailProvider);
-    return {
-      channel,
-      ok: false,
-      reason: configured ? 'provider_not_available' : 'not_configured',
-    };
-  });
+  const providers = notifyChannels.map((channel) => providerFactories[channel](config));
+  const channels = await Promise.all(providers.map((provider) => runProvider(provider, lead)));
 
   return { ok: channels.some((channel) => channel.ok), channels };
 }

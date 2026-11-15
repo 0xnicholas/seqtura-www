@@ -115,7 +115,7 @@
 - [ ] 表单数据只进飞书与邮箱；不建数据库、CRM 或队列。
 - [ ] 不接访问统计、Cookie、Cookie 横幅、A/B 测试。
 - [ ] 同意勾选默认不勾选，链接到隐私政策并在新标签打开；提交 payload 带 `consent`、`consentAt`、`privacyVersion`。
-- [ ] 预览环境保持 `FORM_MODE=test`（或 `off`）；生产 `FORM_MODE=live` 仅在凭证就绪后设置。
+- [ ] 预览环境显式设置 `FORM_MODE=test`（或 `off`）；未设置或拼错时服务端按 `off` 返回 503。生产 `FORM_MODE=live` 仅在凭证就绪后设置。
 - [ ] 生产限流由宿主 WAF 或共享 KV 执行；仓库内的内存限流只作为本地回退。
 - [ ] `FORM_MODE=off` 时返回 503 并显示邮件兜底；`live` 两路失败返回 502。
 - [ ] 自动化已用本地飞书 / SMTP 桩验证 `live` 模式至少一路成功与两路失败；测试不投递真实消息。
@@ -132,9 +132,10 @@
 ### 8.1 部署形态
 
 - 静态产物：`dist/client`，可部署到任意静态托管。
-- 动态端点：`dist/server/entry.mjs`（Node standalone）或独立的境内运行时；`POST /api/contact` 是唯一动态路由。
-- 安全头与缓存规则随仓库走：`public/_headers`，构建后复制到 `dist/client/_headers`。
-- **注意**：Astro Node preview 会自己服务 HTML 与 API，不会把 `_headers` 当作中间件应用；预览环境中 HTML 没有 HSTS / CSP 等头是预期行为。正式部署必须由静态托管或反向代理应用这些头。不要用预览响应证明安全头已生效。
+- 动态端点：`server.mjs`（Node ≥ 22，读取 `dist/server/entry.mjs` 的 middleware handler）；`POST /api/contact` 是唯一动态路由。
+- 本地、测试与自建 Node 部署统一用 `node server.mjs`（`HOST` / `PORT`，默认端口 4321）；它也负责把 `dist/client` 的静态页面、目录索引与 404 交给 Astro handler。
+- 安全头与缓存规则在 `server.mjs` 中应用到每个响应；`public/_headers` 保留给 Cloudflare Pages / Netlify 等静态托管。`pnpm preview`、Playwright 与链接检查都走 `server.mjs`，所以本地响应可以证明安全头已生效。
+- 静态托管不跑 Node 时，`_headers` 必须随发布根目录一起上传；自建 Nginx / Caddy 也可在代理层注入同一组头。
 
 ### 8.2 必须核对的响应头
 
@@ -147,7 +148,7 @@
 | 全站                                                  | `Content-Security-Policy`                  | `default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'` |
 | HTML                                                  | `Cache-Control`                            | `public, max-age=0, must-revalidate`                                                                                                                                             |
 | `/_astro/*`                                           | `Cache-Control`                            | `public, max-age=31536000, immutable`                                                                                                                                            |
-| `/sitemap-index.xml`、`/sitemap-0.xml`、`/robots.txt` | `Cache-Control`                            | `public, max-age=3600`                                                                                                                                                           |
+| `/sitemap-index.xml`、`/sitemap-0.xml`、`/robots.txt` | `Cache-Control`                            | `public, max-age=600`                                                                                                                                                            |
 | `/api/contact`                                        | `X-Content-Type-Options` / `Cache-Control` | `nosniff` / `no-store`（端点自身已设置）                                                                                                                                         |
 
 - Cloudflare Pages / Netlify：直接读取发布根目录的 `_headers`（源文件为 `public/_headers`，构建后复制到 `dist/client/_headers`）。

@@ -118,6 +118,10 @@
     font-synthesis: none;
   }
 
+  :where([id]) {
+    scroll-margin-top: calc(var(--header-h) + 24px);
+  }
+
   h1,
   h2,
   h3,

@@ -49,14 +49,14 @@ export const contactChannels = {
       no: '01',
       title: '微信',
       configuredNote: '扫码添加微信，备注「预约」。',
-      fallbackNote: '获取微信二维码。',
+      fallbackNote: '暂未公开，请先通过邮箱联系：',
     },
     {
       id: 'feishu',
       no: '02',
       title: '飞书',
       configuredNote: '在飞书中打开联系入口，直接留言。',
-      fallbackNote: '获取飞书入口。',
+      fallbackNote: '暂未公开，请先通过邮箱联系：',
     },
     {
       id: 'email',
@@ -68,10 +68,10 @@ export const contactChannels = {
   ],
 } as const;
 
-export function contactFacts(operatorName: string, operatorLocation: string) {
+export function contactFacts(operatorName: string, operatorLocation?: string) {
   return [
     { label: '运营主体', value: operatorName },
-    { label: '所在地', value: operatorLocation },
+    ...(operatorLocation ? [{ label: '所在地', value: operatorLocation }] : []),
     { label: '交付方法', value: 'FDE 8 阶段' },
     { label: '参考架构', value: '5 层能力栈 + 3 条控制面' },
   ] as const;

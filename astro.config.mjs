@@ -8,7 +8,7 @@ export default defineConfig({
   site: process.env.SITE_URL ?? 'https://seqtura.ai',
   trailingSlash: 'never',
   output: 'static',
-  adapter: node({ mode: 'standalone' }),
+  adapter: node({ mode: 'middleware' }),
   session: false,
   integrations: [
     mdx(),
@@ -17,6 +17,10 @@ export default defineConfig({
     }),
   ],
   vite: {
+    build: {
+      // Keep every runtime script external so the strict CSP can stay `script-src 'self'`.
+      assetsInlineLimit: 0,
+    },
     plugins: [tailwindcss()],
     ssr: {
       noExternal: ['zod'],

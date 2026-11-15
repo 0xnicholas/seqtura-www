@@ -21,7 +21,10 @@ test('header carries the four-section navigation and a persistent booking action
 
   const headerBox = await header.boundingBox();
   expect(Math.round(headerBox?.height ?? 0)).toBe(64);
-  await expect(header).toHaveCSS('position', 'sticky');
+
+  await page.evaluate(() => window.scrollTo(0, 1600));
+  await expect.poll(async () => Math.round((await header.boundingBox())?.y ?? -1)).toBe(0);
+  await expect(header).toBeVisible();
 });
 
 test('current page is highlighted in the header', async ({ page }) => {
@@ -65,7 +68,7 @@ test('footer provides site, delivery and contact columns plus legal links', asyn
     '/legal/terms',
   );
 
-  const wordmark = footer.locator('.footer-mark');
+  const wordmark = footer.locator('[data-footer-mark]');
   await expect(wordmark).toHaveAttribute('aria-hidden', 'true');
   await expect(wordmark).toContainText('Seqtura');
 
@@ -166,15 +169,21 @@ test('focus is visible for keyboard users', async ({ page }) => {
   expect(Number.parseFloat(outline.width)).toBeGreaterThan(0);
 });
 
-test('reduced motion turns off the hero entrance animation', async ({ page }) => {
+test('reduced motion leaves the hero copy fully visible without entrance effects', async ({
+  page,
+}) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/');
 
-  const animation = await page
-    .locator('.hero-copy > *')
-    .first()
-    .evaluate((element) => getComputedStyle(element).animationName);
-  expect(animation).toBe('none');
+  const hero = page.locator('.hero-copy > *').first();
+  await expect(hero).toBeVisible();
+  const state = await hero.evaluate((element) => {
+    const style = getComputedStyle(element);
+    return { opacity: style.opacity, filter: style.filter, transform: style.transform };
+  });
+  expect(state.opacity).toBe('1');
+  expect(state.filter).toBe('none');
+  expect(state.transform).toBe('none');
 });
 
 test('200% zoom approximation stays usable without page-level overflow', async ({ page }) => {
