@@ -299,6 +299,10 @@ const markGlyphs = {
     white-space: nowrap;
   }
 
+  .zone-flow-in .flow-word {
+    writing-mode: vertical-rl;
+  }
+
   .flow-pair {
     display: flex;
     flex-direction: column;
@@ -697,6 +701,10 @@ const markGlyphs = {
 
     .flow-word {
       font-size: 8px;
+    }
+
+    .zone-flow-in .flow-word {
+      writing-mode: horizontal-tb;
     }
 
     .flow-track {
