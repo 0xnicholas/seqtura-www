@@ -1,5 +1,8 @@
 name: CI
 
+# Branch protection on `main` must require this `quality` job before merge.
+# Repository protection settings are maintained in GitHub, not by this workflow.
+
 on:
   pull_request:
   push:
@@ -38,8 +41,22 @@ jobs:
       - name: Check internal links and anchors
         run: pnpm check:links
 
+      - name: Check production output for placeholder sentinels
+        run: pnpm check:sentinels
+
       - name: Install browser
         run: pnpm exec playwright install --with-deps chrome
 
       - name: Smoke tests
         run: pnpm test
+
+      - name: Lighthouse (Accessibility, Best Practices, SEO = 100)
+        run: pnpm lighthouse
+
+      - name: Upload Lighthouse reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-reports
+          path: .lighthouseci
+          retention-days: 14

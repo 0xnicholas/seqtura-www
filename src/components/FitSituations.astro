@@ -12,12 +12,7 @@ const { fit } = homeSections;
 
     <div class="fit-grid reveal">
       {fitSituations.map((situation) => (
-        <a
-          class="fit-card"
-          href="/process"
-          data-fit-situation={situation.id}
-          aria-label={`${situation.title}：${fit.cardLinkLabel}`}
-        >
+        <a class="fit-card" href="/process" data-fit-situation={situation.id}>
           <span class="fit-code">{situation.code}</span>
           <h3 class="fit-title">{situation.title}</h3>
           <p class="fit-summary">{situation.summary}</p>

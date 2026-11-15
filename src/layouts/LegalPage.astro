@@ -245,13 +245,15 @@ const sectionLabel = (text: string) => text.replace(/^\d+\.\s*/, '');
   }
 
   .legal-prose :global(a) {
-    border-bottom: 1px solid transparent;
     color: var(--color-red-dark);
     overflow-wrap: anywhere;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
   }
 
   .legal-prose :global(a:hover) {
-    border-bottom-color: currentColor;
+    text-decoration-thickness: 2px;
   }
 
   @media (max-width: 767px) {
