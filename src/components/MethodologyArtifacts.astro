@@ -1,0 +1,249 @@
+---
+import ArrowUpRightIcon from './ArrowUpRightIcon.astro';
+import SectionHeading from './SectionHeading.astro';
+import { agentSpecCardItems, artifactChain, methodologyCopy } from '../data/delivery';
+
+const { artifacts } = methodologyCopy;
+---
+
+<section class="section artifacts-section" id="artifacts" aria-labelledby="artifacts-title">
+  <div class="container-site">
+    <SectionHeading
+      id="artifacts-title"
+      kicker={artifacts.kicker}
+      title={artifacts.title}
+      lead={artifacts.lead}
+    />
+
+    <div class="artifact-layout reveal">
+      <div class="chain-col">
+        <p class="chain-label mono-label">8 个阶段 / 8 项产出</p>
+        <ol class="artifact-chain">
+          {artifactChain.map((step) => (
+            <li class="artifact-step" data-artifact-step={step.stageAnchor}>
+              <a href={`#${step.stageAnchor}`}>
+                <span class="artifact-no">{step.no}</span>
+                <span class="artifact-stage">{step.stage}</span>
+                <span class="artifact-name">{step.artifact}</span>
+                <span class="artifact-arrow" aria-hidden="true">
+                  <ArrowUpRightIcon />
+                </span>
+              </a>
+            </li>
+          ))}
+        </ol>
+      </div>
+
+      <aside class="spec-card" data-spec-card aria-labelledby="spec-title">
+        <div class="spec-head">
+          <span class="spec-code">AGENT SPEC / {agentSpecCardItems.length} FIELDS</span>
+          <span class="spec-tick" aria-hidden="true"></span>
+        </div>
+        <h3 id="spec-title" class="spec-title">
+          {artifacts.specTitle}
+        </h3>
+        <p class="spec-note" data-spec-note>
+          {artifacts.specNote}
+        </p>
+        <ol class="spec-list">
+          {agentSpecCardItems.map((item, index) => (
+            <li data-spec-item>
+              <span class="spec-no">{String(index + 1).padStart(2, '0')}</span>
+              <span class="spec-item-text">{item}</span>
+            </li>
+          ))}
+        </ol>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<style>
+  .artifacts-section {
+    background: var(--color-canvas);
+  }
+
+  .artifact-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.45fr) minmax(0, 0.75fr);
+    gap: 48px;
+    align-items: start;
+  }
+
+  .chain-label {
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--color-line);
+    color: var(--color-muted);
+  }
+
+  .artifact-chain {
+    border-left: 1px solid var(--color-line);
+  }
+
+  .artifact-step {
+    border-bottom: 1px solid var(--color-line);
+  }
+
+  .artifact-step a {
+    display: grid;
+    grid-template-columns: 42px 96px minmax(0, 1fr) 16px;
+    gap: 14px;
+    align-items: baseline;
+    padding: 17px 18px;
+    transition: background-color 150ms var(--ease-site);
+  }
+
+  .artifact-step a:hover {
+    background: var(--color-paper);
+  }
+
+  .artifact-no {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    line-height: 1.5;
+    letter-spacing: 0.05em;
+    color: var(--color-red-dark);
+  }
+
+  .artifact-stage {
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.5;
+    color: var(--color-ink-2);
+  }
+
+  .artifact-name {
+    font-size: 14px;
+    line-height: 1.65;
+    color: var(--color-muted);
+  }
+
+  .artifact-arrow {
+    align-self: center;
+    color: var(--color-faint);
+    transition:
+      color 150ms var(--ease-site),
+      transform 150ms var(--ease-site);
+  }
+
+  .artifact-step a:hover .artifact-arrow {
+    color: var(--color-red-dark);
+    transform: translate(2px, -2px);
+  }
+
+  .spec-card {
+    position: sticky;
+    top: calc(var(--header-h) + 24px);
+    padding: 28px 28px 24px;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-site-lg);
+    background: var(--color-paper);
+    box-shadow: var(--shadow-site-xs);
+  }
+
+  .spec-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .spec-code {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    line-height: 1.5;
+    letter-spacing: 0.08em;
+    color: var(--color-red-dark);
+  }
+
+  .spec-tick {
+    width: 7px;
+    height: 7px;
+    background: var(--color-red);
+  }
+
+  .spec-title {
+    margin-top: 18px;
+    font-size: 28px;
+    font-weight: 500;
+    line-height: 1.25;
+    letter-spacing: -0.02em;
+  }
+
+  .spec-note {
+    margin-top: 8px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    line-height: 1.6;
+    letter-spacing: 0.03em;
+    color: var(--color-muted);
+  }
+
+  .spec-list {
+    margin-top: 20px;
+    border-top: 1px solid var(--color-line);
+  }
+
+  .spec-list li {
+    display: grid;
+    grid-template-columns: 28px minmax(0, 1fr);
+    gap: 8px;
+    padding: 9px 0;
+    border-bottom: 1px solid var(--color-line);
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--color-ink-2);
+  }
+
+  .spec-no {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    line-height: 1.8;
+    letter-spacing: 0.04em;
+    color: var(--color-red-dark);
+  }
+
+  @media (max-width: 1023px) {
+    .artifact-layout {
+      grid-template-columns: 1fr;
+      gap: 32px;
+    }
+
+    .spec-card {
+      position: static;
+    }
+  }
+
+  @media (max-width: 767px) {
+    .artifact-step a {
+      grid-template-columns: 32px minmax(0, 1fr) 14px;
+      gap: 8px;
+      padding: 14px 14px;
+    }
+
+    .artifact-stage {
+      grid-column: 2;
+      grid-row: 1;
+      font-size: 12px;
+    }
+
+    .artifact-name {
+      grid-column: 2;
+      grid-row: 2;
+      font-size: 13px;
+    }
+
+    .artifact-arrow {
+      grid-column: 3;
+      grid-row: 1 / span 2;
+    }
+
+    .spec-card {
+      padding: 24px 22px 20px;
+    }
+
+    .spec-title {
+      font-size: 24px;
+    }
+  }
+</style>

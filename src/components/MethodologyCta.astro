@@ -1,0 +1,74 @@
+---
+import ArrowIcon from './ArrowIcon.astro';
+import { methodologyCopy } from '../data/delivery';
+import { site } from '../config/site';
+
+const { cta } = methodologyCopy;
+---
+
+<section class="section method-cta" id="next-step" aria-labelledby="method-cta-title">
+  <div class="container-site">
+    <div class="cta-inner reveal">
+      <p class="kicker">{cta.kicker}</p>
+      <h2 id="method-cta-title" class="type-h2 cta-title">
+        {cta.title}
+      </h2>
+      <p class="type-lead cta-lead">{cta.lead}</p>
+      <div class="cta-row cta-actions">
+        <a class="btn btn-primary" href={site.bookingPath} data-primary-cta>
+          {cta.primaryCta}
+          <ArrowIcon />
+        </a>
+        <a class="btn btn-ghost" href="/process">
+          {cta.secondaryCta}
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .method-cta {
+    overflow: hidden;
+    padding-block: 128px 136px;
+    border-bottom: 0;
+    background:
+      radial-gradient(54% 70% at 50% 78%, rgb(245 48 3 / 14%), transparent 72%), var(--color-canvas);
+    text-align: center;
+  }
+
+  .cta-inner {
+    max-width: 820px;
+    margin-inline: auto;
+  }
+
+  .cta-title {
+    margin-top: 18px;
+  }
+
+  .cta-lead {
+    max-width: 640px;
+    margin: 22px auto 0;
+    color: var(--color-muted);
+  }
+
+  .cta-actions {
+    justify-content: center;
+    margin-top: 34px;
+  }
+
+  @media (max-width: 767px) {
+    .method-cta {
+      padding-block: 88px 96px;
+    }
+
+    .cta-actions {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .cta-actions .btn {
+      width: 100%;
+    }
+  }
+</style>

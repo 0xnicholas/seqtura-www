@@ -1,0 +1,514 @@
+---
+import SectionHeading from './SectionHeading.astro';
+import MethodologyStageCard from './MethodologyStageCard.astro';
+import {
+  deliveryGroups,
+  deliveryStages,
+  methodologyCopy,
+  type DeliveryGroup,
+} from '../data/delivery';
+
+const { stages, details } = methodologyCopy;
+
+function stagesForGroup(group: DeliveryGroup) {
+  return group.stageAnchors
+    .map((anchor) => deliveryStages.find((stage) => stage.anchor === anchor))
+    .filter((stage): stage is (typeof deliveryStages)[number] => Boolean(stage));
+}
+---
+
+<section class="section stages-overview" id="stages" aria-labelledby="stages-title">
+  <div class="container-site">
+    <SectionHeading
+      id="stages-title"
+      kicker={stages.kicker}
+      title={stages.title}
+      lead={stages.lead}
+    />
+
+    <div class="group-grid reveal">
+      {deliveryGroups.map((group) => (
+        <article class="group-card" data-stage-group={group.id}>
+          <span class="group-range">{group.range}</span>
+          <h3 class="group-title">{group.titleCn}</h3>
+          <p class="group-en">{group.title}</p>
+          <p class="group-summary">{group.summary}</p>
+
+          <ul class="group-stages">
+            {stagesForGroup(group).map((stage) => (
+              <li>
+                <a class="group-stage-link" href={`#${stage.anchor}`} data-stage-link>
+                  <span class="stage-no">{stage.no}</span>
+                  <span class="stage-name">{stage.name}</span>
+                  <span class="stage-cn">{stage.nameCn}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </article>
+      ))}
+    </div>
+
+    <div class="loopback-row reveal">
+      <p class="loopback-label mono-label">反馈回路</p>
+      <ul class="loopback-list">
+        <li data-loopback>
+          <span class="loopback-route">Validate → Build / Design</span>
+          <p class="loopback-copy">验收未通过的项目回到构建或设计，修正后按同一套评测集重跑。</p>
+        </li>
+        <li data-loopback>
+          <span class="loopback-route">Optimize → Build / Knowledge</span>
+          <p class="loopback-copy">上线后的失败案例与知识缺口回到构建与知识库，进入下一轮迭代。</p>
+        </li>
+      </ul>
+    </div>
+
+    <div class="trim-rule reveal">
+      <span class="trim-tick" aria-hidden="true"></span>
+      <div class="trim-body">
+        <h3 class="trim-title">{stages.trimTitle}</h3>
+        <p class="trim-copy">{stages.trimBody}</p>
+      </div>
+      <div class="trim-gates" role="group" aria-label="不可跳过的阶段">
+        {['Define', 'Validate', 'Deploy'].map((gate) => (
+          <span class="trim-gate">{gate}</span>
+        ))}
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section stage-details" id="stage-details" aria-labelledby="stage-details-title">
+  <div class="container-site">
+    <SectionHeading
+      id="stage-details-title"
+      kicker={details.kicker}
+      title={details.title}
+      lead={details.lead}
+    />
+
+    <div class="stage-layout">
+      <aside class="stage-nav-col">
+        <nav class="stage-nav" aria-label="交付阶段子导航">
+          {deliveryGroups.map((group) => (
+            <div class="stage-nav-group" data-subnav-group={group.id}>
+              <p class="stage-nav-title">{group.titleCn}</p>
+              <ul>
+                {stagesForGroup(group).map((stage) => (
+                  <li>
+                    <a href={`#${stage.anchor}`} data-subnav-link>
+                      <span class="nav-no">{stage.no}</span>
+                      <span>{stage.name}</span>
+                      <span class="nav-cn">{stage.nameCn}</span>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </nav>
+      </aside>
+
+      <div class="stage-list">
+        {deliveryGroups.map((group) => (
+          <section class="stage-group" aria-labelledby={`group-${group.id}`}>
+            <header class="stage-group-head">
+              <span class="group-range">{group.range}</span>
+              <h3 id={`group-${group.id}`} class="stage-group-title">
+                {group.titleCn}
+              </h3>
+              <p class="stage-group-en">{group.title}</p>
+            </header>
+
+            {stagesForGroup(group).map((stage) => (
+              <MethodologyStageCard stage={stage} />
+            ))}
+          </section>
+        ))}
+      </div>
+    </div>
+  </div>
+</section>
+
+<script is:inline src="/scripts/methodology.js" defer></script>
+
+<style>
+  .stages-overview {
+    background: var(--color-canvas);
+  }
+
+  .group-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    border-top: 1px solid var(--color-line);
+    border-left: 1px solid var(--color-line);
+  }
+
+  .group-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    padding: 36px 36px 32px;
+    border-right: 1px solid var(--color-line);
+    border-bottom: 1px solid var(--color-line);
+    background: var(--color-canvas);
+    transition: background-color 150ms var(--ease-site);
+  }
+
+  .group-card:hover {
+    background: var(--color-paper);
+  }
+
+  .group-card:nth-child(odd)::before {
+    content: '';
+    position: absolute;
+    top: -4px;
+    left: -4px;
+    width: 7px;
+    height: 7px;
+    background: var(--color-red);
+  }
+
+  .group-range {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    line-height: 1.5;
+    letter-spacing: 0.06em;
+    color: var(--color-red-dark);
+    text-transform: uppercase;
+  }
+
+  .group-title {
+    margin-top: 14px;
+    font-size: 28px;
+    font-weight: 500;
+    line-height: 1.25;
+    letter-spacing: -0.02em;
+  }
+
+  .group-en {
+    margin-top: 4px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    line-height: 1.5;
+    letter-spacing: 0.04em;
+    color: var(--color-muted);
+  }
+
+  .group-summary {
+    max-width: 520px;
+    margin-top: 18px;
+    font-size: 15px;
+    line-height: 1.8;
+    color: var(--color-muted);
+  }
+
+  .group-stages {
+    display: grid;
+    gap: 0;
+    margin-top: 24px;
+    border-top: 1px solid var(--color-line);
+  }
+
+  .group-stage-link {
+    display: grid;
+    grid-template-columns: 34px 86px minmax(0, 1fr);
+    gap: 8px;
+    align-items: baseline;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--color-line);
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--color-ink-2);
+    transition: color 150ms var(--ease-site);
+  }
+
+  .group-stage-link:hover {
+    color: var(--color-red-dark);
+  }
+
+  .stage-no {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.05em;
+    color: var(--color-red-dark);
+  }
+
+  .stage-name {
+    font-weight: 500;
+  }
+
+  .stage-cn {
+    color: var(--color-muted);
+  }
+
+  .loopback-row {
+    margin-top: 32px;
+  }
+
+  .loopback-label {
+    margin-bottom: 10px;
+    color: var(--color-muted);
+  }
+
+  .loopback-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    border-top: 1px solid var(--color-line);
+    border-left: 1px solid var(--color-line);
+  }
+
+  .loopback-list li {
+    min-width: 0;
+    padding: 18px 22px 20px;
+    border-right: 1px solid var(--color-line);
+    border-bottom: 1px solid var(--color-line);
+    background: var(--color-canvas);
+  }
+
+  .loopback-route {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    line-height: 1.5;
+    letter-spacing: 0.03em;
+    color: var(--color-red-dark);
+  }
+
+  .loopback-copy {
+    margin-top: 8px;
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--color-muted);
+  }
+
+  .trim-rule {
+    position: relative;
+    display: grid;
+    grid-template-columns: 14px minmax(0, 1fr) auto;
+    gap: 18px;
+    align-items: start;
+    margin-top: 28px;
+    padding: 32px 36px;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-site);
+    background: var(--color-paper);
+  }
+
+  .trim-tick {
+    width: 7px;
+    height: 7px;
+    margin-top: 8px;
+    background: var(--color-red);
+  }
+
+  .trim-title {
+    font-size: 20px;
+    font-weight: 500;
+    line-height: 1.4;
+    letter-spacing: -0.01em;
+  }
+
+  .trim-copy {
+    max-width: 760px;
+    margin-top: 10px;
+    font-size: 14px;
+    line-height: 1.8;
+    color: var(--color-muted);
+  }
+
+  .trim-gates {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-self: center;
+  }
+
+  .trim-gate {
+    padding: 5px 8px;
+    border: 1px solid var(--color-red-faded);
+    border-radius: 4px;
+    background: var(--color-red-wash);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    line-height: 1.5;
+    letter-spacing: 0.04em;
+    color: var(--color-red-dark);
+  }
+
+  .stage-details {
+    background: var(--color-paper);
+  }
+
+  .stage-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 216px) minmax(0, 1fr);
+    gap: 64px;
+  }
+
+  .stage-nav {
+    position: sticky;
+    top: calc(var(--header-h) + 24px);
+    padding-top: 2px;
+  }
+
+  .stage-nav-group + .stage-nav-group {
+    margin-top: 22px;
+  }
+
+  .stage-nav-title {
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--color-line);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    line-height: 1.5;
+    letter-spacing: 0.05em;
+    color: var(--color-muted);
+    text-transform: uppercase;
+  }
+
+  .stage-nav ul {
+    display: grid;
+    gap: 0;
+  }
+
+  .stage-nav a {
+    display: flex;
+    align-items: baseline;
+    gap: 7px;
+    padding: 7px 0;
+    border-bottom: 1px solid var(--color-line);
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--color-muted);
+    transition: color 150ms var(--ease-site);
+  }
+
+  .stage-nav a:hover {
+    color: var(--color-red-dark);
+  }
+
+  .nav-no {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 0.04em;
+    color: var(--color-red-dark);
+  }
+
+  .nav-cn {
+    margin-left: auto;
+  }
+
+  .stage-list {
+    min-width: 0;
+  }
+
+  .stage-group + .stage-group {
+    margin-top: 64px;
+  }
+
+  .stage-group-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 6px 16px;
+    margin-bottom: 18px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--color-line);
+  }
+
+  .stage-group-title {
+    font-size: 30px;
+    font-weight: 500;
+    line-height: 1.25;
+    letter-spacing: -0.02em;
+  }
+
+  .stage-group-en {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    line-height: 1.5;
+    letter-spacing: 0.04em;
+    color: var(--color-muted);
+  }
+
+  .stage-group-head .group-range {
+    margin-left: auto;
+  }
+
+  @media (max-width: 1023px) {
+    .stage-layout {
+      grid-template-columns: 1fr;
+      gap: 0;
+    }
+
+    .stage-nav-col {
+      display: none;
+    }
+
+    .stage-group + .stage-group {
+      margin-top: 44px;
+    }
+
+    .stage-group-title {
+      font-size: 26px;
+    }
+
+    .stage-group-head .group-range {
+      margin-left: 0;
+    }
+
+    .trim-rule {
+      grid-template-columns: 14px minmax(0, 1fr);
+    }
+
+    .trim-gates {
+      grid-column: 2;
+      margin-top: 4px;
+    }
+  }
+
+  @media (max-width: 767px) {
+    .group-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .loopback-list {
+      grid-template-columns: 1fr;
+    }
+
+    .group-card {
+      padding: 28px 24px 26px;
+    }
+
+    .group-title {
+      font-size: 24px;
+    }
+
+    .group-stage-link {
+      grid-template-columns: 30px 76px minmax(0, 1fr);
+    }
+
+    .trim-rule {
+      grid-template-columns: 10px minmax(0, 1fr);
+      gap: 12px;
+      margin-top: 32px;
+      padding: 24px 22px;
+    }
+
+    .trim-gates {
+      grid-column: 2;
+    }
+  }
+
+  @media (max-width: 359px) {
+    .group-stage-link {
+      grid-template-columns: 26px minmax(0, 1fr);
+    }
+
+    .stage-cn {
+      grid-column: 2;
+    }
+  }
+</style>

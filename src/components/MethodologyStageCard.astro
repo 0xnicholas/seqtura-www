@@ -1,0 +1,295 @@
+---
+import type { DeliveryStage } from '../data/delivery';
+
+interface Props {
+  stage: DeliveryStage;
+}
+
+const { stage } = Astro.props;
+---
+
+<details class="stage-card" id={stage.anchor} data-stage-card open>
+  <summary class="stage-summary">
+    <span class="stage-no">{stage.no}</span>
+    <h4 class="stage-name">
+      {stage.name}
+      <span class="stage-name-cn">{stage.nameCn}</span>
+    </h4>
+    <span class="stage-artifact">{stage.artifacts[0]}</span>
+    <span class="stage-toggle" aria-hidden="true"></span>
+  </summary>
+
+  <div class="stage-body">
+    <p class="stage-copy" data-stage-field="copy">
+      {stage.copy}
+    </p>
+
+    <dl class="stage-fields">
+      <div class="stage-field" data-stage-field="purpose">
+        <dt>目的</dt>
+        <dd>{stage.purpose}</dd>
+      </div>
+
+      <div class="stage-field" data-stage-field="activities">
+        <dt>关键活动</dt>
+        <dd>
+          <ul class="field-list">
+            {stage.activities.map((activity) => (
+              <li>{activity}</li>
+            ))}
+          </ul>
+        </dd>
+      </div>
+
+      <div class="stage-field" data-stage-field="artifact">
+        <dt>产出物</dt>
+        <dd>
+          <ul class="field-list">
+            {stage.artifacts.map((artifact) => (
+              <li>{artifact}</li>
+            ))}
+          </ul>
+        </dd>
+      </div>
+
+      <div class="stage-field" data-stage-field="participation">
+        <dt>客户参与点</dt>
+        <dd>
+          <ul class="field-list">
+            {stage.clientParticipation.map((item) => (
+              <li>{item}</li>
+            ))}
+          </ul>
+        </dd>
+      </div>
+
+      <div class="stage-field" data-stage-field="exit">
+        <dt>过关条件</dt>
+        <dd>
+          <ul class="field-list">
+            {stage.exitCriteria.map((item) => (
+              <li>{item}</li>
+            ))}
+          </ul>
+        </dd>
+      </div>
+    </dl>
+  </div>
+</details>
+
+<style>
+  .stage-card {
+    scroll-margin-top: calc(var(--header-h) + 24px);
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-site-lg);
+    background: var(--color-canvas);
+    box-shadow: var(--shadow-site-xs);
+  }
+
+  .stage-card + .stage-card {
+    margin-top: 14px;
+  }
+
+  .stage-card[open] {
+    box-shadow: var(--shadow-site-sm);
+  }
+
+  .stage-summary {
+    display: grid;
+    grid-template-columns: 56px minmax(0, 1fr) 16px;
+    grid-template-areas:
+      'no name toggle'
+      'no artifact toggle';
+    column-gap: 16px;
+    row-gap: 4px;
+    align-items: baseline;
+    padding: 24px 28px;
+    border-radius: var(--radius-site-lg);
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .stage-summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .stage-summary:hover .stage-name {
+    color: var(--color-red-dark);
+  }
+
+  .stage-summary:focus-visible {
+    outline-offset: -3px;
+  }
+
+  .stage-no {
+    grid-area: no;
+    align-self: start;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    line-height: 1.5;
+    letter-spacing: 0.05em;
+    color: var(--color-red-dark);
+  }
+
+  .stage-name {
+    display: inline-flex;
+    flex-wrap: wrap;
+    grid-area: name;
+    align-items: baseline;
+    gap: 0 10px;
+    margin: 0;
+    font-size: 26px;
+    font-weight: 500;
+    line-height: 1.3;
+    letter-spacing: -0.02em;
+    transition: color 150ms var(--ease-site);
+  }
+
+  .stage-name-cn {
+    font-size: 15px;
+    font-weight: 400;
+    letter-spacing: 0;
+    color: var(--color-muted);
+  }
+
+  .stage-artifact {
+    grid-area: artifact;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    line-height: 1.5;
+    letter-spacing: 0.04em;
+    color: var(--color-muted);
+  }
+
+  .stage-toggle {
+    grid-area: toggle;
+    align-self: center;
+    position: relative;
+    width: 12px;
+    height: 12px;
+  }
+
+  .stage-toggle::before,
+  .stage-toggle::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 12px;
+    height: 1px;
+    background: var(--color-ink-2);
+    transition: transform 150ms var(--ease-site);
+  }
+
+  .stage-toggle::after {
+    transform: rotate(90deg);
+  }
+
+  .stage-card[open] .stage-toggle::after {
+    transform: rotate(0deg);
+  }
+
+  .stage-body {
+    padding: 0 28px 28px;
+  }
+
+  .stage-copy {
+    max-width: 860px;
+    padding-top: 20px;
+    border-top: 1px solid var(--color-line);
+    font-size: 16px;
+    line-height: 1.8;
+    color: var(--color-ink-2);
+    text-wrap: pretty;
+  }
+
+  .stage-fields {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin-top: 24px;
+    border-top: 1px solid var(--color-line);
+    border-left: 1px solid var(--color-line);
+  }
+
+  .stage-field {
+    min-width: 0;
+    padding: 18px 20px 20px;
+    border-right: 1px solid var(--color-line);
+    border-bottom: 1px solid var(--color-line);
+  }
+
+  .stage-field dt {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    line-height: 1.5;
+    letter-spacing: 0.06em;
+    color: var(--color-red-dark);
+    text-transform: uppercase;
+  }
+
+  .stage-field dd {
+    margin-top: 8px;
+    font-size: 14px;
+    line-height: 1.75;
+    color: var(--color-muted);
+  }
+
+  .field-list {
+    display: grid;
+    gap: 5px;
+  }
+
+  .field-list li {
+    position: relative;
+    padding-left: 12px;
+  }
+
+  .field-list li::before {
+    content: '';
+    position: absolute;
+    top: 0.68em;
+    left: 0;
+    width: 4px;
+    height: 4px;
+    background: var(--color-line-strong);
+  }
+
+  @media (max-width: 767px) {
+    .stage-summary {
+      grid-template-columns: 36px minmax(0, 1fr) 14px;
+      grid-template-areas: 'no name toggle';
+      column-gap: 10px;
+      padding: 18px 18px;
+    }
+
+    .stage-name {
+      font-size: 22px;
+    }
+
+    .stage-name-cn {
+      font-size: 14px;
+    }
+
+    .stage-artifact {
+      display: none;
+    }
+
+    .stage-body {
+      padding: 0 18px 20px;
+    }
+
+    .stage-copy {
+      padding-top: 16px;
+      font-size: 15px;
+    }
+
+    .stage-fields {
+      grid-template-columns: 1fr;
+      margin-top: 18px;
+    }
+
+    .stage-field {
+      padding: 15px 16px 16px;
+    }
+  }
+</style>

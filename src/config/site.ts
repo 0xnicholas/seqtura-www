@@ -57,17 +57,6 @@ export interface PageAnchor {
 }
 
 export const pageAnchors = {
-  methodology: [
-    { id: 'stages', label: '8 阶段总览' },
-    { id: 'discover', label: '01 Discover / 发现' },
-    { id: 'diagnose', label: '02 Diagnose / 诊断' },
-    { id: 'define', label: '03 Define / 定义' },
-    { id: 'design', label: '04 Design / 设计' },
-    { id: 'build', label: '05 Build / 构建' },
-    { id: 'validate', label: '06 Validate / 验证' },
-    { id: 'deploy', label: '07 Deploy / 部署' },
-    { id: 'optimize', label: '08 Optimize / 优化' },
-  ],
   architecture: [
     { id: 'overview', label: '参考架构总览' },
     { id: 'lifecycle', label: '请求生命周期' },

@@ -4,7 +4,10 @@ import PlaceholderPage from '../layouts/PlaceholderPage.astro';
 import { pageAnchors, type AnchoredPage } from '../config/site';
 
 export async function getStaticPaths() {
-  const pages = await getCollection('pages', ({ data }) => !data.draft && data.slug !== 'home');
+  const pages = await getCollection(
+    'pages',
+    ({ data }) => !data.draft && data.slug !== 'home' && data.slug !== 'methodology',
+  );
 
   return pages.map((entry) => ({
     params: { slug: entry.data.slug },

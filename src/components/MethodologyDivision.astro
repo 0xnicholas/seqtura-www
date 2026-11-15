@@ -1,0 +1,142 @@
+---
+import ArrowUpRightIcon from './ArrowUpRightIcon.astro';
+import SectionHeading from './SectionHeading.astro';
+import { methodologyCopy } from '../data/delivery';
+
+const { division } = methodologyCopy;
+---
+
+<section class="section division-section" id="division" aria-labelledby="division-title">
+  <div class="container-site">
+    <SectionHeading
+      id="division-title"
+      kicker={division.kicker}
+      title={division.title}
+      lead={division.lead}
+    />
+
+    <div class="division-grid reveal">
+      {division.cards.map((card) => (
+        <article class="division-card" data-division={card.id}>
+          <span class="division-code">{card.code}</span>
+          <h3 class="division-title">{card.title}</h3>
+          <p class="division-summary">{card.summary}</p>
+          <ul class="division-points">
+            {card.points.map((point) => (
+              <li>{point}</li>
+            ))}
+          </ul>
+          {'linkLabel' in card && (
+            <a class="text-link division-link" href="/process">
+              {card.linkLabel}
+              <ArrowUpRightIcon />
+            </a>
+          )}
+        </article>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .division-section {
+    background: var(--color-paper);
+  }
+
+  .division-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    border-top: 1px solid var(--color-line);
+    border-left: 1px solid var(--color-line);
+  }
+
+  .division-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    padding: 36px 36px 32px;
+    border-right: 1px solid var(--color-line);
+    border-bottom: 1px solid var(--color-line);
+    background: var(--color-canvas);
+  }
+
+  .division-card:first-child::before {
+    content: '';
+    position: absolute;
+    top: -4px;
+    left: -4px;
+    width: 7px;
+    height: 7px;
+    background: var(--color-red);
+  }
+
+  .division-code {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    line-height: 1.5;
+    letter-spacing: 0.06em;
+    color: var(--color-red-dark);
+    text-transform: uppercase;
+  }
+
+  .division-title {
+    margin-top: 14px;
+    font-size: 28px;
+    font-weight: 500;
+    line-height: 1.25;
+    letter-spacing: -0.02em;
+  }
+
+  .division-summary {
+    margin-top: 12px;
+    font-size: 15px;
+    line-height: 1.8;
+    color: var(--color-ink-2);
+  }
+
+  .division-points {
+    display: grid;
+    gap: 7px;
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid var(--color-line);
+  }
+
+  .division-points li {
+    position: relative;
+    padding-left: 14px;
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--color-muted);
+  }
+
+  .division-points li::before {
+    content: '';
+    position: absolute;
+    top: 0.7em;
+    left: 0;
+    width: 5px;
+    height: 5px;
+    background: var(--color-red);
+  }
+
+  .division-link {
+    align-self: flex-start;
+    margin-top: 22px;
+  }
+
+  @media (max-width: 767px) {
+    .division-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .division-card {
+      padding: 28px 24px 26px;
+    }
+
+    .division-title {
+      font-size: 24px;
+    }
+  }
+</style>
