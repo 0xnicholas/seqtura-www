@@ -314,7 +314,9 @@ test('home keeps one H1 and never skips a heading level', async ({ page }) => {
   }
 });
 
-test('reduced motion turns off section entrance animations', async ({ page }) => {
+test('reduced motion leaves section content fully visible without entrance effects', async ({
+  page,
+}) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/');
 
@@ -325,10 +327,14 @@ test('reduced motion turns off section entrance animations', async ({ page }) =>
     'section#delivery .commit-grid',
     'section#next-step .cta-inner',
   ]) {
-    const animation = await page.locator(selector).evaluate((element) => {
-      return getComputedStyle(element).animationName;
+    const element = page.locator(selector);
+    await expect(element, selector).toBeVisible();
+    const state = await element.evaluate((node) => {
+      const style = getComputedStyle(node);
+      return { opacity: style.opacity, transform: style.transform };
     });
-    expect(animation, selector).toBe('none');
+    expect(state.opacity, selector).toBe('1');
+    expect(state.transform, selector).toBe('none');
   }
 });
 

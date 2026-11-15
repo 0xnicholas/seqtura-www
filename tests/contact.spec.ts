@@ -104,15 +104,25 @@ test.describe('contact page structure', () => {
   });
 
   test('ships external scripts so the strict CSP can keep script-src self', async ({ page }) => {
-    await page.goto('/contact');
+    for (const route of [
+      '/',
+      '/methodology',
+      '/architecture',
+      '/process',
+      '/contact',
+      '/legal/privacy',
+      '/legal/terms',
+    ]) {
+      await page.goto(route);
 
-    const inlineExecutable = await page.evaluate(() =>
-      Array.from(document.querySelectorAll('script'))
-        .filter((script) => !script.src)
-        .filter((script) => (script.type || 'text/javascript') === 'text/javascript')
-        .map((script) => script.textContent?.slice(0, 80) ?? ''),
-    );
-    expect(inlineExecutable).toEqual([]);
+      const inlineExecutable = await page.evaluate(() =>
+        Array.from(document.querySelectorAll('script'))
+          .filter((script) => !script.src)
+          .filter((script) => script.type !== 'application/ld+json')
+          .map((script) => script.textContent?.slice(0, 80) ?? ''),
+      );
+      expect(inlineExecutable, route).toEqual([]);
+    }
   });
 });
 
@@ -268,7 +278,7 @@ test.describe('contact form validation and consent', () => {
     const note = form.locator('#contact-consent-note');
     await expect(note).toHaveText('你的信息仅用于回复咨询，不会用于营销推送。');
 
-    const label = form.locator('.consent-label');
+    const label = form.locator('[data-consent-label]');
     await expect(label).toContainText(
       '我已阅读并同意《隐私政策》，同意 Seqtura 为回复我的咨询处理上述信息。',
     );
@@ -280,7 +290,7 @@ test.describe('contact form validation and consent', () => {
 
     const notePrecedesLabel = await note.evaluate((element) => {
       const next = element.nextElementSibling;
-      return next?.classList.contains('consent-label') ?? false;
+      return next?.hasAttribute('data-consent-label') ?? false;
     });
     expect(notePrecedesLabel).toBe(true);
   });
@@ -398,9 +408,7 @@ test.describe('contact form validation and consent', () => {
 
     const success = page.locator('[data-contact-success]');
     await expect(success).toBeVisible();
-    await expect(success.locator('.success-title')).toHaveText(
-      '已收到。我们会通过你留下的邮箱或微信联系你。',
-    );
+    await expect(success.getByText('已收到。我们会通过你留下的邮箱或微信联系你。')).toBeVisible();
     await expect(success).toBeFocused();
     await expect(page.locator('[data-contact-form]')).toBeHidden();
     expect(page.url()).toMatch(/\/contact$/);
@@ -418,9 +426,7 @@ test.describe('contact form validation and consent', () => {
     const response = await responsePromise;
     expect(response.status()).toBe(200);
 
-    await expect(page.locator('[data-contact-success] .success-title')).toHaveText(
-      '已收到。我们会通过你留下的邮箱或微信联系你。',
-    );
+    await expect(page.getByText('已收到。我们会通过你留下的邮箱或微信联系你。')).toBeVisible();
     await expect(page.locator('[data-contact-form]')).toBeHidden();
     expect(page.url()).toMatch(/\/contact$/);
   });

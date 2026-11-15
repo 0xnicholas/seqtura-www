@@ -12,7 +12,7 @@ import { processBranches, processStages, processStagesCopy } from '../data/proce
     {processStages.map((stage, index) => (
       <li class="flow-cell" data-flow-node={stage.id}>
         <p class="flow-duration" data-flow-duration>
-          {stage.duration}
+          {stage.flowDuration}
         </p>
 
         <div class="flow-node">

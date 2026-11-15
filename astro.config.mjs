@@ -17,6 +17,10 @@ export default defineConfig({
     }),
   ],
   vite: {
+    build: {
+      // Keep every runtime script external so the strict CSP can stay `script-src 'self'`.
+      assetsInlineLimit: 0,
+    },
     plugins: [tailwindcss()],
     ssr: {
       noExternal: ['zod'],

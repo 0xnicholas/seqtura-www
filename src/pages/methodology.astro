@@ -1,5 +1,5 @@
 ---
-import { getEntry } from 'astro:content';
+import { publishedPage } from '../content/entry';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import MethodologyHero from '../components/MethodologyHero.astro';
 import MethodologyPrinciples from '../components/MethodologyPrinciples.astro';
@@ -8,13 +8,8 @@ import MethodologyArtifacts from '../components/MethodologyArtifacts.astro';
 import MethodologyDivision from '../components/MethodologyDivision.astro';
 import MethodologyCta from '../components/MethodologyCta.astro';
 
-const entry = await getEntry('pages', 'methodology');
-
-if (!entry || entry.data.draft) {
-  throw new Error('Missing published content entry: pages/methodology');
-}
-
-const { title, description } = entry.data;
+const { data } = await publishedPage('methodology');
+const { title, description } = data;
 ---
 
 <BaseLayout title={title} description={description}>

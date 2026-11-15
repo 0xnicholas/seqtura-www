@@ -1,6 +1,12 @@
 import { isOriginAllowed, isPayloadTooLarge, isSameOrigin, isSubmissionTooFast } from './anti-spam';
 import { resolveFormMode } from './config';
-import { logDeliveryFailure, notifyConfigFromEnv, notifyLead, toContactLead } from './notify';
+import {
+  failedNotifyResult,
+  logDeliveryFailure,
+  notifyConfigFromEnv,
+  notifyLead,
+  toContactLead,
+} from './notify';
 import { resolveRateLimiter, type RateLimiter } from './rate-limit';
 import {
   contactFieldErrors,
@@ -91,13 +97,7 @@ async function runDelivery(
     if (result.ok) return jsonResponse({ ok: true }, 200, requestId);
     logDeliveryFailure(requestId, result);
   } catch {
-    logDeliveryFailure(requestId, {
-      ok: false,
-      channels: [
-        { channel: 'feishu', ok: false, reason: 'delivery_error' },
-        { channel: 'email', ok: false, reason: 'delivery_error' },
-      ],
-    });
+    logDeliveryFailure(requestId, failedNotifyResult('delivery_error'));
   }
   return jsonResponse({ ok: false, error: 'delivery_failed' }, 502, requestId);
 }

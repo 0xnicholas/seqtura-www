@@ -115,7 +115,16 @@ test('privacy policy has a non-sticky two-column table of contents with resolvin
 
   const toc = page.locator('[data-legal-toc]');
   await expect(toc).toBeVisible();
-  await expect(toc).toHaveCSS('position', 'static');
+
+  const tocBeforeScroll = await toc.boundingBox();
+  await page.evaluate(() => {
+    document.documentElement.style.scrollBehavior = 'auto';
+    window.scrollBy(0, 500);
+  });
+  const tocAfterScroll = await toc.boundingBox();
+  expect(tocBeforeScroll).not.toBeNull();
+  expect(tocAfterScroll).not.toBeNull();
+  expect(tocAfterScroll!.y).toBeLessThan(tocBeforeScroll!.y - 100);
 
   const links = toc.getByRole('link');
   await expect(links).toHaveCount(12);
@@ -299,6 +308,8 @@ test.describe('configured filing and operator values', () => {
 
   test.beforeAll(async () => {
     test.setTimeout(180_000);
+    // PUBLIC_* values are inlined at build time, so this suite needs a second
+    // build with different values; a runtime server cannot vary them.
     outputDir = await mkdtemp(join(tmpdir(), 'seqtura-legal-filing-'));
     await execFileAsync('pnpm', ['exec', 'astro', 'build', '--outDir', outputDir], {
       cwd: process.cwd(),

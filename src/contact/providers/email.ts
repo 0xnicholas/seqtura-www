@@ -1,17 +1,6 @@
 import nodemailer from 'nodemailer';
 import type { ChannelResult, ContactLead, LeadProvider, NotifyConfig } from '../notify';
-
-const deliveryTimeoutMs = 5000;
-
-function timeoutReason(error: unknown): 'timeout' | 'delivery_error' {
-  if (!error || typeof error !== 'object') return 'delivery_error';
-  const record = error as { name?: unknown; code?: unknown };
-  return record.code === 'ETIMEDOUT' ||
-    record.name === 'TimeoutError' ||
-    record.name === 'AbortError'
-    ? 'timeout'
-    : 'delivery_error';
-}
+import { deliveryTimeoutMs, timeoutReason } from '../transport';
 
 function smtpPort(value: string | undefined): number | undefined {
   if (!value) return undefined;

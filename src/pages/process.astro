@@ -1,5 +1,5 @@
 ---
-import { getEntry } from 'astro:content';
+import { publishedPage } from '../content/entry';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import SectionHeading from '../components/SectionHeading.astro';
 import ProcessHero from '../components/ProcessHero.astro';
@@ -8,13 +8,8 @@ import ProcessStageTable from '../components/ProcessStageTable.astro';
 import PricingPrinciples from '../components/PricingPrinciples.astro';
 import { processStagesCopy } from '../data/process';
 
-const entry = await getEntry('pages', 'process');
-
-if (!entry || entry.data.draft) {
-  throw new Error('Missing published content entry: pages/process');
-}
-
-const { title, description } = entry.data;
+const { data } = await publishedPage('process');
+const { title, description } = data;
 ---
 
 <BaseLayout title={title} description={description}>
@@ -35,9 +30,3 @@ const { title, description } = entry.data;
 
   <PricingPrinciples />
 </BaseLayout>
-
-<style>
-  .process-stages {
-    scroll-margin-top: var(--header-h);
-  }
-</style>
