@@ -16,7 +16,8 @@
     "format": "prettier --write .",
     "test": "playwright test",
     "check:links": "node scripts/check-links.mjs",
-    "check:sentinels": "node scripts/check-sentinels.mjs"
+    "check:sentinels": "node scripts/check-sentinels.mjs",
+    "lighthouse": "lhci autorun"
   },
   "dependencies": {
     "@astrojs/mdx": "^8.1.6",
