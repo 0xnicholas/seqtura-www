@@ -1,3 +1,6 @@
+import { spawn, type ChildProcess } from 'node:child_process';
+import { once } from 'node:events';
+import { existsSync } from 'node:fs';
 import { expect, test, type APIRequestContext } from '@playwright/test';
 
 const origin = `http://127.0.0.1:${Number(process.env.PORT ?? 4321)}`;
@@ -547,4 +550,191 @@ test.describe('contact form mobile layout', () => {
       expect(overflow).toBeLessThanOrEqual(0);
     });
   }
+});
+
+interface ContactTestServer {
+  readonly baseURL: string;
+  readonly child: ChildProcess;
+  output(): string;
+  stop(): Promise<void>;
+}
+
+async function waitForContactServer(baseURL: string, child: ChildProcess): Promise<void> {
+  for (let attempt = 0; attempt < 100; attempt += 1) {
+    if (child.exitCode !== null) {
+      throw new Error(`Contact server exited with code ${child.exitCode}`);
+    }
+    try {
+      const response = await fetch(baseURL);
+      if (response.ok) return;
+    } catch {
+      // Server not up yet.
+    }
+    await new Promise((resolve) => setTimeout(resolve, 100));
+  }
+  throw new Error(`Contact server did not start at ${baseURL}`);
+}
+
+async function startContactServer(
+  port: number,
+  env: Record<string, string>,
+): Promise<ContactTestServer> {
+  if (!existsSync('dist/server/entry.mjs')) {
+    throw new Error('Run pnpm build before starting a contact test server');
+  }
+
+  const child = spawn(process.execPath, ['dist/server/entry.mjs'], {
+    cwd: process.cwd(),
+    env: { ...process.env, HOST: '127.0.0.1', PORT: String(port), ...env },
+    stdio: ['ignore', 'pipe', 'pipe'],
+  });
+
+  let output = '';
+  child.stdout?.on('data', (chunk: Buffer) => {
+    output += chunk.toString();
+  });
+  child.stderr?.on('data', (chunk: Buffer) => {
+    output += chunk.toString();
+  });
+
+  const baseURL = `http://127.0.0.1:${port}`;
+  await waitForContactServer(baseURL, child);
+
+  return {
+    baseURL,
+    child,
+    output: () => output,
+    stop: async () => {
+      if (child.exitCode === null) {
+        child.kill('SIGTERM');
+        await once(child, 'exit');
+      }
+    },
+  };
+}
+
+test.describe('FORM_MODE=off', () => {
+  test.describe.configure({ mode: 'serial' });
+
+  let server: ContactTestServer;
+
+  test.beforeAll(async () => {
+    test.setTimeout(120_000);
+    server = await startContactServer(4462, {
+      FORM_MODE: 'off',
+      PUBLIC_CONTACT_ENDPOINT: 'https://forms.example',
+    });
+  });
+
+  test.afterAll(async () => {
+    await server?.stop();
+  });
+
+  test('returns 503 with the form_off contract', async ({ request }) => {
+    const response = await request.post(`${server.baseURL}/api/contact`, {
+      data: validPayload(),
+      headers: { origin: server.baseURL, 'content-type': 'application/json' },
+    });
+
+    expect(response.status()).toBe(503);
+    expect(await response.json()).toEqual({ ok: false, error: 'form_off' });
+  });
+
+  test('allows the configured public endpoint origin and answers its preflight', async ({
+    request,
+  }) => {
+    const response = await request.post(`${server.baseURL}/api/contact`, {
+      data: validPayload(),
+      headers: { origin: 'https://forms.example', 'content-type': 'application/json' },
+    });
+    expect(response.status()).toBe(503);
+    expect(response.headers()['access-control-allow-origin']).toBe('https://forms.example');
+
+    const preflight = await request.fetch(`${server.baseURL}/api/contact`, {
+      method: 'OPTIONS',
+      headers: {
+        origin: 'https://forms.example',
+        'access-control-request-method': 'POST',
+      },
+    });
+    expect(preflight.status()).toBe(204);
+    expect(preflight.headers()['access-control-allow-origin']).toBe('https://forms.example');
+    expect(preflight.headers()['access-control-allow-methods']).toContain('POST');
+  });
+
+  test('shows the email fallback in the browser when the form is off', async ({ page }) => {
+    await page.goto(`${server.baseURL}/contact`);
+    await fillValidForm(page);
+    await page.locator('[data-contact-submit]').click();
+
+    const failure = page.locator('[data-form-failure]');
+    await expect(failure).toBeVisible();
+    await expect(failure.locator('p')).toHaveText(
+      '提交失败。请重试，或直接发邮件至 hello@seqtura.ai。',
+    );
+    await expect(failure.getByRole('link', { name: 'hello@seqtura.ai' })).toHaveAttribute(
+      'href',
+      'mailto:hello@seqtura.ai',
+    );
+    expect(page.url()).toMatch(/\/contact$/);
+  });
+});
+
+test.describe('FORM_MODE=live without providers', () => {
+  test.describe.configure({ mode: 'serial' });
+
+  let server: ContactTestServer;
+
+  test.beforeAll(async () => {
+    test.setTimeout(120_000);
+    server = await startContactServer(4463, {
+      FORM_MODE: 'live',
+      CONTACT_RATE_LIMIT_MAX: '2',
+      CONTACT_RATE_LIMIT_WINDOW_MS: '600000',
+    });
+  });
+
+  test.afterAll(async () => {
+    await server?.stop();
+  });
+
+  test('returns 502 and logs only non-PII failure metadata', async ({ request }) => {
+    const response = await request.post(`${server.baseURL}/api/contact`, {
+      data: validPayload(),
+      headers: { origin: server.baseURL, 'content-type': 'application/json' },
+    });
+
+    expect(response.status()).toBe(502);
+    expect(await response.json()).toEqual({ ok: false, error: 'delivery_failed' });
+
+    await expect.poll(() => server.output()).toContain('contact.delivery_failed');
+    const output = server.output();
+    expect(output).toContain('requestId');
+    for (const pii of [
+      '张明',
+      'zhangming@example.com',
+      '序构测试制造有限公司',
+      needText,
+      'zhangming-work',
+    ]) {
+      expect(output, pii).not.toContain(pii);
+    }
+  });
+
+  test('returns 429 after the configured per-IP limit', async ({ request }) => {
+    const next = await request.post(`${server.baseURL}/api/contact`, {
+      data: validPayload(),
+      headers: { origin: server.baseURL, 'content-type': 'application/json' },
+    });
+    expect(next.status()).toBe(502);
+
+    const limited = await request.post(`${server.baseURL}/api/contact`, {
+      data: validPayload(),
+      headers: { origin: server.baseURL, 'content-type': 'application/json' },
+    });
+
+    expect(limited.status()).toBe(429);
+    expect(await limited.json()).toEqual({ ok: false, error: 'rate_limited' });
+    expect(Number(limited.headers()['retry-after'])).toBeGreaterThan(0);
+  });
 });
