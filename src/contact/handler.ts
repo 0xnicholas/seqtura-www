@@ -1,11 +1,6 @@
 import { isOriginAllowed, isPayloadTooLarge, isSameOrigin, isSubmissionTooFast } from './anti-spam';
 import { resolveFormMode } from './config';
-import {
-  logDeliveryFailure,
-  notifyConfigFromEnv,
-  notifyLead,
-  toContactLead,
-} from './notify';
+import { logDeliveryFailure, notifyConfigFromEnv, notifyLead, toContactLead } from './notify';
 import { resolveRateLimiter, type RateLimiter } from './rate-limit';
 import {
   contactFieldErrors,
@@ -15,12 +10,7 @@ import {
 } from './schema';
 
 type ContactError =
-  | 'validation'
-  | 'origin'
-  | 'payload_too_large'
-  | 'rate_limited'
-  | 'delivery_failed'
-  | 'form_off';
+  'validation' | 'origin' | 'payload_too_large' | 'rate_limited' | 'delivery_failed' | 'form_off';
 
 type ContactResponseBody =
   | { ok: true }
@@ -33,8 +23,7 @@ export interface ContactRequestOptions {
 }
 
 let limiterCache:
-  | { readonly signature: string; readonly limiter: RateLimiter | undefined }
-  | undefined;
+  { readonly signature: string; readonly limiter: RateLimiter | undefined } | undefined;
 
 function getRateLimiter(
   env: Record<string, string | undefined>,
@@ -101,7 +90,7 @@ async function runDelivery(
     const result = await notifyLead(toContactLead(payload), notifyConfigFromEnv(env));
     if (result.ok) return jsonResponse({ ok: true }, 200, requestId);
     logDeliveryFailure(requestId, result);
-  } catch (error) {
+  } catch {
     logDeliveryFailure(requestId, {
       ok: false,
       channels: [
@@ -109,15 +98,6 @@ async function runDelivery(
         { channel: 'email', ok: false, reason: 'delivery_error' },
       ],
     });
-    if (error instanceof Error) {
-      console.warn(
-        JSON.stringify({
-          event: 'contact.delivery_exception',
-          requestId,
-          name: error.name,
-        }),
-      );
-    }
   }
   return jsonResponse({ ok: false, error: 'delivery_failed' }, 502, requestId);
 }
@@ -149,11 +129,7 @@ export async function handleContactRequest(
   try {
     rawBody = await request.text();
   } catch {
-    return validationResponse(
-      { form: contactMessages.submitFailed },
-      requestId,
-      cors,
-    );
+    return validationResponse({ form: contactMessages.submitFailed }, requestId, cors);
   }
 
   if (isPayloadTooLarge(request, rawBody)) {

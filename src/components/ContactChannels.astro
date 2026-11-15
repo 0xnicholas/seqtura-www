@@ -18,7 +18,9 @@ const availability = {
   <div class="container-site">
     <header class="channels-head">
       <p class="kicker">{contactChannels.kicker}</p>
-      <h2 id="channels-title" class="type-h2 channels-title">{contactChannels.title}</h2>
+      <h2 id="channels-title" class="type-h2 channels-title">
+        {contactChannels.title}
+      </h2>
       <p class="type-lead channels-lead">{contactChannels.lead}</p>
     </header>
 
@@ -59,12 +61,7 @@ const availability = {
             {channel.id === 'feishu' &&
               (feishuUrl ? (
                 <>
-                  <a
-                    class="channel-link"
-                    href={feishuUrl}
-                    target="_blank"
-                    rel="noopener"
-                  >
+                  <a class="channel-link" href={feishuUrl} target="_blank" rel="noopener">
                     打开飞书
                     <ArrowUpRightIcon />
                   </a>

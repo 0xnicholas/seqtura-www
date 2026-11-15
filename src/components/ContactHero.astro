@@ -6,7 +6,9 @@ import { contactHero } from '../data/contact';
   <div class="container-site">
     <div class="hero-copy">
       <p class="kicker">{contactHero.kicker}</p>
-      <h1 id="contact-hero-title" class="type-h1 hero-title">{contactHero.title}</h1>
+      <h1 id="contact-hero-title" class="type-h1 hero-title">
+        {contactHero.title}
+      </h1>
       <p class="type-lead hero-lead">{contactHero.lead}</p>
       <p class="hero-note">
         <span class="hero-note-mark" aria-hidden="true"></span>
@@ -29,10 +31,13 @@ import { contactHero } from '../data/contact';
               stroke="currentColor"
               stroke-width="1.4"
               stroke-linecap="round"
-              stroke-linejoin="round"></path>
+              stroke-linejoin="round"
+            ></path>
           </svg>
         </a>
-        <a class="btn btn-ghost" href="/methodology">{contactHero.secondaryCta}</a>
+        <a class="btn btn-ghost" href="/methodology">
+          {contactHero.secondaryCta}
+        </a>
       </div>
     </div>
   </div>

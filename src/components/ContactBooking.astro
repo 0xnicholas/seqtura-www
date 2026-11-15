@@ -7,13 +7,17 @@ import { bookingCopy } from '../data/contact';
   <div class="container-site booking-grid">
     <div class="booking-intro">
       <p class="kicker">{bookingCopy.kicker}</p>
-      <h2 id="book-title" class="type-h2 booking-title">{bookingCopy.title}</h2>
+      <h2 id="book-title" class="type-h2 booking-title">
+        {bookingCopy.title}
+      </h2>
       <p class="type-lead booking-lead">{bookingCopy.lead}</p>
 
       <ol class="booking-steps" aria-label="提交后会发生什么">
         {bookingCopy.steps.map((step) => (
           <li>
-            <span class="step-no" aria-hidden="true">{step.no}</span>
+            <span class="step-no" aria-hidden="true">
+              {step.no}
+            </span>
             <div>
               <h3 class="step-title">{step.title}</h3>
               <p class="step-text">{step.text}</p>

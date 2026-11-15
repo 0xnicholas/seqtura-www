@@ -1,7 +1,7 @@
 import { spawn, type ChildProcess } from 'node:child_process';
 import { once } from 'node:events';
 import { existsSync } from 'node:fs';
-import { expect, test, type APIRequestContext } from '@playwright/test';
+import { expect, test, type APIRequestContext, type Page } from '@playwright/test';
 
 const origin = `http://127.0.0.1:${Number(process.env.PORT ?? 4321)}`;
 
@@ -37,7 +37,9 @@ test.describe('contact page structure', () => {
     expect(response?.status()).toBe(200);
     const main = page.getByRole('main');
     await expect(main.getByRole('heading', { level: 1 })).toHaveText('先聊一个具体场景。');
-    await expect(main).toContainText('30 分钟，围绕一个具体业务场景，给出值不值得做、下一步是什么的判断。');
+    await expect(main).toContainText(
+      '30 分钟，围绕一个具体业务场景，给出值不值得做、下一步是什么的判断。',
+    );
     await expect(main).toContainText('提交后，我们会通过你留下的邮箱或微信联系你。');
 
     await expect(page.locator('#book')).toHaveCount(1);
@@ -74,11 +76,7 @@ test.describe('contact page structure', () => {
 
     const channels = page.locator('#channels');
     await expect(channels.getByRole('heading', { level: 2 })).toHaveText('其他通道');
-    await expect(channels.getByRole('heading', { level: 3 })).toHaveText([
-      '微信',
-      '飞书',
-      '邮箱',
-    ]);
+    await expect(channels.getByRole('heading', { level: 3 })).toHaveText(['微信', '飞书', '邮箱']);
     await expect(channels.getByRole('link', { name: 'hello@seqtura.ai' }).first()).toHaveAttribute(
       'href',
       'mailto:hello@seqtura.ai',
@@ -154,7 +152,9 @@ test.describe('POST /api/contact contract', () => {
     expect(await response.json()).toEqual({ ok: true });
   });
 
-  test('rejects a submission faster than three seconds with a generic error', async ({ request }) => {
+  test('rejects a submission faster than three seconds with a generic error', async ({
+    request,
+  }) => {
     const response = await postContact(request, { startedAt: Date.now() });
 
     expect(response.status()).toBe(400);
@@ -229,7 +229,7 @@ test.describe('POST /api/contact contract', () => {
 const needText = '我们有一条客服工单流程，希望评估 Agent 是否适合接入，并给出第一步建议。';
 
 async function setStartedAt(page: Page, millisecondsAgo = 10_000): Promise<void> {
-  await page.evaluate((ago) => {
+  await page.evaluate((ago: number) => {
     const input = document.querySelector<HTMLInputElement>('input[name="startedAt"]');
     if (input) input.value = String(Date.now() - ago);
   }, millisecondsAgo);
@@ -328,10 +328,7 @@ test.describe('contact form validation and consent', () => {
 
     await page.locator('[data-contact-submit]').click();
 
-    await expect(form.getByLabel('邮箱', { exact: true })).toHaveAttribute(
-      'aria-invalid',
-      'true',
-    );
+    await expect(form.getByLabel('邮箱', { exact: true })).toHaveAttribute('aria-invalid', 'true');
     await expect(page.locator('#contact-email-error')).toHaveText('请输入有效的邮箱地址。');
     await expect(page.locator('#contact-need-error')).toHaveText('需求描述至少 10 个字符。');
     await expect(form.getByLabel('邮箱', { exact: true })).toBeFocused();
@@ -404,7 +401,8 @@ test.describe('contact form validation and consent', () => {
     await fillValidForm(page);
 
     const responsePromise = page.waitForResponse(
-      (response) => response.url().endsWith('/api/contact') && response.request().method() === 'POST',
+      (response) =>
+        response.url().endsWith('/api/contact') && response.request().method() === 'POST',
     );
     await page.locator('[data-contact-submit]').click();
     const response = await responsePromise;
@@ -495,10 +493,7 @@ test.describe('contact form submission states', () => {
     await expect(page.locator('[data-form-summary]')).toContainText(
       '邮箱：服务端校验：请使用公司邮箱。',
     );
-    await expect(page.getByLabel('邮箱', { exact: true })).toHaveAttribute(
-      'aria-invalid',
-      'true',
-    );
+    await expect(page.getByLabel('邮箱', { exact: true })).toHaveAttribute('aria-invalid', 'true');
     await expect(page.locator('#contact-email-error')).toHaveText('服务端校验：请使用公司邮箱。');
     await expect(page.getByLabel('邮箱', { exact: true })).toBeFocused();
   });

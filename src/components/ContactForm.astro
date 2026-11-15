@@ -6,6 +6,7 @@ import { bookingCopy } from '../data/contact';
 
 const endpoint = import.meta.env.PUBLIC_CONTACT_ENDPOINT || '/api/contact';
 const email = placeholders.contactEmail.value;
+const consentCopy = `我已阅读并同意<a href="${privacyConsentPath}" target="_blank" rel="noopener">《隐私政策》</a>，同意 Seqtura 为回复我的咨询处理上述信息。`;
 ---
 
 <div class="contact-form-panel" data-contact-panel>
@@ -80,7 +81,11 @@ const email = placeholders.contactEmail.value;
           autocomplete="tel"
           maxlength={contactLimits.wechatPhone}
         />
-        <p class="field-error" id="contact-wechatPhone-error" data-error-for="wechatPhone" hidden
+        <p
+          class="field-error"
+          id="contact-wechatPhone-error"
+          data-error-for="wechatPhone"
+          hidden
         ></p>
       </div>
 
@@ -94,7 +99,9 @@ const email = placeholders.contactEmail.value;
           required
           aria-required="true"
         ></textarea>
-        <p class="field-hint">至少 {contactLimits.needMin} 个字符，最多 {contactLimits.needMax} 个字符。</p>
+        <p class="field-hint">
+          至少 {contactLimits.needMin} 个字符，最多 {contactLimits.needMax} 个字符。
+        </p>
         <p class="field-error" id="contact-need-error" data-error-for="need" hidden></p>
       </div>
     </div>
@@ -124,7 +131,7 @@ const email = placeholders.contactEmail.value;
           aria-required="true"
           aria-describedby="contact-consent-note"
         />
-        <span>我已阅读并同意<a href={privacyConsentPath} target="_blank" rel="noopener">《隐私政策》</a>，同意 Seqtura 为回复我的咨询处理上述信息。</span>
+        <span set:html={consentCopy} />
       </label>
       <p class="field-error" id="contact-consent-error" data-error-for="consent" hidden></p>
     </div>
@@ -136,7 +143,9 @@ const email = placeholders.contactEmail.value;
   </form>
 
   <div class="contact-success" data-contact-success role="status" tabindex="-1" hidden>
-    <p class="success-mark" aria-hidden="true">✓</p>
+    <p class="success-mark" aria-hidden="true">
+      ✓
+    </p>
     <p class="type-h3 success-title">已收到。我们会通过你留下的邮箱或微信联系你。</p>
     <p class="success-note">如果还需要补充信息，直接回复我们的邮件即可。</p>
   </div>
@@ -184,9 +193,7 @@ const email = placeholders.contactEmail.value;
     if (startedAtInput) startedAtInput.value = String(Date.now());
 
     function control(name: ContactField): HTMLInputElement | HTMLTextAreaElement | null {
-      return contactForm.querySelector<HTMLInputElement | HTMLTextAreaElement>(
-        `[name="${name}"]`,
-      );
+      return contactForm.querySelector<HTMLInputElement | HTMLTextAreaElement>(`[name="${name}"]`);
     }
 
     function errorElement(name: ContactField): HTMLElement | null {
@@ -351,6 +358,11 @@ const email = placeholders.contactEmail.value;
           error.hidden = true;
         }
         input.removeAttribute('aria-invalid');
+        if (name === 'consent') {
+          input.setAttribute('aria-describedby', 'contact-consent-note');
+        } else {
+          input.removeAttribute('aria-describedby');
+        }
       });
     }
 
@@ -386,9 +398,7 @@ const email = placeholders.contactEmail.value;
         });
 
         const body = (await response.json().catch(() => null)) as
-          | { ok: true }
-          | { ok: false; error: string; fields?: Record<string, string> }
-          | null;
+          { ok: true } | { ok: false; error: string; fields?: Record<string, string> } | null;
 
         if (response.ok && body?.ok === true) {
           showSuccess();
@@ -481,7 +491,6 @@ const email = placeholders.contactEmail.value;
   .field textarea:focus {
     border-color: var(--color-red-dark);
     box-shadow: 0 0 0 3px rgb(196 38 2 / 12%);
-    outline: none;
   }
 
   .field input[aria-invalid='true'],

@@ -53,7 +53,6 @@ export function resolveRateLimiter(
   const limit = configuredLimit ?? (mode === 'live' ? defaultLiveRateLimit : undefined);
   if (!limit) return undefined;
 
-  const windowMs =
-    positiveNumber(env.CONTACT_RATE_LIMIT_WINDOW_MS) ?? defaultRateLimitWindowMs;
+  const windowMs = positiveNumber(env.CONTACT_RATE_LIMIT_WINDOW_MS) ?? defaultRateLimitWindowMs;
   return createMemoryRateLimiter(limit, windowMs);
 }

@@ -2,10 +2,7 @@ import type { ContactPayload } from './schema';
 
 export type NotifyChannel = 'feishu' | 'email';
 export type NotifyFailureReason =
-  | 'not_configured'
-  | 'provider_not_available'
-  | 'timeout'
-  | 'delivery_error';
+  'not_configured' | 'provider_not_available' | 'timeout' | 'delivery_error';
 
 export interface ContactLead {
   readonly name: string;
