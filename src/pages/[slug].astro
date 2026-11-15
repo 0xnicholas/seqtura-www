@@ -7,10 +7,7 @@ export async function getStaticPaths() {
   const pages = await getCollection(
     'pages',
     ({ data }) =>
-      !data.draft &&
-      data.slug !== 'home' &&
-      data.slug !== 'methodology' &&
-      data.slug !== 'architecture',
+      !data.draft && !['home', 'methodology', 'process', 'architecture'].includes(data.slug),
   );
 
   return pages.map((entry) => ({
