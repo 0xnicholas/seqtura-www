@@ -19,6 +19,7 @@ function parseDate(value: string): Date | undefined {
 }
 
 const launchDate = parseDate(placeholders.launchDate.value);
+const legalUpdatedAt = parseDate(placeholders.legalUpdatedAt.value);
 const operatorName = placeholders.operatorName.value || 'Seqtura AI';
 const hostingProvider = placeholders.hostingProvider.value || '站点托管服务商';
 const emailProvider = placeholders.emailProvider.value
@@ -40,7 +41,7 @@ export const legal = {
     : hostingProvider,
   operatorLocation: placeholders.operatorLocation.value || '运营主体所在地',
   effectiveAt: launchDate,
-  updatedAt: launchDate,
+  updatedAt: legalUpdatedAt ?? launchDate,
 } as const;
 
 export const missingLegalPlaceholders: readonly string[] = [

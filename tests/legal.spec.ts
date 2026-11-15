@@ -310,6 +310,7 @@ test.describe('configured filing and operator values', () => {
         PUBLIC_REGISTERED_ADDRESS: '北京市朝阳区测试路 1 号',
         PUBLIC_SITE_DOMAIN: 'seqtura.ai',
         PUBLIC_LAUNCH_DATE: '2026-12-01',
+        PUBLIC_LEGAL_UPDATED_AT: '2026-12-15',
         PUBLIC_EMAIL_PROVIDER: '邮件服务（测试）',
         PUBLIC_HOSTING_PROVIDER: '境内托管服务（测试）',
         PUBLIC_HOSTING_LOCATION: '北京',
@@ -369,14 +370,14 @@ test.describe('configured filing and operator values', () => {
     await expect(main).toContainText('seqtura.ai');
     await expect(page.locator('[data-legal-meta] dd')).toHaveText([
       '2026年12月1日',
-      '2026年12月1日',
+      '2026年12月15日',
       '1.1',
     ]);
     expect(
       await page
         .locator('[data-legal-meta] time')
         .evaluateAll((elements) => elements.map((element) => element.getAttribute('datetime'))),
-    ).toEqual(['2026-12-01', '2026-12-01']);
+    ).toEqual(['2026-12-01', '2026-12-15']);
 
     await page.goto(`${baseURL}/legal/terms`);
     await expect(page.getByRole('main')).toContainText('北京序构科技有限公司');

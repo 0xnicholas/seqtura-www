@@ -21,6 +21,7 @@ export const placeholders = {
   registeredAddress: envValue('PUBLIC_REGISTERED_ADDRESS', ''),
   siteDomain: envValue('PUBLIC_SITE_DOMAIN', ''),
   launchDate: envValue('PUBLIC_LAUNCH_DATE', ''),
+  legalUpdatedAt: envValue('PUBLIC_LEGAL_UPDATED_AT', ''),
   emailProvider: envValue('PUBLIC_EMAIL_PROVIDER', ''),
   hostingProvider: envValue('PUBLIC_HOSTING_PROVIDER', ''),
   hostingLocation: envValue('PUBLIC_HOSTING_LOCATION', ''),
