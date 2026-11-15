@@ -1,0 +1,117 @@
+---
+import SectionHeading from './SectionHeading.astro';
+import { architectureCopy, architectureMetrics } from '../data/architecture';
+
+const { metrics } = architectureCopy;
+---
+
+<section class="section metrics-section" id="metrics" aria-labelledby="metrics-title">
+  <div class="container-site">
+    <SectionHeading
+      id="metrics-title"
+      kicker={metrics.kicker}
+      title={metrics.title}
+      lead={metrics.lead}
+    />
+
+    <div class="metric-grid reveal" role="list" aria-label="评测指标">
+      {architectureMetrics.map((metric) => (
+        <article class="metric" data-metric={metric.id} role="listitem">
+          <span class="metric-no">{metric.no}</span>
+          <h3 class="metric-name">{metric.name}</h3>
+          <p class="metric-use">{metric.use}</p>
+        </article>
+      ))}
+    </div>
+
+    <p class="metric-note">
+      <span class="tick" aria-hidden="true"></span>
+      {metrics.note}
+    </p>
+  </div>
+</section>
+
+<style>
+  .metrics-section {
+    background: var(--color-canvas);
+  }
+
+  .metric-grid {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    border-top: 1px solid var(--color-line);
+    border-left: 1px solid var(--color-line);
+  }
+
+  .metric {
+    position: relative;
+    min-width: 0;
+    padding: 22px 20px 24px;
+    border-right: 1px solid var(--color-line);
+    border-bottom: 1px solid var(--color-line);
+    background: var(--color-canvas);
+  }
+
+  .metric:first-child::before {
+    content: '';
+    position: absolute;
+    top: -4px;
+    left: -4px;
+    width: 7px;
+    height: 7px;
+    background: var(--color-red);
+  }
+
+  .metric-no {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    line-height: 1.5;
+    letter-spacing: 0.05em;
+    color: var(--color-red-dark);
+  }
+
+  .metric-name {
+    margin-top: 12px;
+    font-size: 18px;
+    font-weight: 500;
+    line-height: 1.4;
+  }
+
+  .metric-use {
+    margin-top: 8px;
+    font-size: 12px;
+    line-height: 1.8;
+    color: var(--color-muted);
+  }
+
+  .metric-note {
+    display: grid;
+    grid-template-columns: 7px minmax(0, 1fr);
+    gap: 10px;
+    max-width: 760px;
+    margin-top: 18px;
+    font-size: 12px;
+    line-height: 1.75;
+    color: var(--color-muted);
+  }
+
+  .metric-note .tick {
+    margin-top: 8px;
+  }
+
+  @media (max-width: 1023px) {
+    .metric-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 767px) {
+    .metric-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .metric {
+      padding: 18px 16px 20px;
+    }
+  }
+</style>

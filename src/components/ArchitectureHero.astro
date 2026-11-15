@@ -1,0 +1,154 @@
+---
+import ArrowIcon from './ArrowIcon.astro';
+import { architectureCopy } from '../data/architecture';
+import { site } from '../config/site';
+
+const { hero } = architectureCopy;
+---
+
+<section class="arch-hero" aria-labelledby="arch-hero-title">
+  <div class="container-site">
+    <div class="hero-copy">
+      <p class="kicker">{hero.kicker}</p>
+      <h1 id="arch-hero-title" class="type-h1 hero-title">
+        {hero.title}
+      </h1>
+      <p class="type-lead hero-lead">{hero.lead}</p>
+
+      <ul class="hero-tags" aria-label="架构属性">
+        {hero.tags.map((tag) => (
+          <li data-hero-tag>{tag}</li>
+        ))}
+      </ul>
+
+      <div class="cta-row hero-actions">
+        <a class="btn btn-primary" href={site.bookingPath} data-primary-cta>
+          {hero.primaryCta}
+          <ArrowIcon />
+        </a>
+        <a class="btn btn-ghost" href="/methodology">
+          {hero.secondaryCta}
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .arch-hero {
+    position: relative;
+    overflow: hidden;
+    padding: 96px 0 88px;
+    border-bottom: 1px solid var(--color-line);
+    background: var(--color-canvas);
+  }
+
+  .arch-hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: max(var(--gutter), calc((100vw - var(--container-site)) / 2));
+    width: 7px;
+    height: 7px;
+    background: var(--color-red);
+  }
+
+  .arch-hero::after {
+    content: '';
+    position: absolute;
+    top: 10%;
+    left: 54%;
+    width: 56%;
+    height: 72%;
+    background: radial-gradient(closest-side, rgb(245 48 3 / 8%), rgb(245 48 3 / 0%) 74%);
+    pointer-events: none;
+  }
+
+  .hero-copy {
+    position: relative;
+    z-index: 1;
+    max-width: 940px;
+    animation: hero-in 600ms var(--ease-site) both;
+  }
+
+  .hero-title {
+    margin-top: 24px;
+  }
+
+  .hero-lead {
+    max-width: 740px;
+    margin-top: 26px;
+    color: var(--color-muted);
+  }
+
+  .hero-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 30px;
+  }
+
+  .hero-tags li {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    height: 28px;
+    padding: 0 12px;
+    border: 1px solid var(--color-line);
+    border-radius: 4px;
+    background: var(--color-paper);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    line-height: 1;
+    letter-spacing: 0.04em;
+    color: var(--color-ink-2);
+  }
+
+  .hero-tags li::before {
+    content: '';
+    width: 5px;
+    height: 5px;
+    background: var(--color-red);
+  }
+
+  .hero-actions {
+    margin-top: 34px;
+  }
+
+  @keyframes hero-in {
+    from {
+      opacity: 0;
+      transform: translateY(16px);
+    }
+
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @media (max-width: 767px) {
+    .arch-hero {
+      padding: 64px 0 56px;
+    }
+
+    .hero-actions {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .hero-actions .btn {
+      width: 100%;
+    }
+
+    .hero-tags {
+      margin-top: 24px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-copy {
+      animation: none;
+    }
+  }
+</style>

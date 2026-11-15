@@ -1,0 +1,394 @@
+---
+import { architectureLayers, controlPlanes } from '../data/architecture';
+---
+
+<div
+  class="arch-map"
+  data-arch-diagram
+  role="img"
+  aria-label="交付参考架构示意：五层能力栈横切三条控制面；虚线框内是 Seqtura 交付的组件与模式，框外是客户的系统、数据、身份与审批。"
+>
+  <div class="map-head">
+    <span>REFERENCE ARCHITECTURE / 交付参考架构</span>
+    <span class="map-status">
+      <i aria-hidden="true"></i>5 LAYERS + 3 PLANES
+    </span>
+  </div>
+
+  <div class="map-body">
+    <div class="client-rail" aria-hidden="true">
+      <span class="rail-title">客户环境</span>
+      <span>系统</span>
+      <span>数据</span>
+      <span>身份</span>
+      <span>审批</span>
+    </div>
+
+    <div class="boundary-frame">
+      <div class="plane-guides" aria-hidden="true">
+        <i></i>
+        <i></i>
+        <i></i>
+      </div>
+      <span class="boundary-tag" aria-hidden="true">
+        SEQTURA 交付边界 / 组件与模式
+      </span>
+
+      <div class="planes" aria-hidden="true">
+        {controlPlanes.map((plane) => (
+          <span class="plane">
+            <b>{plane.short}</b>
+            {plane.name}
+          </span>
+        ))}
+      </div>
+
+      <div class="layer-stack">
+        {architectureLayers.map((layer) => (
+          <div class="map-layer" data-map-layer={layer.id}>
+            <span class="map-no">{layer.no}</span>
+            <span class="map-name">
+              <b>{layer.name}</b>
+              <span>{layer.label}</span>
+            </span>
+            <span class="map-marks" aria-hidden="true">
+              {layer.id === 'ingress' && <span class="mark mark-human">人</span>}
+              {layer.id === 'tools' && <span class="mark mark-lock">锁</span>}
+              {layer.id === 'knowledge' && <span class="mark mark-lock">锁</span>}
+            </span>
+          </div>
+        ))}
+      </div>
+
+      <div class="flow-axis" aria-hidden="true">
+        <span>请求 / 数据流</span>
+        <span class="flow-line"></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="map-foot" aria-hidden="true">
+    <span>SEQTURA 交付边界：组件与模式</span>
+    <span>客户环境：系统 · 数据 · 身份 · 审批</span>
+  </div>
+</div>
+
+<style>
+  .arch-map {
+    overflow: hidden;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-site-lg);
+    background: var(--color-canvas);
+    box-shadow: var(--shadow-site-xs);
+  }
+
+  .map-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px 16px;
+    padding: 13px 20px;
+    border-bottom: 1px solid var(--color-line);
+    background: var(--color-paper);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    line-height: 1.5;
+    letter-spacing: 0.05em;
+    color: var(--color-muted);
+    text-transform: uppercase;
+  }
+
+  .map-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .map-status i {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--color-red);
+  }
+
+  .map-body {
+    display: grid;
+    grid-template-columns: 108px minmax(0, 1fr);
+    gap: 18px;
+    padding: 24px 20px 20px;
+  }
+
+  .client-rail {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-self: stretch;
+    padding-top: 104px;
+  }
+
+  .rail-title,
+  .client-rail span:not(.rail-title) {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    line-height: 1.5;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .rail-title {
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--color-line);
+    color: var(--color-red-dark);
+  }
+
+  .client-rail span:not(.rail-title) {
+    padding: 6px 8px;
+    border: 1px solid var(--color-line);
+    border-radius: 4px;
+    background: var(--color-paper);
+    color: var(--color-muted);
+  }
+
+  .boundary-frame {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    padding: 44px 18px 18px;
+    border: 1px dashed var(--color-line-strong);
+    border-radius: var(--radius-site);
+    background:
+      linear-gradient(var(--color-canvas), var(--color-canvas)) padding-box,
+      var(--color-paper);
+  }
+
+  .plane-guides {
+    position: absolute;
+    inset: 36px 18px 18px;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    pointer-events: none;
+  }
+
+  .plane-guides i {
+    margin-left: 50%;
+    border-left: 1px dashed rgb(245 48 3 / 18%);
+  }
+
+  .boundary-tag {
+    position: absolute;
+    top: 12px;
+    right: 18px;
+    font-family: var(--font-mono);
+    font-size: 8px;
+    line-height: 1.5;
+    letter-spacing: 0.05em;
+    color: var(--color-muted);
+    text-transform: uppercase;
+  }
+
+  .planes {
+    position: relative;
+    z-index: 2;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+
+  .plane {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    font-family: var(--font-mono);
+    font-size: 9px;
+    line-height: 1.4;
+    letter-spacing: 0.03em;
+    color: var(--color-red-dark);
+    text-align: center;
+    text-transform: uppercase;
+  }
+
+  .plane b {
+    font-weight: 500;
+  }
+
+  .layer-stack {
+    position: relative;
+    z-index: 2;
+    border-top: 1px solid var(--color-line);
+    border-left: 1px solid var(--color-line);
+    background: var(--color-canvas);
+  }
+
+  .map-layer {
+    display: grid;
+    grid-template-columns: 34px minmax(0, 1fr) auto;
+    gap: 10px;
+    align-items: center;
+    min-height: 54px;
+    padding: 9px 12px;
+    border-right: 1px solid var(--color-line);
+    border-bottom: 1px solid var(--color-line);
+    background: rgb(255 255 255 / 88%);
+  }
+
+  .map-no {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    line-height: 1.5;
+    letter-spacing: 0.04em;
+    color: var(--color-muted);
+  }
+
+  .map-name b {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.4;
+  }
+
+  .map-name span {
+    display: block;
+    margin-top: 1px;
+    font-family: var(--font-mono);
+    font-size: 9px;
+    line-height: 1.5;
+    letter-spacing: 0.03em;
+    color: var(--color-muted);
+  }
+
+  .map-marks {
+    display: flex;
+    gap: 4px;
+  }
+
+  .mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 4px;
+    border: 1px solid var(--color-line);
+    border-radius: 3px;
+    font-size: 9px;
+    line-height: 1;
+    color: var(--color-muted);
+  }
+
+  .mark-human {
+    border-color: rgb(245 48 3 / 35%);
+    color: var(--color-red-dark);
+  }
+
+  .mark-lock {
+    background: var(--color-paper);
+  }
+
+  .flow-axis {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+    font-family: var(--font-mono);
+    font-size: 8px;
+    line-height: 1.5;
+    letter-spacing: 0.04em;
+    color: var(--color-muted);
+    text-transform: uppercase;
+  }
+
+  .flow-line {
+    flex: 1;
+    height: 1px;
+    background: var(--color-line-strong);
+  }
+
+  .map-foot {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 4px 16px;
+    padding: 11px 20px;
+    border-top: 1px dashed var(--color-line-strong);
+    background: var(--color-paper);
+    font-family: var(--font-mono);
+    font-size: 8px;
+    line-height: 1.6;
+    letter-spacing: 0.04em;
+    color: var(--color-muted);
+    text-transform: uppercase;
+  }
+
+  @media (max-width: 767px) {
+    .map-body {
+      display: block;
+      padding: 16px 14px 14px;
+    }
+
+    .client-rail {
+      flex-direction: row;
+      flex-wrap: wrap;
+      gap: 6px;
+      padding: 0 0 12px;
+    }
+
+    .rail-title {
+      flex: 1 1 100%;
+      padding-bottom: 0;
+      border-bottom: 0;
+    }
+
+    .boundary-frame {
+      padding: 34px 12px 12px;
+    }
+
+    .boundary-tag {
+      top: 10px;
+      right: 12px;
+      left: 12px;
+      text-align: left;
+    }
+
+    .plane-guides {
+      display: none;
+    }
+
+    .planes {
+      order: 2;
+      grid-template-columns: 1fr;
+      gap: 4px;
+      margin: 12px 0 0;
+      padding-top: 10px;
+      border-top: 1px solid var(--color-line);
+    }
+
+    .plane {
+      justify-content: flex-start;
+      font-size: 8px;
+    }
+
+    .layer-stack {
+      order: 1;
+    }
+
+    .map-layer {
+      grid-template-columns: 28px minmax(0, 1fr) auto;
+      min-height: 48px;
+      padding: 8px 9px;
+    }
+
+    .map-name b {
+      font-size: 13px;
+    }
+
+    .map-foot {
+      flex-direction: column;
+      padding: 10px 14px;
+    }
+  }
+</style>
