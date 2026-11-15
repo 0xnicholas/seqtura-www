@@ -1,34 +1,6 @@
-import { spawn, type ChildProcess } from 'node:child_process';
-import { once } from 'node:events';
-import { existsSync } from 'node:fs';
-import { expect, test, type APIRequestContext, type Page } from '@playwright/test';
-
-const origin = `http://127.0.0.1:${Number(process.env.PORT ?? 4321)}`;
-
-const validPayload = (overrides: Record<string, unknown> = {}) => ({
-  name: '张明',
-  company: '序构测试制造有限公司',
-  email: 'zhangming@example.com',
-  need: '我们有一条客服工单流程，希望评估 Agent 是否适合接入，并给出第一步建议。',
-  wechatPhone: '微信：zhangming-work',
-  consent: true,
-  consentAt: '2026-11-16T08:00:00.000Z',
-  privacyVersion: '1.0',
-  website: '',
-  startedAt: Date.now() - 10_000,
-  ...overrides,
-});
-
-async function postContact(
-  request: APIRequestContext,
-  overrides: Record<string, unknown> = {},
-  headers: Record<string, string> = {},
-) {
-  return request.post('/api/contact', {
-    data: validPayload(overrides),
-    headers: { origin, 'content-type': 'application/json', ...headers },
-  });
-}
+import { expect, test, type Page } from '@playwright/test';
+import { defaultOrigin, postContact, validPayload } from './support/contact';
+import { startTestServer, type TestServer } from './support/server';
 
 test.describe('contact page structure', () => {
   test('has the hero, booking form, channels and about sections', async ({ page }) => {
@@ -151,12 +123,14 @@ test.describe('POST /api/contact contract', () => {
 
   test('returns field errors for invalid values', async ({ request }) => {
     const response = await postContact(request, {
-      name: '',
-      company: 'x'.repeat(81),
-      email: 'not-an-email',
-      need: '太短',
-      wechatPhone: 'x'.repeat(41),
-      consent: false,
+      overrides: {
+        name: '',
+        company: 'x'.repeat(81),
+        email: 'not-an-email',
+        need: '太短',
+        wechatPhone: 'x'.repeat(41),
+        consent: false,
+      },
     });
 
     expect(response.status()).toBe(400);
@@ -170,10 +144,12 @@ test.describe('POST /api/contact contract', () => {
 
   test('returns 200 without validation when the honeypot is filled', async ({ request }) => {
     const response = await postContact(request, {
-      website: 'https://spam.example',
-      name: '',
-      email: '',
-      consent: false,
+      overrides: {
+        website: 'https://spam.example',
+        name: '',
+        email: '',
+        consent: false,
+      },
     });
 
     expect(response.status()).toBe(200);
@@ -183,7 +159,7 @@ test.describe('POST /api/contact contract', () => {
   test('rejects a submission faster than three seconds with a generic error', async ({
     request,
   }) => {
-    const response = await postContact(request, { startedAt: Date.now() });
+    const response = await postContact(request, { overrides: { startedAt: Date.now() } });
 
     expect(response.status()).toBe(400);
     const body = await response.json();
@@ -195,14 +171,16 @@ test.describe('POST /api/contact contract', () => {
   });
 
   test('rejects bodies over 16 KB with 413', async ({ request }) => {
-    const response = await postContact(request, { need: 'x'.repeat(17_000) });
+    const response = await postContact(request, { overrides: { need: 'x'.repeat(17_000) } });
 
     expect(response.status()).toBe(413);
     expect(await response.json()).toEqual({ ok: false, error: 'payload_too_large' });
   });
 
   test('rejects a foreign origin with 403', async ({ request }) => {
-    const response = await postContact(request, {}, { origin: 'https://evil.example' });
+    const response = await postContact(request, {
+      headers: { origin: 'https://evil.example' },
+    });
 
     expect(response.status()).toBe(403);
     expect(await response.json()).toEqual({ ok: false, error: 'origin' });
@@ -220,7 +198,7 @@ test.describe('POST /api/contact contract', () => {
   test('rejects malformed JSON as a validation error', async ({ request }) => {
     const response = await request.post('/api/contact', {
       data: '{"name":',
-      headers: { origin, 'content-type': 'application/json' },
+      headers: { origin: defaultOrigin, 'content-type': 'application/json' },
     });
 
     expect(response.status()).toBe(400);
@@ -239,7 +217,7 @@ test.describe('POST /api/contact contract', () => {
         consent: true,
         website: '',
       },
-      headers: { origin, 'content-type': 'application/json' },
+      headers: { origin: defaultOrigin, 'content-type': 'application/json' },
     });
 
     expect(response.status()).toBe(400);
@@ -575,75 +553,14 @@ test.describe('contact form mobile layout', () => {
   }
 });
 
-interface ContactTestServer {
-  readonly baseURL: string;
-  readonly child: ChildProcess;
-  output(): string;
-  stop(): Promise<void>;
-}
-
-async function waitForContactServer(baseURL: string, child: ChildProcess): Promise<void> {
-  for (let attempt = 0; attempt < 100; attempt += 1) {
-    if (child.exitCode !== null) {
-      throw new Error(`Contact server exited with code ${child.exitCode}`);
-    }
-    try {
-      const response = await fetch(baseURL);
-      if (response.ok) return;
-    } catch {
-      // Server not up yet.
-    }
-    await new Promise((resolve) => setTimeout(resolve, 100));
-  }
-  throw new Error(`Contact server did not start at ${baseURL}`);
-}
-
-async function startContactServer(
-  port: number,
-  env: Record<string, string>,
-): Promise<ContactTestServer> {
-  if (!existsSync('dist/server/entry.mjs')) {
-    throw new Error('Run pnpm build before starting a contact test server');
-  }
-
-  const child = spawn(process.execPath, ['dist/server/entry.mjs'], {
-    cwd: process.cwd(),
-    env: { ...process.env, HOST: '127.0.0.1', PORT: String(port), ...env },
-    stdio: ['ignore', 'pipe', 'pipe'],
-  });
-
-  let output = '';
-  child.stdout?.on('data', (chunk: Buffer) => {
-    output += chunk.toString();
-  });
-  child.stderr?.on('data', (chunk: Buffer) => {
-    output += chunk.toString();
-  });
-
-  const baseURL = `http://127.0.0.1:${port}`;
-  await waitForContactServer(baseURL, child);
-
-  return {
-    baseURL,
-    child,
-    output: () => output,
-    stop: async () => {
-      if (child.exitCode === null) {
-        child.kill('SIGTERM');
-        await once(child, 'exit');
-      }
-    },
-  };
-}
-
 test.describe('FORM_MODE=off', () => {
   test.describe.configure({ mode: 'serial' });
 
-  let server: ContactTestServer;
+  let server: TestServer;
 
   test.beforeAll(async () => {
     test.setTimeout(120_000);
-    server = await startContactServer(4462, {
+    server = await startTestServer(4462, {
       FORM_MODE: 'off',
       PUBLIC_CONTACT_ENDPOINT: 'https://forms.example',
     });
@@ -654,10 +571,7 @@ test.describe('FORM_MODE=off', () => {
   });
 
   test('returns 503 with the form_off contract', async ({ request }) => {
-    const response = await request.post(`${server.baseURL}/api/contact`, {
-      data: validPayload(),
-      headers: { origin: server.baseURL, 'content-type': 'application/json' },
-    });
+    const response = await postContact(request, { baseURL: server.baseURL });
 
     expect(response.status()).toBe(503);
     expect(await response.json()).toEqual({ ok: false, error: 'form_off' });
@@ -666,9 +580,9 @@ test.describe('FORM_MODE=off', () => {
   test('allows the configured public endpoint origin and answers its preflight', async ({
     request,
   }) => {
-    const response = await request.post(`${server.baseURL}/api/contact`, {
-      data: validPayload(),
-      headers: { origin: 'https://forms.example', 'content-type': 'application/json' },
+    const response = await postContact(request, {
+      baseURL: server.baseURL,
+      headers: { origin: 'https://forms.example' },
     });
     expect(response.status()).toBe(503);
     expect(response.headers()['access-control-allow-origin']).toBe('https://forms.example');
@@ -703,14 +617,47 @@ test.describe('FORM_MODE=off', () => {
   });
 });
 
-test.describe('FORM_MODE=live without providers', () => {
+test.describe('FORM_MODE fail-safe', () => {
   test.describe.configure({ mode: 'serial' });
 
-  let server: ContactTestServer;
+  let unset: TestServer;
+  let invalid: TestServer;
 
   test.beforeAll(async () => {
     test.setTimeout(120_000);
-    server = await startContactServer(4463, {
+    [unset, invalid] = await Promise.all([
+      startTestServer(4464, { FORM_MODE: undefined }),
+      startTestServer(4465, { FORM_MODE: 'production' }),
+    ]);
+  });
+
+  test.afterAll(async () => {
+    await Promise.all([unset?.stop(), invalid?.stop()]);
+  });
+
+  test('treats an unset FORM_MODE as off', async ({ request }) => {
+    const response = await postContact(request, { baseURL: unset.baseURL });
+
+    expect(response.status()).toBe(503);
+    expect(await response.json()).toEqual({ ok: false, error: 'form_off' });
+  });
+
+  test('treats an unrecognized FORM_MODE as off', async ({ request }) => {
+    const response = await postContact(request, { baseURL: invalid.baseURL });
+
+    expect(response.status()).toBe(503);
+    expect(await response.json()).toEqual({ ok: false, error: 'form_off' });
+  });
+});
+
+test.describe('FORM_MODE=live without providers', () => {
+  test.describe.configure({ mode: 'serial' });
+
+  let server: TestServer;
+
+  test.beforeAll(async () => {
+    test.setTimeout(120_000);
+    server = await startTestServer(4463, {
       FORM_MODE: 'live',
       CONTACT_RATE_LIMIT_MAX: '2',
       CONTACT_RATE_LIMIT_WINDOW_MS: '600000',
@@ -722,10 +669,7 @@ test.describe('FORM_MODE=live without providers', () => {
   });
 
   test('returns 502 and logs only non-PII failure metadata', async ({ request }) => {
-    const response = await request.post(`${server.baseURL}/api/contact`, {
-      data: validPayload(),
-      headers: { origin: server.baseURL, 'content-type': 'application/json' },
-    });
+    const response = await postContact(request, { baseURL: server.baseURL });
 
     expect(response.status()).toBe(502);
     expect(await response.json()).toEqual({ ok: false, error: 'delivery_failed' });
@@ -745,16 +689,10 @@ test.describe('FORM_MODE=live without providers', () => {
   });
 
   test('returns 429 after the configured per-IP limit', async ({ request }) => {
-    const next = await request.post(`${server.baseURL}/api/contact`, {
-      data: validPayload(),
-      headers: { origin: server.baseURL, 'content-type': 'application/json' },
-    });
+    const next = await postContact(request, { baseURL: server.baseURL });
     expect(next.status()).toBe(502);
 
-    const limited = await request.post(`${server.baseURL}/api/contact`, {
-      data: validPayload(),
-      headers: { origin: server.baseURL, 'content-type': 'application/json' },
-    });
+    const limited = await postContact(request, { baseURL: server.baseURL });
 
     expect(limited.status()).toBe(429);
     expect(await limited.json()).toEqual({ ok: false, error: 'rate_limited' });

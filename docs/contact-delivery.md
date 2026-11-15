@@ -4,7 +4,8 @@
 providers in parallel. Each channel has a 5 second budget. The endpoint contract
 is unchanged: at least one success returns `200 { "ok": true }`; both failures
 return `502 { "ok": false, "error": "delivery_failed" }`; `FORM_MODE=test`
-returns 200 without delivery; `FORM_MODE=off` returns 503.
+returns 200 without delivery; `FORM_MODE=off` returns 503. An unset or invalid
+`FORM_MODE` behaves as `off`.
 
 ## Provider matrix
 
@@ -28,7 +29,10 @@ fields, message bodies and provider error text never reach stdout/stderr.
   `SMTP_USER`, `SMTP_PASS`.
 - Envelope: `CONTACT_TO_EMAIL` (recipient) and `CONTACT_FROM_EMAIL` (verified
   sending domain). The submitter email is used as `reply_to`.
-- Mode: `FORM_MODE=live|test|off`. Preview deployments stay on `test` or `off`.
+- Mode: `FORM_MODE=live|test|off`. Unset or unrecognized values fail safe to
+  `off` (503 with the email fallback), so a production deploy never silently
+  drops leads. Preview deployments must set `test` explicitly; production sets
+  `live` only after credentials are ready.
 - Rate limit: `CONTACT_RATE_LIMIT_MAX`, `CONTACT_RATE_LIMIT_WINDOW_MS`.
 
 No secret belongs in a `PUBLIC_*` variable.

@@ -1,98 +1,14 @@
 import { createHmac } from 'node:crypto';
-import { spawn, type ChildProcess } from 'node:child_process';
-import { once } from 'node:events';
-import { existsSync } from 'node:fs';
-import { expect, test, type APIRequestContext } from '@playwright/test';
+import { expect, test } from '@playwright/test';
+import { postContact } from './support/contact';
 import { startFeishuStub, type FeishuStub } from './support/feishu-stub';
+import { startTestServer, type TestServer } from './support/server';
 import { startSmtpSink, type SmtpSink } from './support/smtp-sink';
 
 const contactToEmail = 'leads@seqtura.test';
 const contactFromEmail = 'Seqtura AI <no-reply@seqtura.test>';
 const feishuSecret = 'test-feishu-secret';
 const needText = '我们有一条客服工单流程，希望评估 Agent 是否适合接入，并给出第一步建议。';
-
-const validPayload = (overrides: Record<string, unknown> = {}) => ({
-  name: '张明',
-  company: '序构测试制造有限公司',
-  email: 'zhangming@example.com',
-  need: needText,
-  wechatPhone: '微信：zhangming-work',
-  consent: true,
-  consentAt: '2026-11-16T08:00:00.000Z',
-  privacyVersion: '1.0',
-  website: '',
-  startedAt: Date.now() - 10_000,
-  ...overrides,
-});
-
-interface DeliveryTestServer {
-  readonly baseURL: string;
-  readonly child: ChildProcess;
-  output(): string;
-  stop(): Promise<void>;
-}
-
-async function waitForServer(baseURL: string, child: ChildProcess): Promise<void> {
-  for (let attempt = 0; attempt < 150; attempt += 1) {
-    if (child.exitCode !== null) {
-      throw new Error(`Delivery server exited with code ${child.exitCode}`);
-    }
-    try {
-      const response = await fetch(baseURL);
-      if (response.ok) return;
-    } catch {
-      // Server not up yet.
-    }
-    await new Promise((resolve) => setTimeout(resolve, 100));
-  }
-  throw new Error(`Delivery server did not start at ${baseURL}`);
-}
-
-async function startServer(port: number, env: Record<string, string>): Promise<DeliveryTestServer> {
-  if (!existsSync('dist/server/entry.mjs')) {
-    throw new Error('Run pnpm build before starting a delivery test server');
-  }
-
-  const child = spawn(process.execPath, ['dist/server/entry.mjs'], {
-    cwd: process.cwd(),
-    env: { ...process.env, HOST: '127.0.0.1', PORT: String(port), ...env },
-    stdio: ['ignore', 'pipe', 'pipe'],
-  });
-
-  let output = '';
-  child.stdout?.on('data', (chunk: Buffer) => {
-    output += chunk.toString();
-  });
-  child.stderr?.on('data', (chunk: Buffer) => {
-    output += chunk.toString();
-  });
-
-  const baseURL = `http://127.0.0.1:${port}`;
-  await waitForServer(baseURL, child);
-
-  return {
-    baseURL,
-    child,
-    output: () => output,
-    stop: async () => {
-      if (child.exitCode === null) {
-        child.kill('SIGTERM');
-        await once(child, 'exit');
-      }
-    },
-  };
-}
-
-function postContact(
-  request: APIRequestContext,
-  server: DeliveryTestServer,
-  overrides: Record<string, unknown> = {},
-) {
-  return request.post(`${server.baseURL}/api/contact`, {
-    data: validPayload(overrides),
-    headers: { origin: server.baseURL, 'content-type': 'application/json' },
-  });
-}
 
 function headerValue(raw: string, name: string): string | undefined {
   const match = raw.match(new RegExp(`^${name}:\\s*(.+)$`, 'im'));
@@ -126,12 +42,12 @@ test.describe('lead delivery providers', () => {
 
   let feishu: FeishuStub;
   let smtp: SmtpSink;
-  let feishuOk: DeliveryTestServer;
-  let emailOk: DeliveryTestServer;
-  let bothFail: DeliveryTestServer;
-  let testMode: DeliveryTestServer;
-  let rateLimit: DeliveryTestServer;
-  let timeout: DeliveryTestServer;
+  let feishuOk: TestServer;
+  let emailOk: TestServer;
+  let bothFail: TestServer;
+  let testMode: TestServer;
+  let rateLimit: TestServer;
+  let timeout: TestServer;
 
   test.beforeAll(async () => {
     feishu = await startFeishuStub();
@@ -146,7 +62,7 @@ test.describe('lead delivery providers', () => {
       CONTACT_FROM_EMAIL: contactFromEmail,
     };
 
-    feishuOk = await startServer(4470, {
+    feishuOk = await startTestServer(4470, {
       FORM_MODE: 'live',
       FEISHU_WEBHOOK_URL: `${feishu.url}/webhook/ok`,
       FEISHU_WEBHOOK_SECRET: feishuSecret,
@@ -154,33 +70,33 @@ test.describe('lead delivery providers', () => {
       SMTP_PORT: '1',
     });
 
-    emailOk = await startServer(4471, {
+    emailOk = await startTestServer(4471, {
       FORM_MODE: 'live',
       FEISHU_WEBHOOK_URL: `${feishu.url}/webhook/fail`,
       ...emailEnv,
     });
 
-    bothFail = await startServer(4472, {
+    bothFail = await startTestServer(4472, {
       FORM_MODE: 'live',
       FEISHU_WEBHOOK_URL: `${feishu.url}/webhook/fail`,
       ...emailEnv,
       SMTP_PORT: '1',
     });
 
-    testMode = await startServer(4473, {
+    testMode = await startTestServer(4473, {
       FORM_MODE: 'test',
       FEISHU_WEBHOOK_URL: `${feishu.url}/webhook/ok`,
       ...emailEnv,
     });
 
-    rateLimit = await startServer(4474, {
+    rateLimit = await startTestServer(4474, {
       FORM_MODE: 'live',
       FEISHU_WEBHOOK_URL: `${feishu.url}/webhook/ok`,
       ...emailEnv,
       SMTP_PORT: '1',
     });
 
-    timeout = await startServer(4475, {
+    timeout = await startTestServer(4475, {
       FORM_MODE: 'live',
       FEISHU_WEBHOOK_URL: `${feishu.url}/webhook/hang`,
       ...emailEnv,
@@ -207,7 +123,7 @@ test.describe('lead delivery providers', () => {
   });
 
   test('delivers a signed interactive Feishu card when email fails', async ({ request }) => {
-    const response = await postContact(request, feishuOk);
+    const response = await postContact(request, { baseURL: feishuOk.baseURL });
 
     expect(response.status()).toBe(200);
     expect(await response.json()).toEqual({ ok: true });
@@ -246,7 +162,7 @@ test.describe('lead delivery providers', () => {
   });
 
   test('delivers email with the submitter as reply-to when Feishu fails', async ({ request }) => {
-    const response = await postContact(request, emailOk);
+    const response = await postContact(request, { baseURL: emailOk.baseURL });
 
     expect(response.status()).toBe(200);
     expect(await response.json()).toEqual({ ok: true });
@@ -275,7 +191,7 @@ test.describe('lead delivery providers', () => {
   });
 
   test('returns 502 and logs no PII when both channels fail', async ({ request }) => {
-    const response = await postContact(request, bothFail);
+    const response = await postContact(request, { baseURL: bothFail.baseURL });
 
     expect(response.status()).toBe(502);
     expect(await response.json()).toEqual({ ok: false, error: 'delivery_failed' });
@@ -296,7 +212,7 @@ test.describe('lead delivery providers', () => {
   });
 
   test('FORM_MODE=test returns 200 without calling either provider', async ({ request }) => {
-    const response = await postContact(request, testMode);
+    const response = await postContact(request, { baseURL: testMode.baseURL });
 
     expect(response.status()).toBe(200);
     expect(await response.json()).toEqual({ ok: true });
@@ -310,11 +226,11 @@ test.describe('lead delivery providers', () => {
     request,
   }) => {
     for (let attempt = 0; attempt < 5; attempt += 1) {
-      const accepted = await postContact(request, rateLimit);
+      const accepted = await postContact(request, { baseURL: rateLimit.baseURL });
       expect(accepted.status(), `attempt ${attempt + 1}`).toBe(200);
     }
 
-    const limited = await postContact(request, rateLimit);
+    const limited = await postContact(request, { baseURL: rateLimit.baseURL });
     expect(limited.status()).toBe(429);
     expect(await limited.json()).toEqual({ ok: false, error: 'rate_limited' });
     expect(Number(limited.headers()['retry-after'])).toBeGreaterThan(0);
@@ -323,7 +239,7 @@ test.describe('lead delivery providers', () => {
 
   test('times out a hanging channel at five seconds and still answers', async ({ request }) => {
     const started = Date.now();
-    const response = await postContact(request, timeout);
+    const response = await postContact(request, { baseURL: timeout.baseURL });
     const elapsed = Date.now() - started;
 
     expect(response.status()).toBe(502);
