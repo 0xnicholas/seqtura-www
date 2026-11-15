@@ -878,3 +878,16 @@ test('diagram interaction never depends on the keyboard and decoration stays hid
     }
   }
 });
+
+test('self-hosted offline capability stays conditional', async ({ page }) => {
+  await page.goto('/architecture');
+
+  const tier = page.locator('[data-deployment-tier="self-hosted"]');
+  const offline = tier
+    .locator('[data-deployment-fact]')
+    .filter({ hasText: '模型能否离线' })
+    .locator('dd');
+
+  await expect(offline).toContainText('按所选模型与部署条件确认');
+  await expect(offline).not.toContainText('可以；');
+});

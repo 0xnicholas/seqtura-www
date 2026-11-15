@@ -39,7 +39,7 @@ export const legal = {
   hostingProviderLine: placeholders.hostingLocation.value
     ? `${hostingProvider}（${placeholders.hostingLocation.value}）`
     : hostingProvider,
-  operatorLocation: placeholders.operatorLocation.value || '运营主体所在地',
+  operatorLocation: placeholders.operatorLocation.value || undefined,
   effectiveAt: launchDate,
   updatedAt: legalUpdatedAt ?? launchDate,
 } as const;

@@ -53,6 +53,10 @@ test.describe('contact page structure', () => {
       'href',
       'mailto:hello@seqtura.ai',
     );
+    const channelText = await channels.innerText();
+    expect(channelText).not.toContain('获取微信二维码');
+    expect(channelText).not.toContain('获取飞书入口');
+    expect(channelText.match(/暂未公开，请先通过邮箱联系/g)).toHaveLength(2);
 
     const about = page.locator('#about');
     await expect(about.getByRole('heading', { level: 2 })).toHaveText('关于我们');
@@ -61,7 +65,7 @@ test.describe('contact page structure', () => {
     );
     await expect(about).toContainText('我们相信：先把验收标准定下来，再开始构建。');
     await expect(about.getByText('运营主体', { exact: true })).toBeVisible();
-    await expect(about.getByText('所在地', { exact: true })).toBeVisible();
+    await expect(about.getByText('所在地', { exact: true })).toHaveCount(0);
     await expect(about.locator('img')).toHaveCount(0);
     const aboutText = await about.innerText();
     expect(aboutText).not.toContain('团队规模');

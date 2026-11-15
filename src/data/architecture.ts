@@ -320,7 +320,7 @@ export const deploymentTiers: readonly DeploymentTier[] = [
     label: '客户环境',
     operator: '客户运维；Seqtura 提供组件、模式与运行手册。',
     data: '数据留在客户自有环境，日志与备份由客户控制。',
-    offline: '可以；具体模型与硬件要求按项目确认。',
+    offline: '按所选模型与部署条件确认；不默认承诺离线。',
     when: '数据边界或网络隔离要求最高时评估。',
   },
 ];

@@ -77,10 +77,12 @@ test('terms of service carries the nine canonical sections and disclosures', asy
     '未经我们书面许可',
     '按「现状」和「现有」基础提供',
     '适用中华人民共和国法律',
-    '运营主体所在地',
+    '有管辖权的人民法院',
   ]) {
     await expect(main.getByText(disclosure).first(), disclosure).toBeVisible();
   }
+
+  expect(await main.innerText()).not.toContain('运营主体所在地');
 });
 
 test('both legal pages show the version metadata and no preview placeholder', async ({ page }) => {
@@ -382,6 +384,11 @@ test.describe('configured filing and operator values', () => {
     await page.goto(`${baseURL}/legal/terms`);
     await expect(page.getByRole('main')).toContainText('北京序构科技有限公司');
     await expect(page.getByRole('main')).toContainText('向北京市有管辖权');
+
+    await page.goto(`${baseURL}/contact#about`);
+    const about = page.locator('#about');
+    await expect(about.getByText('所在地', { exact: true })).toBeVisible();
+    await expect(about).toContainText('北京市');
 
     const bodyText = await page.locator('body').innerText();
     for (const sentinel of ['【', '待补', '占位', 'example']) {
