@@ -1,0 +1,728 @@
+---
+import { contactLimits } from '../contact/schema';
+import { privacyConsentPath, privacyConsentVersion } from '../config/legal';
+import { placeholders } from '../config/placeholders';
+import { bookingCopy } from '../data/contact';
+
+const endpoint = import.meta.env.PUBLIC_CONTACT_ENDPOINT || '/api/contact';
+const email = placeholders.contactEmail.value;
+const consentCopy = `我已阅读并同意<a href="${privacyConsentPath}" target="_blank" rel="noopener">《隐私政策》</a>，同意 Seqtura 为回复我的咨询处理上述信息。`;
+---
+
+<div class="contact-form-panel" data-contact-panel>
+  <form
+    class="contact-form"
+    data-contact-form
+    data-endpoint={endpoint}
+    data-privacy-version={privacyConsentVersion}
+    novalidate
+  >
+    <div class="form-summary" data-form-summary role="alert" tabindex="-1" hidden>
+      <p class="form-summary-title">请检查以下内容：</p>
+      <ul data-form-summary-list></ul>
+    </div>
+
+    <div class="form-failure" data-form-failure role="alert" tabindex="-1" hidden>
+      <p>
+        提交失败。请重试，或直接发邮件至 <a href={`mailto:${email}`}>{email}</a>。
+      </p>
+    </div>
+
+    <div class="form-grid">
+      <div class="field">
+        <label for="contact-name">姓名</label>
+        <input
+          id="contact-name"
+          name="name"
+          type="text"
+          autocomplete="name"
+          maxlength={contactLimits.name}
+          required
+          aria-required="true"
+        />
+        <p class="field-error" id="contact-name-error" data-error-for="name" hidden></p>
+      </div>
+
+      <div class="field">
+        <label for="contact-company">公司</label>
+        <input
+          id="contact-company"
+          name="company"
+          type="text"
+          autocomplete="organization"
+          maxlength={contactLimits.company}
+          required
+          aria-required="true"
+        />
+        <p class="field-error" id="contact-company-error" data-error-for="company" hidden></p>
+      </div>
+
+      <div class="field">
+        <label for="contact-email">邮箱</label>
+        <input
+          id="contact-email"
+          name="email"
+          type="email"
+          inputmode="email"
+          autocomplete="email"
+          maxlength={contactLimits.email}
+          required
+          aria-required="true"
+        />
+        <p class="field-error" id="contact-email-error" data-error-for="email" hidden></p>
+      </div>
+
+      <div class="field">
+        <label for="contact-wechat">微信 / 电话（选填）</label>
+        <input
+          id="contact-wechat"
+          name="wechatPhone"
+          type="text"
+          autocomplete="tel"
+          maxlength={contactLimits.wechatPhone}
+        />
+        <p
+          class="field-error"
+          id="contact-wechatPhone-error"
+          data-error-for="wechatPhone"
+          hidden
+        ></p>
+      </div>
+
+      <div class="field field-wide">
+        <label for="contact-need">需求描述</label>
+        <textarea
+          id="contact-need"
+          name="need"
+          rows="6"
+          maxlength={contactLimits.needMax}
+          required
+          aria-required="true"
+        ></textarea>
+        <p class="field-hint">
+          至少 {contactLimits.needMin} 个字符，最多 {contactLimits.needMax} 个字符。
+        </p>
+        <p class="field-error" id="contact-need-error" data-error-for="need" hidden></p>
+      </div>
+    </div>
+
+    <input
+      class="honeypot"
+      type="text"
+      name="website"
+      tabindex="-1"
+      autocomplete="off"
+      aria-hidden="true"
+    />
+    <input type="hidden" name="startedAt" value="" data-started-at />
+    <input type="hidden" name="consentAt" value="" data-consent-at />
+    <input type="hidden" name="privacyVersion" value={privacyConsentVersion} />
+
+    <div class="consent-block">
+      <p class="consent-note" id="contact-consent-note">
+        你的信息仅用于回复咨询，不会用于营销推送。
+      </p>
+      <label class="consent-label" for="contact-consent">
+        <input
+          id="contact-consent"
+          name="consent"
+          type="checkbox"
+          required
+          aria-required="true"
+          aria-describedby="contact-consent-note"
+        />
+        <span set:html={consentCopy} />
+      </label>
+      <p class="field-error" id="contact-consent-error" data-error-for="consent" hidden></p>
+    </div>
+
+    <button class="btn btn-primary form-submit" type="submit" data-contact-submit data-primary-cta>
+      <span data-submit-label>{bookingCopy.submitLabel}</span>
+      <span class="submit-progress" data-submit-progress hidden aria-hidden="true"></span>
+    </button>
+  </form>
+
+  <div class="contact-success" data-contact-success role="status" tabindex="-1" hidden>
+    <p class="success-mark" aria-hidden="true">
+      ✓
+    </p>
+    <p class="type-h3 success-title">已收到。我们会通过你留下的邮箱或微信联系你。</p>
+    <p class="success-note">如果还需要补充信息，直接回复我们的邮件即可。</p>
+  </div>
+
+  <noscript>
+    <div class="noscript-fallback" data-noscript>
+      <p>
+        JavaScript 未启用，表单无法提交。请直接发邮件至 <a href={`mailto:${email}`}>{email}</a>。
+      </p>
+    </div>
+  </noscript>
+</div>
+
+<script>
+  import {
+    contactFieldErrors,
+    contactFields,
+    contactFormSchema,
+    contactMessages,
+    type ContactField,
+  } from '../contact/schema';
+
+  const form = document.querySelector<HTMLFormElement>('[data-contact-form]');
+
+  if (form) {
+    setupContactForm(form);
+  }
+
+  function setupContactForm(contactForm: HTMLFormElement): void {
+    const endpoint = contactForm.dataset.endpoint || '/api/contact';
+    const privacyVersion = contactForm.dataset.privacyVersion || '1.0';
+    const startedAtInput = contactForm.querySelector<HTMLInputElement>('[data-started-at]');
+    const consentAtInput = contactForm.querySelector<HTMLInputElement>('[data-consent-at]');
+    const honeypot = contactForm.querySelector<HTMLInputElement>('input[name="website"]');
+    const consent = contactForm.querySelector<HTMLInputElement>('input[name="consent"]');
+    const submit = contactForm.querySelector<HTMLButtonElement>('[data-contact-submit]');
+    const submitLabel = contactForm.querySelector<HTMLElement>('[data-submit-label]');
+    const submitProgress = contactForm.querySelector<HTMLElement>('[data-submit-progress]');
+    const summary = document.querySelector<HTMLElement>('[data-form-summary]');
+    const summaryList = document.querySelector<HTMLUListElement>('[data-form-summary-list]');
+    const failure = document.querySelector<HTMLElement>('[data-form-failure]');
+    const success = document.querySelector<HTMLElement>('[data-contact-success]');
+    const initialSubmitLabel = submitLabel?.textContent ?? '提交预约';
+
+    if (startedAtInput) startedAtInput.value = String(Date.now());
+
+    function control(name: ContactField): HTMLInputElement | HTMLTextAreaElement | null {
+      return contactForm.querySelector<HTMLInputElement | HTMLTextAreaElement>(`[name="${name}"]`);
+    }
+
+    function errorElement(name: ContactField): HTMLElement | null {
+      return document.querySelector<HTMLElement>(`[data-error-for="${name}"]`);
+    }
+
+    function errorId(name: ContactField): string {
+      return `contact-${name}-error`;
+    }
+
+    function labelFor(name: ContactField): string {
+      const labels: Record<ContactField, string> = {
+        name: '姓名',
+        company: '公司',
+        email: '邮箱',
+        need: '需求描述',
+        wechatPhone: '微信 / 电话',
+        consent: '隐私政策同意',
+      };
+      return labels[name];
+    }
+
+    function readValues(): Record<ContactField, string | boolean> {
+      return {
+        name: control('name')?.value ?? '',
+        company: control('company')?.value ?? '',
+        email: control('email')?.value ?? '',
+        need: control('need')?.value ?? '',
+        wechatPhone: control('wechatPhone')?.value ?? '',
+        consent: consent?.checked ?? false,
+      };
+    }
+
+    function clearErrors(): void {
+      for (const name of contactFields) {
+        const input = control(name);
+        input?.removeAttribute('aria-invalid');
+        if (name === 'consent') {
+          input?.setAttribute('aria-describedby', 'contact-consent-note');
+        } else {
+          input?.removeAttribute('aria-describedby');
+        }
+        const error = errorElement(name);
+        if (error) {
+          error.textContent = '';
+          error.hidden = true;
+        }
+      }
+      if (summary) summary.hidden = true;
+      summaryList?.replaceChildren();
+      if (failure) failure.hidden = true;
+    }
+
+    function showSummary(messages: readonly { text: string; targetId?: string }[]): void {
+      if (!summary || !summaryList) return;
+      summaryList.replaceChildren();
+      for (const message of messages) {
+        const item = document.createElement('li');
+        if (message.targetId) {
+          const link = document.createElement('a');
+          link.href = `#${message.targetId}`;
+          link.textContent = message.text;
+          link.addEventListener('click', (event) => {
+            event.preventDefault();
+            document.getElementById(message.targetId ?? '')?.focus();
+          });
+          item.append(link);
+        } else {
+          item.textContent = message.text;
+        }
+        summaryList.append(item);
+      }
+      summary.hidden = false;
+    }
+
+    function showErrors(fields: Record<string, string>): void {
+      clearErrors();
+      const messages: { text: string; targetId?: string }[] = [];
+
+      for (const name of contactFields) {
+        const message = fields[name];
+        if (!message) continue;
+        const input = control(name);
+        const error = errorElement(name);
+        if (input) {
+          input.setAttribute('aria-invalid', 'true');
+          if (name === 'consent') {
+            input.setAttribute('aria-describedby', `contact-consent-note ${errorId(name)}`);
+          } else {
+            input.setAttribute('aria-describedby', errorId(name));
+          }
+        }
+        if (error) {
+          error.textContent = message;
+          error.hidden = false;
+        }
+        messages.push({
+          text: `${labelFor(name)}：${message}`,
+          targetId: input?.id,
+        });
+      }
+
+      if (messages.length === 0) {
+        messages.push({ text: fields.form ?? contactMessages.submitFailed });
+      }
+
+      showSummary(messages);
+      const firstControl = messages[0]?.targetId
+        ? document.getElementById(messages[0].targetId)
+        : null;
+      if (firstControl instanceof HTMLElement) {
+        firstControl.focus();
+      } else {
+        summary?.focus();
+      }
+    }
+
+    function setPending(pending: boolean): void {
+      if (submit) {
+        submit.disabled = pending;
+        if (pending) submit.setAttribute('aria-busy', 'true');
+        else submit.removeAttribute('aria-busy');
+      }
+      if (submitLabel) submitLabel.textContent = pending ? '提交中…' : initialSubmitLabel;
+      if (submitProgress) submitProgress.hidden = !pending;
+    }
+
+    function showSuccess(): void {
+      contactForm.hidden = true;
+      if (success) {
+        success.hidden = false;
+        success.focus();
+      }
+    }
+
+    function showFailure(): void {
+      if (failure) {
+        failure.hidden = false;
+        failure.focus();
+      }
+    }
+
+    for (const name of contactFields) {
+      const input = control(name);
+      input?.addEventListener('input', () => {
+        const error = errorElement(name);
+        if (error) {
+          error.textContent = '';
+          error.hidden = true;
+        }
+        input.removeAttribute('aria-invalid');
+        if (name === 'consent') {
+          input.setAttribute('aria-describedby', 'contact-consent-note');
+        } else {
+          input.removeAttribute('aria-describedby');
+        }
+      });
+      input?.addEventListener('change', () => {
+        const error = errorElement(name);
+        if (error) {
+          error.textContent = '';
+          error.hidden = true;
+        }
+        input.removeAttribute('aria-invalid');
+        if (name === 'consent') {
+          input.setAttribute('aria-describedby', 'contact-consent-note');
+        } else {
+          input.removeAttribute('aria-describedby');
+        }
+      });
+    }
+
+    contactForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      if (submit?.disabled) return;
+
+      const result = contactFormSchema.safeParse(readValues());
+      if (!result.success) {
+        showErrors(contactFieldErrors(result.error));
+        return;
+      }
+
+      const values = result.data;
+      if (consentAtInput) consentAtInput.value = new Date().toISOString();
+
+      const payload = {
+        ...values,
+        consentAt: consentAtInput?.value ?? new Date().toISOString(),
+        privacyVersion,
+        website: honeypot?.value ?? '',
+        startedAt: Number(startedAtInput?.value ?? Date.now()),
+      };
+
+      clearErrors();
+      setPending(true);
+
+      try {
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+
+        const body = (await response.json().catch(() => null)) as
+          { ok: true } | { ok: false; error: string; fields?: Record<string, string> } | null;
+
+        if (response.ok && body?.ok === true) {
+          showSuccess();
+          return;
+        }
+
+        if (response.status === 400 && body?.ok === false && body.error === 'validation') {
+          showErrors(body.fields ?? {});
+          return;
+        }
+
+        showFailure();
+      } catch {
+        showFailure();
+      } finally {
+        setPending(false);
+      }
+    });
+  }
+</script>
+
+<style>
+  .contact-form-panel {
+    min-width: 0;
+  }
+
+  .contact-form {
+    padding: 36px;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-site-lg);
+    background: var(--color-paper);
+    box-shadow: var(--shadow-site-xs);
+  }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px 18px;
+  }
+
+  .field {
+    display: grid;
+    min-width: 0;
+    gap: 8px;
+  }
+
+  .field-wide {
+    grid-column: 1 / -1;
+  }
+
+  .field label {
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.5;
+    color: var(--color-ink);
+  }
+
+  .field input,
+  .field textarea {
+    width: 100%;
+    min-width: 0;
+    padding: 12px 14px;
+    border: 1px solid var(--color-line-strong);
+    border-radius: var(--radius-site-sm);
+    background: var(--color-canvas);
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.5;
+    color: var(--color-ink);
+    transition:
+      border-color 150ms var(--ease-site),
+      box-shadow 150ms var(--ease-site);
+  }
+
+  .field input {
+    height: 48px;
+  }
+
+  .field textarea {
+    min-height: 160px;
+    resize: vertical;
+  }
+
+  .field input:hover,
+  .field textarea:hover {
+    border-color: var(--color-faint);
+  }
+
+  .field input:focus,
+  .field textarea:focus {
+    border-color: var(--color-red-dark);
+    box-shadow: 0 0 0 3px rgb(196 38 2 / 12%);
+  }
+
+  .field input[aria-invalid='true'],
+  .field textarea[aria-invalid='true'] {
+    border-color: var(--color-red-dark);
+    background: var(--color-red-wash);
+  }
+
+  .field-hint {
+    margin-top: -2px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    line-height: 1.5;
+    letter-spacing: 0.03em;
+    color: var(--color-muted);
+  }
+
+  .field-error {
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--color-red-dark);
+  }
+
+  .honeypot {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .consent-block {
+    margin-top: 26px;
+    padding-top: 24px;
+    border-top: 1px solid var(--color-line);
+  }
+
+  .consent-note {
+    font-size: 12px;
+    line-height: 1.6;
+    color: var(--color-muted);
+  }
+
+  .consent-label {
+    display: grid;
+    grid-template-columns: 18px minmax(0, 1fr);
+    gap: 10px;
+    align-items: start;
+    margin-top: 12px;
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--color-ink-2);
+    cursor: pointer;
+  }
+
+  .consent-label input {
+    width: 18px;
+    height: 18px;
+    margin: 2px 0 0;
+    accent-color: var(--color-red-dark);
+  }
+
+  .consent-label a {
+    color: var(--color-red-dark);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  .consent-label a:hover {
+    color: var(--color-red-hover);
+  }
+
+  .consent-label input[aria-invalid='true'] {
+    outline: 2px solid var(--color-red-dark);
+    outline-offset: 2px;
+  }
+
+  .consent-block .field-error {
+    margin-top: 8px;
+    margin-left: 28px;
+  }
+
+  .form-submit {
+    width: 100%;
+    margin-top: 26px;
+  }
+
+  .form-submit:disabled {
+    cursor: progress;
+    opacity: 0.72;
+  }
+
+  .submit-progress {
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgb(255 255 255 / 45%);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: submit-spin 700ms linear infinite;
+  }
+
+  @keyframes submit-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  .form-summary,
+  .form-failure {
+    margin-bottom: 22px;
+    padding: 14px 16px;
+    border: 1px solid var(--color-red-faded);
+    border-left: 3px solid var(--color-red-dark);
+    border-radius: var(--radius-site-sm);
+    background: var(--color-red-wash);
+    font-size: 14px;
+    line-height: 1.65;
+    color: var(--color-ink-2);
+  }
+
+  .form-summary:focus,
+  .form-failure:focus {
+    outline: 2px solid var(--color-red);
+    outline-offset: 2px;
+  }
+
+  .form-summary-title {
+    font-weight: 500;
+    color: var(--color-ink);
+  }
+
+  .form-summary ul {
+    margin-top: 8px;
+    padding-left: 18px;
+    list-style: disc;
+  }
+
+  .form-summary a {
+    color: var(--color-red-dark);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  .form-failure a {
+    color: var(--color-red-dark);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    overflow-wrap: anywhere;
+  }
+
+  .contact-success {
+    padding: 42px 36px;
+    border: 1px solid var(--color-line);
+    border-top: 3px solid var(--color-red);
+    border-radius: var(--radius-site-lg);
+    background: var(--color-paper);
+    box-shadow: var(--shadow-site-xs);
+  }
+
+  .contact-success:focus {
+    outline: 2px solid var(--color-red);
+    outline-offset: 2px;
+  }
+
+  .success-mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--color-red-faded);
+    font-size: 16px;
+    line-height: 1;
+    color: var(--color-red-dark);
+  }
+
+  .success-title {
+    margin-top: 20px;
+    line-height: 1.45;
+  }
+
+  .success-note {
+    margin-top: 14px;
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--color-muted);
+  }
+
+  .noscript-fallback {
+    margin-top: 20px;
+    padding: 14px 16px;
+    border: 1px dashed var(--color-line-strong);
+    border-radius: var(--radius-site-sm);
+    font-size: 14px;
+    line-height: 1.65;
+    color: var(--color-ink-2);
+  }
+
+  .noscript-fallback a {
+    color: var(--color-red-dark);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    overflow-wrap: anywhere;
+  }
+
+  @media (max-width: 767px) {
+    .contact-form {
+      padding: 22px 20px;
+    }
+
+    .form-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .field-wide {
+      grid-column: auto;
+    }
+
+    .contact-success {
+      padding: 30px 22px;
+    }
+
+    .consent-block .field-error {
+      margin-left: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .submit-progress {
+      animation: none;
+    }
+  }
+</style>

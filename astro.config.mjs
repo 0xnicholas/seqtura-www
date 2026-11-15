@@ -9,6 +9,7 @@ export default defineConfig({
   trailingSlash: 'never',
   output: 'static',
   adapter: node({ mode: 'standalone' }),
+  session: false,
   integrations: [
     mdx(),
     sitemap({
@@ -17,5 +18,15 @@ export default defineConfig({
   ],
   vite: {
     plugins: [tailwindcss()],
+    ssr: {
+      noExternal: ['zod'],
+    },
+    environments: {
+      prerender: {
+        resolve: {
+          noExternal: ['zod'],
+        },
+      },
+    },
   },
 });

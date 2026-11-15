@@ -1,0 +1,31 @@
+---
+import { getEntry } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ContactHero from '../components/ContactHero.astro';
+import ContactBooking from '../components/ContactBooking.astro';
+import ContactChannels from '../components/ContactChannels.astro';
+import ContactAbout from '../components/ContactAbout.astro';
+
+const entry = await getEntry('pages', 'contact');
+
+if (!entry || entry.data.draft) {
+  throw new Error('Missing published content entry: pages/contact');
+}
+
+const { title, description } = entry.data;
+---
+
+<BaseLayout title={title} description={description}>
+  <ContactHero />
+  <ContactBooking />
+  <ContactChannels />
+  <ContactAbout />
+</BaseLayout>
+
+<style is:global>
+  #book,
+  #channels,
+  #about {
+    scroll-margin-top: calc(var(--header-h) + 24px);
+  }
+</style>
