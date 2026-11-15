@@ -88,6 +88,12 @@ test.describe('contact page structure', () => {
       'Seqtura AI（序构 AI）为企业定制 AI Agent，把业务场景从评估做到生产上线。',
     );
     await expect(about).toContainText('我们相信：先把验收标准定下来，再开始构建。');
+    await expect(about.getByText('运营主体', { exact: true })).toBeVisible();
+    await expect(about.getByText('所在地', { exact: true })).toBeVisible();
+    await expect(about.locator('img')).toHaveCount(0);
+    const aboutText = await about.innerText();
+    expect(aboutText).not.toContain('团队规模');
+    expect(aboutText).not.toContain('创始人');
   });
 
   test('production copy carries no preview sentinels', async ({ page }) => {
