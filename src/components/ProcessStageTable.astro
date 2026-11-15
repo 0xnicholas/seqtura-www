@@ -1,0 +1,538 @@
+---
+import ArrowUpRightIcon from './ArrowUpRightIcon.astro';
+import { processStages, processStagesCopy } from '../data/process';
+---
+
+<div class="stage-detail-head">
+  <p class="mono-label stage-detail-kicker">{processStagesCopy.tableKicker}</p>
+  <h3 class="type-h3 stage-detail-title">{processStagesCopy.tableTitle}</h3>
+  <p class="stage-detail-lead">{processStagesCopy.tableLead}</p>
+</div>
+
+<div class="stage-table-wrap" data-stage-table>
+  <table class="stage-table">
+    <caption class="visually-hidden">六个合作阶段的周期、参与人、客户投入、产出与边界</caption>
+    <thead>
+      <tr>
+        <th scope="col">阶段</th>
+        <th scope="col">周期</th>
+        <th scope="col">参与人</th>
+        <th scope="col">客户投入</th>
+        <th scope="col">产出</th>
+        <th scope="col">边界</th>
+      </tr>
+    </thead>
+    <tbody>
+      {processStages.map((stage) => (
+        <tr data-stage-row={stage.id}>
+          <th scope="row">
+            <span class="stage-no">{stage.no}</span>
+            <span class="stage-name" data-stage-name>
+              {stage.name}
+            </span>
+            <span class="stage-copy" data-stage-copy>
+              {stage.copy}
+            </span>
+          </th>
+          <td>
+            <span class="stage-duration" data-stage-duration>
+              {stage.cycle}
+            </span>
+          </td>
+          <td>
+            <p class="stage-party">
+              <span class="party-label">我们：</span>
+              {stage.ourParticipants}
+            </p>
+            <p class="stage-party">
+              <span class="party-label">客户：</span>
+              <span data-stage-client>{stage.clientParticipants}</span>
+            </p>
+          </td>
+          <td>
+            <span class="stage-cell-text" data-stage-investment>
+              {stage.clientInvestment}
+            </span>
+          </td>
+          <td>
+            <span class="stage-cell-text" data-stage-outputs>
+              {stage.outputs}
+            </span>
+          </td>
+          <td>
+            <span class="stage-cell-text" data-stage-boundary>
+              {stage.boundary}
+            </span>
+          </td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>
+
+<div class="stage-cards">
+  {processStages.map((stage) => (
+    <details class="stage-card" data-process-stage-card={stage.id}>
+      <summary class="stage-card-summary">
+        <span class="card-no">{stage.no}</span>
+        <span class="card-main">
+          <h4 class="card-name">{stage.name}</h4>
+          <span class="card-duration">{stage.cycle}</span>
+        </span>
+        <span class="card-toggle" aria-hidden="true"></span>
+      </summary>
+
+      <div class="stage-card-body">
+        <p class="card-copy">{stage.copy}</p>
+
+        <dl class="card-fields">
+          <div class="card-field">
+            <dt>周期</dt>
+            <dd>{stage.cycle}</dd>
+          </div>
+          <div class="card-field">
+            <dt>参与人</dt>
+            <dd>
+              <span class="card-party">
+                <span class="party-label">我们：</span>
+                {stage.ourParticipants}
+              </span>
+              <span class="card-party">
+                <span class="party-label">客户：</span>
+                {stage.clientParticipants}
+              </span>
+            </dd>
+          </div>
+          <div class="card-field">
+            <dt>客户投入</dt>
+            <dd>{stage.clientInvestment}</dd>
+          </div>
+          <div class="card-field">
+            <dt>产出</dt>
+            <dd>{stage.outputs}</dd>
+          </div>
+          <div class="card-field">
+            <dt>边界</dt>
+            <dd>{stage.boundary}</dd>
+          </div>
+        </dl>
+      </div>
+    </details>
+  ))}
+</div>
+
+<p class="methodology-ref">
+  {processStagesCopy.methodologyRef}
+  <a class="text-link" href="/methodology#stages">
+    {processStagesCopy.methodologyLink}
+    <ArrowUpRightIcon />
+  </a>
+</p>
+
+<style>
+  .stage-detail-head {
+    margin-top: 96px;
+    padding-top: 56px;
+    border-top: 1px solid var(--color-line);
+  }
+
+  .stage-detail-kicker {
+    color: var(--color-red-dark);
+  }
+
+  .stage-detail-title {
+    max-width: 860px;
+    margin-top: 14px;
+  }
+
+  .stage-detail-lead {
+    max-width: 680px;
+    margin-top: 14px;
+    font-size: 15px;
+    line-height: 1.75;
+    color: var(--color-muted);
+  }
+
+  .stage-table-wrap {
+    margin-top: 40px;
+  }
+
+  .stage-table {
+    width: 100%;
+    table-layout: fixed;
+    border: 1px solid var(--color-line);
+    border-collapse: collapse;
+    background: var(--color-canvas);
+  }
+
+  .stage-table th,
+  .stage-table td {
+    min-width: 0;
+    padding: 20px 14px;
+    border-right: 1px solid var(--color-line);
+    border-bottom: 1px solid var(--color-line);
+    text-align: left;
+    vertical-align: top;
+    overflow-wrap: break-word;
+  }
+
+  .stage-table tr > *:last-child {
+    border-right: 0;
+  }
+
+  .stage-table tbody tr:last-child > * {
+    border-bottom: 0;
+  }
+
+  .stage-table thead th {
+    padding-block: 12px;
+    background: var(--color-paper);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 400;
+    line-height: 1.5;
+    letter-spacing: 0.06em;
+    color: var(--color-red-dark);
+  }
+
+  .stage-table thead th:nth-child(1) {
+    width: 18%;
+  }
+
+  .stage-table thead th:nth-child(2) {
+    width: 13%;
+  }
+
+  .stage-table thead th:nth-child(3) {
+    width: 19%;
+  }
+
+  .stage-table thead th:nth-child(4) {
+    width: 16%;
+  }
+
+  .stage-table thead th:nth-child(5) {
+    width: 17%;
+  }
+
+  .stage-table thead th:nth-child(6) {
+    width: 17%;
+  }
+
+  .stage-table tbody tr {
+    transition: background-color 150ms var(--ease-site);
+  }
+
+  .stage-table tbody tr:hover {
+    background: var(--color-paper);
+  }
+
+  .stage-no {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    line-height: 1.5;
+    letter-spacing: 0.05em;
+    color: var(--color-red-dark);
+  }
+
+  .stage-name {
+    display: block;
+    margin-top: 8px;
+    font-size: 18px;
+    font-weight: 500;
+    line-height: 1.35;
+    letter-spacing: -0.01em;
+    color: var(--color-ink);
+  }
+
+  .stage-copy {
+    display: block;
+    margin-top: 12px;
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 1.75;
+    color: var(--color-muted);
+  }
+
+  .stage-duration {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 1.55;
+    color: var(--color-ink);
+  }
+
+  .stage-party {
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--color-ink-2);
+  }
+
+  .stage-party + .stage-party {
+    margin-top: 10px;
+  }
+
+  .party-label {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 9px;
+    line-height: 1.5;
+    letter-spacing: 0.06em;
+    color: var(--color-red-dark);
+  }
+
+  .stage-cell-text {
+    display: block;
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--color-ink-2);
+  }
+
+  .stage-cards {
+    display: none;
+    margin-top: 40px;
+  }
+
+  .stage-card {
+    scroll-margin-top: calc(var(--header-h) + 24px);
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-site-lg);
+    background: var(--color-canvas);
+    box-shadow: var(--shadow-site-xs);
+  }
+
+  .stage-card + .stage-card {
+    margin-top: 12px;
+  }
+
+  .stage-card[open] {
+    box-shadow: var(--shadow-site-sm);
+  }
+
+  .stage-card-summary {
+    display: grid;
+    grid-template-columns: 36px minmax(0, 1fr) 14px;
+    column-gap: 12px;
+    align-items: center;
+    padding: 18px 18px;
+    border-radius: var(--radius-site-lg);
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .stage-card-summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .stage-card-summary:focus-visible {
+    outline-offset: -3px;
+  }
+
+  .stage-card-summary:hover .card-name {
+    color: var(--color-red-dark);
+  }
+
+  .card-no {
+    align-self: start;
+    padding-top: 4px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    line-height: 1.5;
+    letter-spacing: 0.05em;
+    color: var(--color-red-dark);
+  }
+
+  .card-main {
+    min-width: 0;
+  }
+
+  .card-name {
+    margin: 0;
+    font-size: 21px;
+    font-weight: 500;
+    line-height: 1.35;
+    letter-spacing: -0.01em;
+    transition: color 150ms var(--ease-site);
+  }
+
+  .card-duration {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px 8px;
+    margin-top: 5px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    line-height: 1.5;
+    color: var(--color-muted);
+  }
+
+  .card-toggle {
+    position: relative;
+    width: 12px;
+    height: 12px;
+  }
+
+  .card-toggle::before,
+  .card-toggle::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 12px;
+    height: 1px;
+    background: var(--color-ink-2);
+    transition: transform 150ms var(--ease-site);
+  }
+
+  .card-toggle::after {
+    transform: rotate(90deg);
+  }
+
+  .stage-card[open] .card-toggle::after {
+    transform: rotate(0deg);
+  }
+
+  .stage-card-body {
+    padding: 0 18px 20px;
+  }
+
+  .card-copy {
+    padding-top: 16px;
+    border-top: 1px solid var(--color-line);
+    font-size: 15px;
+    line-height: 1.8;
+    color: var(--color-ink-2);
+    text-wrap: pretty;
+  }
+
+  .card-fields {
+    margin-top: 18px;
+    border-top: 1px solid var(--color-line);
+  }
+
+  .card-field {
+    display: grid;
+    grid-template-columns: 80px minmax(0, 1fr);
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--color-line);
+  }
+
+  .card-field:last-child {
+    border-bottom: 0;
+    padding-bottom: 0;
+  }
+
+  .card-field dt {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    line-height: 1.7;
+    letter-spacing: 0.05em;
+    color: var(--color-red-dark);
+  }
+
+  .card-field dd {
+    min-width: 0;
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--color-ink-2);
+    overflow-wrap: break-word;
+  }
+
+  .card-party {
+    display: block;
+  }
+
+  .card-party + .card-party {
+    margin-top: 8px;
+  }
+
+  .methodology-ref {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 6px;
+    margin-top: 22px;
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--color-muted);
+  }
+
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  @media (max-width: 1199px) {
+    .stage-name {
+      font-size: 17px;
+    }
+  }
+
+  @media (max-width: 1023px) {
+    .stage-detail-head {
+      margin-top: 64px;
+      padding-top: 40px;
+    }
+
+    .stage-detail-title {
+      font-size: 26px;
+    }
+
+    .stage-table-wrap {
+      display: none;
+    }
+
+    .stage-cards {
+      display: block;
+    }
+  }
+
+  @media (max-width: 767px) {
+    .stage-detail-head {
+      margin-top: 52px;
+      padding-top: 34px;
+    }
+
+    .stage-detail-title {
+      font-size: 24px;
+    }
+
+    .stage-detail-lead {
+      font-size: 14px;
+    }
+
+    .stage-cards {
+      margin-top: 28px;
+    }
+  }
+
+  @media (max-width: 359px) {
+    .stage-card-summary {
+      grid-template-columns: 30px minmax(0, 1fr) 12px;
+      column-gap: 9px;
+      padding: 16px 14px;
+    }
+
+    .card-name {
+      font-size: 19px;
+    }
+
+    .stage-card-body {
+      padding: 0 14px 18px;
+    }
+
+    .card-field {
+      grid-template-columns: 68px minmax(0, 1fr);
+      gap: 8px;
+    }
+  }
+</style>

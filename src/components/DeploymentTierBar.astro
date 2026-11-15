@@ -2,7 +2,7 @@
 import { deploymentNote, deploymentTiers } from '../data/architecture';
 ---
 
-<section class="deployment" aria-labelledby="deployment-title">
+<section class="deployment" data-deployment-bar aria-labelledby="deployment-title">
   <div class="deployment-head">
     <div>
       <p class="mono-label deployment-label">部署形态 / 参考对比</p>
@@ -20,29 +20,31 @@ import { deploymentNote, deploymentTiers } from '../data/architecture';
         data-deployment-tier={tier.id}
         aria-labelledby={`tier-${tier.id}-title`}
       >
-        <span class="tier-no">{tier.no}</span>
-        <h4 id={`tier-${tier.id}-title`} class="tier-name">
-          {tier.name}
-        </h4>
-        <p class="tier-label">{tier.label}</p>
+        <div class="tier-head">
+          <span class="tier-no">{tier.no}</span>
+          <h4 id={`tier-${tier.id}-title`} class="tier-name">
+            {tier.name}
+          </h4>
+          <p class="tier-label">{tier.label}</p>
+        </div>
         <dl class="tier-facts">
-          <div>
+          <div data-deployment-fact>
             <dt>谁运维</dt>
             <dd>{tier.operator}</dd>
           </div>
-          <div>
+          <div data-deployment-fact>
             <dt>数据在哪</dt>
             <dd>{tier.data}</dd>
           </div>
-          <div>
+          <div data-deployment-fact>
             <dt>模型能否离线</dt>
             <dd>{tier.offline}</dd>
           </div>
-          <div>
-            <dt>选择依据</dt>
-            <dd>{tier.when}</dd>
-          </div>
         </dl>
+        <p class="tier-when">
+          <span>选择依据</span>
+          {tier.when}
+        </p>
       </article>
     ))}
   </div>
@@ -90,14 +92,20 @@ import { deploymentNote, deploymentTiers } from '../data/architecture';
   }
 
   .tier {
+    display: flex;
+    flex-direction: column;
     min-width: 0;
-    padding: 24px 24px 26px;
+    padding: 22px 22px 20px;
     border-right: 1px solid var(--color-line);
     background: var(--color-canvas);
   }
 
   .tier:last-child {
     border-right: 0;
+  }
+
+  .tier-head {
+    padding-bottom: 16px;
   }
 
   .tier-no {
@@ -127,12 +135,11 @@ import { deploymentNote, deploymentTiers } from '../data/architecture';
   .tier-facts {
     display: grid;
     gap: 0;
-    margin-top: 18px;
     border-top: 1px solid var(--color-line);
   }
 
   .tier-facts > div {
-    padding: 10px 0;
+    padding: 11px 0;
     border-bottom: 1px solid var(--color-line);
   }
 
@@ -150,6 +157,24 @@ import { deploymentNote, deploymentTiers } from '../data/architecture';
     font-size: 13px;
     line-height: 1.7;
     color: var(--color-ink-2);
+  }
+
+  .tier-when {
+    margin-top: auto;
+    padding-top: 12px;
+    font-size: 11px;
+    line-height: 1.7;
+    color: var(--color-muted);
+  }
+
+  .tier-when span {
+    display: block;
+    margin-bottom: 2px;
+    font-family: var(--font-mono);
+    font-size: 8px;
+    line-height: 1.5;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
   }
 
   @media (max-width: 1023px) {
@@ -170,16 +195,27 @@ import { deploymentNote, deploymentTiers } from '../data/architecture';
 
     .tier-grid {
       grid-template-columns: 1fr;
+      gap: 10px;
+      padding: 0 12px 12px;
     }
 
     .tier {
-      padding: 20px;
-      border-right: 0;
-      border-bottom: 1px solid var(--color-line);
+      padding: 18px 16px 16px;
+      border: 1px solid var(--color-line);
+      border-radius: var(--radius-site);
+      background: var(--color-paper);
     }
 
     .tier:last-child {
+      border-right: 1px solid var(--color-line);
+    }
+
+    .tier-facts > div:last-child {
       border-bottom: 0;
+    }
+
+    .tier-when {
+      padding-top: 10px;
     }
   }
 </style>

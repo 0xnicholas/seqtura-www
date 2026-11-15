@@ -50,30 +50,3 @@ export const site = {
   description: '把 AI Agent 从演示做到上线：8 阶段交付方法、可私有化的参考架构、可审计的工程边界。',
   bookingPath: '/contact#book',
 } as const;
-
-export interface PageAnchor {
-  readonly id: string;
-  readonly label: string;
-}
-
-export const pageAnchors = {
-  architecture: [
-    { id: 'overview', label: '参考架构总览' },
-    { id: 'lifecycle', label: '请求生命周期' },
-    { id: 'layers', label: '能力栈分层' },
-    { id: 'controls', label: '控制面' },
-    { id: 'scenarios', label: '典型场景' },
-  ],
-  process: [
-    { id: 'stages', label: '合作阶段' },
-    { id: 'pricing', label: '计价原则' },
-    { id: 'support', label: '上线后支持' },
-  ],
-  contact: [
-    { id: 'book', label: '预约表单' },
-    { id: 'channels', label: '其他通道' },
-    { id: 'about', label: '关于我们' },
-  ],
-} as const satisfies Record<string, readonly PageAnchor[]>;
-
-export type AnchoredPage = keyof typeof pageAnchors;

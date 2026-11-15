@@ -1,0 +1,438 @@
+---
+import { processBranches, processStages, processStagesCopy } from '../data/process';
+---
+
+<figure class="process-flow" data-process-flow aria-labelledby="flow-caption">
+  <figcaption id="flow-caption" class="flow-caption">
+    <span class="mono-label flow-caption-label">{processStagesCopy.flowLabel}</span>
+    <span class="flow-caption-count">{processStagesCopy.flowCount}</span>
+  </figcaption>
+
+  <ol class="flow-track" data-flow-track>
+    {processStages.map((stage, index) => (
+      <li class="flow-cell" data-flow-node={stage.id}>
+        <p class="flow-duration" data-flow-duration>
+          {stage.duration}
+        </p>
+
+        <div class="flow-node">
+          <span class="flow-no">{stage.no}</span>
+          <p class="flow-name" data-flow-name>
+            {stage.name}
+          </p>
+        </div>
+
+        <p class="flow-role">
+          <span class="flow-role-label">客户侧</span>
+          <span data-flow-role>{stage.customerRole}</span>
+        </p>
+
+        {index < processStages.length - 1 && <span class="flow-link" aria-hidden="true"></span>}
+      </li>
+    ))}
+  </ol>
+
+  <div class="flow-returns" data-flow-returns aria-hidden="true">
+    <svg class="flow-return-svg" viewBox="0 0 1200 132" preserveAspectRatio="none">
+      <defs>
+        <marker
+          id="flow-arrow-up"
+          viewBox="0 0 8 8"
+          refX="4"
+          refY="4"
+          markerWidth="7"
+          markerHeight="7"
+          orient="auto"
+        >
+          <path d="M0 8 L4 0 L8 8" fill="none" stroke="currentColor" stroke-width="1.2"></path>
+        </marker>
+      </defs>
+      <g class="flow-return-lines">
+        <path d="M 300 0 V 34 H 100 V 8" marker-end="url(#flow-arrow-up)"></path>
+        <path d="M 500 0 V 56"></path>
+        <path d="M 488 56 H 512"></path>
+        <path d="M 1100 0 V 116 H 520 V 8" marker-end="url(#flow-arrow-up)"></path>
+      </g>
+    </svg>
+  </div>
+
+  <div class="flow-branch-block">
+    <p class="mono-label flow-branch-label">{processStagesCopy.branchLabel}</p>
+    <ol class="flow-branches">
+      {processBranches.map((branch) => (
+        <li class="flow-branch" data-flow-branch={branch.id}>
+          <span class="branch-route">{branch.route}</span>
+          <p class="branch-label">{branch.label}</p>
+          <p class="branch-detail">{branch.detail}</p>
+        </li>
+      ))}
+    </ol>
+  </div>
+
+  <div class="flow-legend" data-flow-legend>
+    <span class="legend-item">
+      <span class="legend-line" aria-hidden="true"></span>
+      {processStagesCopy.legendSolid}
+    </span>
+    <span class="legend-item">
+      <span class="legend-line legend-line-dashed" aria-hidden="true"></span>
+      {processStagesCopy.legendDashed}
+    </span>
+  </div>
+
+  <p class="flow-note">
+    <span class="flow-note-tick" aria-hidden="true"></span>
+    {processStagesCopy.note}
+  </p>
+</figure>
+
+<style>
+  .process-flow {
+    margin-top: 4px;
+  }
+
+  .flow-caption {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px 16px;
+    margin-bottom: 18px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--color-line);
+  }
+
+  .flow-caption-label {
+    color: var(--color-red-dark);
+  }
+
+  .flow-caption-count {
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--color-muted);
+  }
+
+  .flow-track {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    align-items: stretch;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .flow-cell {
+    position: relative;
+    display: grid;
+    grid-template-rows: 24px 104px auto;
+    min-width: 0;
+    padding: 0 8px;
+  }
+
+  .flow-duration {
+    position: relative;
+    padding-left: 12px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    line-height: 1.4;
+    letter-spacing: 0.02em;
+    color: var(--color-ink-2);
+    white-space: nowrap;
+  }
+
+  .flow-duration::before {
+    content: '';
+    position: absolute;
+    top: 0.55em;
+    left: 0;
+    width: 4px;
+    height: 4px;
+    background: var(--color-red);
+  }
+
+  .flow-node {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-width: 0;
+    padding: 12px 12px 14px;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-site);
+    background: var(--color-paper);
+    box-shadow: var(--shadow-site-xs);
+  }
+
+  .flow-no {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    line-height: 1.5;
+    letter-spacing: 0.06em;
+    color: var(--color-red-dark);
+  }
+
+  .flow-name {
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 1.35;
+    letter-spacing: -0.01em;
+    color: var(--color-ink);
+  }
+
+  .flow-role {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2px;
+    margin-top: 12px;
+    font-size: 11px;
+    line-height: 1.55;
+    color: var(--color-muted);
+  }
+
+  .flow-role-label {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    line-height: 1.5;
+    letter-spacing: 0.05em;
+    color: var(--color-faint);
+  }
+
+  .flow-link {
+    position: absolute;
+    top: 76px;
+    right: -8px;
+    width: 16px;
+    height: 1px;
+    background: var(--color-line-strong);
+  }
+
+  .flow-link::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: 0;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--color-red);
+  }
+
+  .flow-link::after {
+    content: '';
+    position: absolute;
+    top: -3px;
+    right: 0;
+    width: 0;
+    height: 0;
+    border-top: 3px solid transparent;
+    border-bottom: 3px solid transparent;
+    border-left: 5px solid var(--color-line-strong);
+  }
+
+  .flow-returns {
+    height: 132px;
+    margin-top: 4px;
+  }
+
+  .flow-return-svg {
+    width: 100%;
+    height: 132px;
+    overflow: visible;
+    color: var(--color-muted);
+  }
+
+  .flow-return-lines {
+    fill: none;
+    stroke: var(--color-muted);
+    stroke-width: 1;
+    stroke-dasharray: 4 5;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .flow-return-lines path {
+    vector-effect: non-scaling-stroke;
+  }
+
+  .flow-branch-block {
+    margin-top: 8px;
+  }
+
+  .flow-branch-label {
+    margin-bottom: 10px;
+    color: var(--color-muted);
+  }
+
+  .flow-branches {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin: 0;
+    padding: 0;
+    border-top: 1px dashed var(--color-line-strong);
+    border-left: 1px solid var(--color-line);
+    list-style: none;
+  }
+
+  .flow-branch {
+    min-width: 0;
+    padding: 18px 22px 20px;
+    border-right: 1px solid var(--color-line);
+    border-bottom: 1px solid var(--color-line);
+    background: var(--color-canvas);
+  }
+
+  .branch-route {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    line-height: 1.5;
+    letter-spacing: 0.05em;
+    color: var(--color-red-dark);
+  }
+
+  .branch-label {
+    margin-top: 8px;
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 1.5;
+    color: var(--color-ink);
+  }
+
+  .branch-detail {
+    margin-top: 6px;
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--color-muted);
+  }
+
+  .flow-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 28px;
+    margin-top: 22px;
+  }
+
+  .legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--color-ink-2);
+  }
+
+  .legend-line {
+    display: inline-block;
+    width: 30px;
+    height: 1px;
+    background: var(--color-line-strong);
+  }
+
+  .legend-line-dashed {
+    height: 0;
+    border-top: 1px dashed var(--color-muted);
+    background: none;
+  }
+
+  .flow-note {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin-top: 12px;
+    font-size: 12px;
+    line-height: 1.6;
+    color: var(--color-muted);
+  }
+
+  .flow-note-tick {
+    flex: none;
+    width: 4px;
+    height: 4px;
+    background: var(--color-red);
+  }
+
+  @media (max-width: 1023px) {
+    .flow-caption {
+      margin-bottom: 6px;
+    }
+
+    .flow-track {
+      grid-template-columns: 1fr;
+    }
+
+    .flow-cell {
+      grid-template-columns: 76px minmax(0, 1fr);
+      grid-template-rows: auto auto;
+      grid-template-areas:
+        'duration node'
+        'role role';
+      column-gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--color-line);
+    }
+
+    .flow-duration {
+      grid-area: duration;
+      align-self: center;
+      padding-left: 10px;
+      font-size: 10px;
+      white-space: normal;
+    }
+
+    .flow-node {
+      grid-area: node;
+      min-height: 0;
+      flex-direction: row;
+      align-items: baseline;
+      justify-content: flex-start;
+      gap: 12px;
+      padding: 14px 16px;
+    }
+
+    .flow-name {
+      font-size: 18px;
+    }
+
+    .flow-role {
+      grid-area: role;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2px 8px;
+      margin-top: 10px;
+      padding-left: 88px;
+    }
+
+    .flow-link {
+      display: none;
+    }
+
+    .flow-returns {
+      display: none;
+    }
+
+    .flow-branch-block {
+      margin-top: 30px;
+    }
+
+    .flow-branches {
+      grid-template-columns: 1fr;
+    }
+
+    .flow-branch {
+      padding: 14px 0 16px;
+      border-right: 0;
+      border-bottom: 1px solid var(--color-line);
+    }
+
+    .flow-branch + .flow-branch {
+      border-top: 1px dashed var(--color-line-strong);
+    }
+
+    .flow-legend {
+      margin-top: 20px;
+    }
+  }
+
+  @media (max-width: 359px) {
+    .flow-name {
+      font-size: 17px;
+    }
+  }
+</style>

@@ -2,51 +2,88 @@
 import { lifecycleNodes } from '../data/architecture';
 ---
 
-<div class="lifecycle-diagram">
-  <ol class="node-grid" aria-label="请求生命周期六个节点">
-    {lifecycleNodes.map((node) => (
-      <li class="node" data-lifecycle-node={node.id}>
-        <div class="node-head">
-          <span class="node-no">{node.no}</span>
-          <span class="node-label">{node.label}</span>
-        </div>
-        <p class="node-name">{node.name}</p>
-        <p class="node-desc">{node.description}</p>
-        <div class="node-marks">
-          {node.permission && <span class="badge badge-permission">权限检查点</span>}
-          {node.hitl && <span class="badge badge-hitl">HITL</span>}
-          {node.audits?.map((audit) => (
-            <span class="badge badge-audit" data-audit-mark>
-              AUDIT · {audit}
-            </span>
-          ))}
-        </div>
-      </li>
-    ))}
-  </ol>
+<figure
+  class="lifecycle-diagram"
+  data-lifecycle-diagram
+  aria-labelledby="lifecycle-diagram-title"
+  aria-describedby="lifecycle-diagram-desc"
+>
+  <span id="lifecycle-diagram-title" class="visually-hidden">
+    请求生命周期示意
+  </span>
+  <p id="lifecycle-diagram-desc" class="visually-hidden">
+    六个节点：任务进入 → 编排决策 → 模型选择 → 工具 / 知识调用 → HITL
+    gate；工具调用、数据变更与人工审批留下 audit
+    标记；输出与评测的评测结果经虚线回路回到编排与知识迭代。
+  </p>
 
-  <div class="trace-band" data-trace-span aria-label="一条 trace 贯穿全部节点，用于排障与回放。">
-    <span class="trace-label">TRACE</span>
-    <span class="trace-rail" aria-hidden="true">
-      {lifecycleNodes.map(() => (
-        <i></i>
+  <div class="timeline">
+    <ol class="node-grid" aria-label="请求生命周期六个节点">
+      {lifecycleNodes.map((node, index) => (
+        <li class="node" data-lifecycle-node={node.id}>
+          <div class="node-head">
+            <span class="node-no">{node.no}</span>
+            <span class="node-label">{node.label}</span>
+          </div>
+          <p class="node-name">{node.name}</p>
+          <p class="node-desc">{node.description}</p>
+          <div class="node-marks">
+            {node.permission && <span class="badge badge-permission">权限检查点</span>}
+            {node.hitl && <span class="badge badge-hitl">HITL</span>}
+            {node.audits?.map((audit) => (
+              <span class="badge badge-audit" data-audit-mark>
+                <i class="audit-tick" aria-hidden="true"></i>
+                AUDIT · {audit}
+              </span>
+            ))}
+          </div>
+          {index < lifecycleNodes.length - 1 && (
+            <span class="node-link" data-lifecycle-link aria-hidden="true">
+              <i></i>
+            </span>
+          )}
+        </li>
       ))}
-    </span>
-    <span class="trace-copy">一条 trace 贯穿全部节点，用于排障与回放。</span>
+    </ol>
+
+    <div class="trace-band" data-trace-span aria-label="一条 trace 贯穿全部节点，用于排障与回放。">
+      <span class="trace-label">TRACE</span>
+      <span class="trace-rail" aria-hidden="true">
+        {lifecycleNodes.map(() => (
+          <i class="trace-dot" data-trace-dot></i>
+        ))}
+      </span>
+      <span class="trace-copy">一条 trace 贯穿全部节点，用于排障与回放。</span>
+    </div>
   </div>
 
   <div class="loop" data-iteration-loop>
-    <span class="loop-arrow" aria-hidden="true">
-      ←
-    </span>
+    <span class="loop-rail" data-loop-rail aria-hidden="true"></span>
     <p class="loop-copy">
       <b>评测结果 → 编排 / 知识迭代</b>
       <span>迭代不等于自动改生产。</span>
     </p>
   </div>
-</div>
+</figure>
 
 <style>
+  .lifecycle-diagram {
+    margin: 0;
+  }
+
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+  }
+
   .node-grid {
     display: grid;
     grid-template-columns: repeat(6, minmax(0, 1fr));
@@ -55,6 +92,7 @@ import { lifecycleNodes } from '../data/architecture';
   }
 
   .node {
+    position: relative;
     display: flex;
     flex-direction: column;
     min-width: 0;
@@ -142,6 +180,35 @@ import { lifecycleNodes } from '../data/architecture';
     background: var(--color-canvas);
   }
 
+  .audit-tick {
+    width: 5px;
+    height: 5px;
+    margin-right: 4px;
+    border: 1px solid var(--color-ink-2);
+    border-radius: 1px;
+  }
+
+  .node-link {
+    position: absolute;
+    top: 30px;
+    right: -6px;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 12px;
+    height: 12px;
+    background: var(--color-canvas);
+  }
+
+  .node-link i {
+    width: 5px;
+    height: 5px;
+    border-top: 1px solid var(--color-red-dark);
+    border-right: 1px solid var(--color-red-dark);
+    transform: rotate(45deg);
+  }
+
   .trace-band {
     display: flex;
     align-items: center;
@@ -196,22 +263,47 @@ import { lifecycleNodes } from '../data/architecture';
   }
 
   .loop {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    margin-top: 14px;
-    padding: 14px 16px;
-    border: 1px dashed var(--color-line-strong);
-    border-radius: var(--radius-site-sm);
-    background: var(--color-canvas);
+    position: relative;
+    display: block;
+    margin-top: 30px;
+    margin-left: calc(100% / 6);
+    padding-top: 0;
   }
 
-  .loop-arrow {
-    flex: none;
-    font-family: var(--font-mono);
-    font-size: 18px;
-    line-height: 1;
-    color: var(--color-red-dark);
+  .loop::before,
+  .loop::after {
+    content: '';
+    position: absolute;
+    top: -18px;
+    height: 18px;
+    border-left: 1px dashed var(--color-red-dark);
+  }
+
+  .loop::before {
+    right: 0;
+  }
+
+  .loop::after {
+    left: 0;
+  }
+
+  .loop-rail {
+    position: relative;
+    display: block;
+    width: 100%;
+    border-top: 1px dashed var(--color-red-dark);
+  }
+
+  .loop-rail::before {
+    content: '';
+    position: absolute;
+    top: -4px;
+    left: 0;
+    width: 6px;
+    height: 6px;
+    border-bottom: 1px solid var(--color-red-dark);
+    border-left: 1px solid var(--color-red-dark);
+    transform: rotate(45deg);
   }
 
   .loop-copy {
@@ -219,6 +311,11 @@ import { lifecycleNodes } from '../data/architecture';
     flex-wrap: wrap;
     align-items: baseline;
     gap: 4px 14px;
+    margin-top: 11px;
+    padding: 10px 12px;
+    border: 1px dashed var(--color-line-strong);
+    border-radius: var(--radius-site-sm);
+    background: var(--color-canvas);
   }
 
   .loop-copy b {
@@ -241,11 +338,24 @@ import { lifecycleNodes } from '../data/architecture';
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
+    .node-link {
+      display: none;
+    }
+
     .trace-rail {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
     .trace-copy {
+      display: none;
+    }
+
+    .loop {
+      margin-left: 0;
+    }
+
+    .loop::before,
+    .loop::after {
       display: none;
     }
   }
@@ -272,11 +382,16 @@ import { lifecycleNodes } from '../data/architecture';
 
     .loop {
       align-items: flex-start;
+      margin-top: 18px;
     }
 
     .loop-copy {
       display: grid;
       gap: 4px;
+    }
+
+    .trace-rail {
+      grid-template-columns: repeat(6, minmax(0, 1fr));
     }
   }
 </style>

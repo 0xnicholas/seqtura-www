@@ -6,11 +6,14 @@ export interface CapabilityLayer {
   readonly chips: readonly string[];
 }
 
+export type OverviewMark = 'lock' | 'human' | 'record';
+
 export interface ArchitectureLayer extends CapabilityLayer {
   readonly id: 'ingress' | 'models' | 'tools' | 'knowledge' | 'runtime';
   readonly responsibility: string;
   readonly constraint: string;
   readonly practice: string;
+  readonly marks: readonly OverviewMark[];
 }
 
 export const architectureLayers: readonly ArchitectureLayer[] = [
@@ -26,6 +29,7 @@ export const architectureLayers: readonly ArchitectureLayer[] = [
       '先 workflow 后 agent；单 Agent 优先；多 Agent 只在职责边界清楚时用；HITL gate 放在敏感工具调用前。',
     summary: '任务入口 / Workflow / HITL gate / 状态与重放',
     chips: ['Workflow', 'HITL', '路由'],
+    marks: ['human'],
   },
   {
     id: 'models',
@@ -37,6 +41,7 @@ export const architectureLayers: readonly ArchitectureLayer[] = [
     practice: '模型层按可替换设计；路由 + fallback；不绑定单一厂商；模型选择用评测集说话。',
     summary: '模型路由 / 结构化输出 / 失败回退 / 成本控制',
     chips: ['路由', 'Fallback', '成本'],
+    marks: [],
   },
   {
     id: 'tools',
@@ -49,6 +54,7 @@ export const architectureLayers: readonly ArchitectureLayer[] = [
       'MCP / OpenAPI 按标准协议接入；工具注册与最小权限；沙箱联调；工具调用处设权限检查点。',
     summary: '标准接入 / 最小权限 / 沙箱联调 / 幂等回滚',
     chips: ['MCP', 'OpenAPI', '最小权限'],
+    marks: ['lock', 'record'],
   },
   {
     id: 'knowledge',
@@ -61,6 +67,7 @@ export const architectureLayers: readonly ArchitectureLayer[] = [
       'ingestion → 解析 → 索引 → 检索 → 引用；检索时 ACL；短期会话状态与长期记忆分开；记忆策略写入方案架构。',
     summary: '业务本体 / 检索 / 会话记忆 / 权限过滤',
     chips: ['RAG', 'ACL', '引用'],
+    marks: ['lock'],
   },
   {
     id: 'runtime',
@@ -73,6 +80,7 @@ export const architectureLayers: readonly ArchitectureLayer[] = [
       '按三档部署模型（SaaS / 专属实例 / 自托管）；会话隔离与沙箱；监控 / 告警 / 回滚；上线检查清单与运行手册。',
     summary: 'SaaS / 专属实例 / 自托管 / 监控与回滚',
     chips: ['SaaS', '专属实例', '自托管'],
+    marks: ['record'],
   },
 ];
 
@@ -224,6 +232,38 @@ export const overviewConclusions: readonly string[] = [
   '敢上线靠三条横切控制面：身份与权限、评测与可观测、策略与审计；安全不是最后一层。',
   '架构按交付边界划分：我们交付组件与模式，客户保留系统、数据、身份与审批权。',
 ];
+
+export interface OverviewZone {
+  readonly id: 'users' | 'runtime';
+  readonly tag: string;
+  readonly title: string;
+  readonly items: readonly string[];
+  readonly note: string;
+}
+
+export const overviewZones: readonly OverviewZone[] = [
+  {
+    id: 'users',
+    tag: 'ZONE A / 请求来源',
+    title: '用户 / 业务系统',
+    items: ['业务系统', '客服工作台', '内部工具', '定时任务'],
+    note: '请求从这里进入；身份由客户身份源提供。',
+  },
+  {
+    id: 'runtime',
+    tag: 'ZONE C / 客户保留',
+    title: '客户运行环境',
+    items: ['客户系统', '数据与存储', '身份源', '审批流程'],
+    note: '系统、数据、身份与审批权留在客户侧。',
+  },
+];
+
+export const overviewBoundary = {
+  tag: 'ZONE B / 交付边界',
+  title: 'Seqtura 交付边界',
+  sub: '组件与模式',
+  flow: '请求 / 数据流穿过五层；控制面横切每一次调用',
+} as const;
 
 export interface ArchitectureLegendItem {
   readonly id: string;
@@ -430,6 +470,13 @@ export interface ArchitectureScenario {
   readonly layers: string;
   readonly human: string;
   readonly evaluation: string;
+  readonly flow: readonly ScenarioFlowNode[];
+}
+
+export interface ScenarioFlowNode {
+  readonly label: string;
+  readonly layer: string;
+  readonly human?: boolean;
 }
 
 export const architectureScenarios: readonly ArchitectureScenario[] = [
@@ -442,6 +489,13 @@ export const architectureScenarios: readonly ArchitectureScenario[] = [
     layers: '接入与编排、模型、工具与系统集成、运行时与部署。',
     human: '金额超阈值或高风险操作由业务负责人审批。',
     evaluation: '任务成功率、工具调用正确率、回复引用准确性。',
+    flow: [
+      { label: '工单进入', layer: '接入与编排' },
+      { label: '识别问题', layer: '模型' },
+      { label: '查订单与售后记录', layer: '工具与系统集成' },
+      { label: '业务负责人审批', layer: 'HITL gate', human: true },
+      { label: '起草回复与留痕', layer: '运行时与部署' },
+    ],
   },
   {
     id: 'knowledge-base',
@@ -452,6 +506,13 @@ export const architectureScenarios: readonly ArchitectureScenario[] = [
     layers: '知识与记忆、模型、接入与编排、控制面。',
     human: '低置信度或权限不足时转知识管理员。',
     evaluation: '检索质量、引用可追溯、拒答准确率。',
+    flow: [
+      { label: '提问进入', layer: '接入与编排' },
+      { label: '检索制度与交付文档', layer: '知识与记忆' },
+      { label: '带引用回答', layer: '模型' },
+      { label: '低置信度转知识管理员', layer: 'HITL gate', human: true },
+      { label: '缺口回流知识迭代', layer: '知识与记忆' },
+    ],
   },
   {
     id: 'process-automation',
@@ -462,6 +523,13 @@ export const architectureScenarios: readonly ArchitectureScenario[] = [
     layers: '工具与系统集成、接入与编排、运行时与部署、控制面。',
     human: '异常与写操作前审批。',
     evaluation: '任务完成率、字段准确率、回滚成功率。',
+    flow: [
+      { label: '单据进入', layer: '接入与编排' },
+      { label: '抽取字段', layer: '模型' },
+      { label: '匹配规则、调用系统', layer: '工具与系统集成' },
+      { label: '异常与写操作审批', layer: 'HITL gate', human: true },
+      { label: '生成草稿与回滚记录', layer: '运行时与部署' },
+    ],
   },
 ];
 
