@@ -1,0 +1,46 @@
+---
+import { getEntry } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ArchitectureHero from '../components/ArchitectureHero.astro';
+import ArchitectureOverview from '../components/ArchitectureOverview.astro';
+import ArchitectureLifecycle from '../components/ArchitectureLifecycle.astro';
+import ArchitectureLayers from '../components/ArchitectureLayers.astro';
+import ArchitectureControls from '../components/ArchitectureControls.astro';
+import EnterpriseConcerns from '../components/EnterpriseConcerns.astro';
+import ArchitectureScenarios from '../components/ArchitectureScenarios.astro';
+import ArchitectureMetrics from '../components/ArchitectureMetrics.astro';
+import ArchitectureCta from '../components/ArchitectureCta.astro';
+
+const entry = await getEntry('pages', 'architecture');
+
+if (!entry || entry.data.draft) {
+  throw new Error('Missing published content entry: pages/architecture');
+}
+
+const { title, description } = entry.data;
+---
+
+<BaseLayout title={title} description={description}>
+  <ArchitectureHero />
+  <ArchitectureOverview />
+  <ArchitectureLifecycle />
+  <ArchitectureLayers />
+  <ArchitectureControls />
+  <EnterpriseConcerns />
+  <ArchitectureScenarios />
+  <ArchitectureMetrics />
+  <ArchitectureCta />
+</BaseLayout>
+
+<style is:global>
+  #overview,
+  #lifecycle,
+  #layers,
+  #controls,
+  #concerns,
+  #scenarios,
+  #metrics,
+  #next-step {
+    scroll-margin-top: calc(var(--header-h) + 24px);
+  }
+</style>

@@ -1,0 +1,282 @@
+---
+import { lifecycleNodes } from '../data/architecture';
+---
+
+<div class="lifecycle-diagram">
+  <ol class="node-grid" aria-label="请求生命周期六个节点">
+    {lifecycleNodes.map((node) => (
+      <li class="node" data-lifecycle-node={node.id}>
+        <div class="node-head">
+          <span class="node-no">{node.no}</span>
+          <span class="node-label">{node.label}</span>
+        </div>
+        <p class="node-name">{node.name}</p>
+        <p class="node-desc">{node.description}</p>
+        <div class="node-marks">
+          {node.permission && <span class="badge badge-permission">权限检查点</span>}
+          {node.hitl && <span class="badge badge-hitl">HITL</span>}
+          {node.audits?.map((audit) => (
+            <span class="badge badge-audit" data-audit-mark>
+              AUDIT · {audit}
+            </span>
+          ))}
+        </div>
+      </li>
+    ))}
+  </ol>
+
+  <div class="trace-band" data-trace-span aria-label="一条 trace 贯穿全部节点，用于排障与回放。">
+    <span class="trace-label">TRACE</span>
+    <span class="trace-rail" aria-hidden="true">
+      {lifecycleNodes.map(() => (
+        <i></i>
+      ))}
+    </span>
+    <span class="trace-copy">一条 trace 贯穿全部节点，用于排障与回放。</span>
+  </div>
+
+  <div class="loop" data-iteration-loop>
+    <span class="loop-arrow" aria-hidden="true">
+      ←
+    </span>
+    <p class="loop-copy">
+      <b>评测结果 → 编排 / 知识迭代</b>
+      <span>迭代不等于自动改生产。</span>
+    </p>
+  </div>
+</div>
+
+<style>
+  .node-grid {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    border-top: 1px solid var(--color-line);
+    border-left: 1px solid var(--color-line);
+  }
+
+  .node {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    padding: 18px 16px 16px;
+    border-right: 1px solid var(--color-line);
+    border-bottom: 1px solid var(--color-line);
+    background: var(--color-canvas);
+  }
+
+  .node-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 6px;
+  }
+
+  .node-no {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    line-height: 1.5;
+    letter-spacing: 0.05em;
+    color: var(--color-red-dark);
+  }
+
+  .node-label {
+    font-family: var(--font-mono);
+    font-size: 8px;
+    line-height: 1.5;
+    letter-spacing: 0.03em;
+    color: var(--color-muted);
+    text-transform: uppercase;
+    text-align: right;
+  }
+
+  .node-name {
+    margin-top: 14px;
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 1.4;
+  }
+
+  .node-desc {
+    margin-top: 8px;
+    font-size: 12px;
+    line-height: 1.75;
+    color: var(--color-muted);
+  }
+
+  .node-marks {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: auto;
+    padding-top: 14px;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    height: 20px;
+    padding: 0 6px;
+    border: 1px solid var(--color-line);
+    border-radius: 3px;
+    background: var(--color-paper);
+    font-family: var(--font-mono);
+    font-size: 8px;
+    line-height: 1;
+    letter-spacing: 0.02em;
+    color: var(--color-muted);
+    white-space: nowrap;
+  }
+
+  .badge-permission {
+    border-color: var(--color-line-strong);
+    color: var(--color-ink-2);
+  }
+
+  .badge-hitl {
+    border-color: rgb(245 48 3 / 35%);
+    background: var(--color-red-wash);
+    color: var(--color-red-dark);
+  }
+
+  .badge-audit {
+    background: var(--color-canvas);
+  }
+
+  .trace-band {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-top: 14px;
+    padding: 10px 14px;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-site-sm);
+    background: var(--color-paper);
+  }
+
+  .trace-label {
+    flex: none;
+    font-family: var(--font-mono);
+    font-size: 9px;
+    line-height: 1.5;
+    letter-spacing: 0.08em;
+    color: var(--color-red-dark);
+  }
+
+  .trace-rail {
+    display: grid;
+    flex: 1;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  .trace-rail i {
+    position: relative;
+    height: 1px;
+    border-top: 1px dotted var(--color-ink-2);
+  }
+
+  .trace-rail i::after {
+    content: '';
+    position: absolute;
+    top: -3px;
+    left: 50%;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--color-ink-2);
+  }
+
+  .trace-copy {
+    flex: none;
+    font-family: var(--font-mono);
+    font-size: 8px;
+    line-height: 1.5;
+    letter-spacing: 0.03em;
+    color: var(--color-muted);
+  }
+
+  .loop {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-top: 14px;
+    padding: 14px 16px;
+    border: 1px dashed var(--color-line-strong);
+    border-radius: var(--radius-site-sm);
+    background: var(--color-canvas);
+  }
+
+  .loop-arrow {
+    flex: none;
+    font-family: var(--font-mono);
+    font-size: 18px;
+    line-height: 1;
+    color: var(--color-red-dark);
+  }
+
+  .loop-copy {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 14px;
+  }
+
+  .loop-copy b {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1.5;
+    letter-spacing: 0.02em;
+    color: var(--color-ink-2);
+  }
+
+  .loop-copy span {
+    font-size: 12px;
+    line-height: 1.6;
+    color: var(--color-muted);
+  }
+
+  @media (max-width: 1023px) {
+    .node-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .trace-rail {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .trace-copy {
+      display: none;
+    }
+  }
+
+  @media (max-width: 767px) {
+    .node-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .node {
+      padding: 16px;
+    }
+
+    .trace-band {
+      align-items: flex-start;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .trace-rail {
+      width: 100%;
+      gap: 4px;
+    }
+
+    .loop {
+      align-items: flex-start;
+    }
+
+    .loop-copy {
+      display: grid;
+      gap: 4px;
+    }
+  }
+</style>

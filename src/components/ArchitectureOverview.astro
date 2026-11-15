@@ -1,0 +1,210 @@
+---
+import SectionHeading from './SectionHeading.astro';
+import ArchitectureMap from './ArchitectureMap.astro';
+import DeploymentTierBar from './DeploymentTierBar.astro';
+import { architectureCopy, architectureLegend, overviewConclusions } from '../data/architecture';
+
+const { overview } = architectureCopy;
+---
+
+<section class="section overview-section" id="overview" aria-labelledby="overview-title">
+  <div class="container-site">
+    <SectionHeading
+      id="overview-title"
+      kicker={overview.kicker}
+      title={overview.title}
+      lead={overview.lead}
+    />
+
+    <div class="conclusion-grid reveal" aria-label="总览结论">
+      {overviewConclusions.map((conclusion, index) => (
+        <article class="conclusion" data-arch-conclusion>
+          <span class="conclusion-no">{String(index + 1).padStart(2, '0')}</span>
+          <p class="conclusion-copy">{conclusion}</p>
+        </article>
+      ))}
+    </div>
+
+    <div class="map-wrap reveal">
+      <ArchitectureMap />
+    </div>
+
+    <ul class="legend reveal" aria-label="图例">
+      {architectureLegend.map((item) => (
+        <li class="legend-item" data-legend-item>
+          <span class:list={['legend-swatch', `swatch-${item.marker}`]} aria-hidden="true">
+            {item.marker === 'lock' && '锁'}
+            {item.marker === 'human' && '人'}
+            {item.marker === 'record' && '记'}
+          </span>
+          <span>{item.label}</span>
+        </li>
+      ))}
+    </ul>
+
+    <DeploymentTierBar />
+
+    <p class="boundary-note">
+      <span class="tick" aria-hidden="true"></span>
+      {overview.boundaryNote}
+    </p>
+  </div>
+</section>
+
+<style>
+  .overview-section {
+    background: var(--color-canvas);
+  }
+
+  .conclusion-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    border-top: 1px solid var(--color-line);
+    border-left: 1px solid var(--color-line);
+  }
+
+  .conclusion {
+    position: relative;
+    min-width: 0;
+    padding: 24px 26px 26px;
+    border-right: 1px solid var(--color-line);
+    border-bottom: 1px solid var(--color-line);
+    background: var(--color-canvas);
+  }
+
+  .conclusion:first-child::before {
+    content: '';
+    position: absolute;
+    top: -4px;
+    left: -4px;
+    width: 7px;
+    height: 7px;
+    background: var(--color-red);
+  }
+
+  .conclusion-no {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    line-height: 1.5;
+    letter-spacing: 0.06em;
+    color: var(--color-red-dark);
+  }
+
+  .conclusion-copy {
+    margin-top: 12px;
+    font-size: 15px;
+    line-height: 1.85;
+    color: var(--color-ink-2);
+    text-wrap: pretty;
+  }
+
+  .map-wrap {
+    margin-top: 24px;
+  }
+
+  .legend {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    margin-top: 24px;
+    border-top: 1px solid var(--color-line);
+    border-left: 1px solid var(--color-line);
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    min-height: 48px;
+    padding: 8px 10px;
+    border-right: 1px solid var(--color-line);
+    border-bottom: 1px solid var(--color-line);
+    font-family: var(--font-mono);
+    font-size: 9px;
+    line-height: 1.5;
+    letter-spacing: 0.02em;
+    color: var(--color-muted);
+  }
+
+  .legend-swatch {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 14px;
+    font-family: var(--font-mono);
+    font-size: 8px;
+    line-height: 1;
+    color: var(--color-red-dark);
+  }
+
+  .swatch-solid {
+    border-top: 1px solid var(--color-ink);
+  }
+
+  .swatch-dashed {
+    border-top: 1px dashed var(--color-red-dark);
+  }
+
+  .swatch-dotted {
+    border-top: 1px dotted var(--color-ink);
+  }
+
+  .swatch-boundary {
+    border: 1px dashed var(--color-line-strong);
+  }
+
+  .swatch-lock,
+  .swatch-human,
+  .swatch-record {
+    border: 1px solid var(--color-line);
+    border-radius: 3px;
+    font-size: 8px;
+    color: var(--color-muted);
+  }
+
+  .swatch-human {
+    border-color: rgb(245 48 3 / 35%);
+    color: var(--color-red-dark);
+  }
+
+  .boundary-note {
+    display: grid;
+    grid-template-columns: 7px minmax(0, 1fr);
+    gap: 10px;
+    max-width: 860px;
+    margin-top: 20px;
+    font-size: 12px;
+    line-height: 1.75;
+    color: var(--color-muted);
+  }
+
+  .boundary-note .tick {
+    margin-top: 8px;
+  }
+
+  @media (max-width: 1023px) {
+    .conclusion-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .legend {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 767px) {
+    .conclusion {
+      padding: 20px;
+    }
+
+    .legend {
+      grid-template-columns: 1fr;
+    }
+
+    .legend-item {
+      min-height: 40px;
+    }
+  }
+</style>
