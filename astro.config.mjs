@@ -17,5 +17,15 @@ export default defineConfig({
   ],
   vite: {
     plugins: [tailwindcss()],
+    ssr: {
+      noExternal: ['zod'],
+    },
+    environments: {
+      prerender: {
+        resolve: {
+          noExternal: ['zod'],
+        },
+      },
+    },
   },
 });
