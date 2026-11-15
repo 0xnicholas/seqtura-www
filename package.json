@@ -26,6 +26,7 @@
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.12",
+    "@astrojs/node": "^11.1.13",
     "@eslint/js": "^10.0.1",
     "@playwright/test": "^1.65.1",
     "eslint": "^10.15.0",
