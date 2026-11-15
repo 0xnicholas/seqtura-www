@@ -1,0 +1,135 @@
+---
+import ArrowUpRightIcon from './ArrowUpRightIcon.astro';
+import SectionHeading from './SectionHeading.astro';
+import { fitSituations, homeSections } from '../data/homepage';
+
+const { fit } = homeSections;
+---
+
+<section class="section fit-section" id="fit" aria-labelledby="fit-title">
+  <div class="container-site">
+    <SectionHeading id="fit-title" kicker={fit.kicker} title={fit.title} lead={fit.lead} />
+
+    <div class="fit-grid reveal">
+      {fitSituations.map((situation) => (
+        <a
+          class="fit-card"
+          href="/process"
+          data-fit-situation={situation.id}
+          aria-label={`${situation.title}：${fit.cardLinkLabel}`}
+        >
+          <span class="fit-code">{situation.code}</span>
+          <h3 class="fit-title">{situation.title}</h3>
+          <p class="fit-summary">{situation.summary}</p>
+          <span class="fit-link">
+            {fit.cardLinkLabel}
+            <ArrowUpRightIcon />
+          </span>
+        </a>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .fit-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+  }
+
+  .fit-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 232px;
+    padding: 32px 30px 28px;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-site-lg);
+    background: var(--color-canvas);
+    color: inherit;
+    transition:
+      border-color 150ms var(--ease-site),
+      background-color 150ms var(--ease-site);
+  }
+
+  .fit-card::before {
+    content: '';
+    position: absolute;
+    top: 20px;
+    right: 24px;
+    width: 7px;
+    height: 7px;
+    background: var(--color-red);
+  }
+
+  .fit-card:hover {
+    border-color: var(--color-line-strong);
+    background: var(--color-paper);
+  }
+
+  .fit-code {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    line-height: 1.5;
+    letter-spacing: 0.06em;
+    color: var(--color-red-dark);
+    text-transform: uppercase;
+  }
+
+  .fit-title {
+    margin-top: 14px;
+    font-size: 24px;
+    font-weight: 500;
+    line-height: 1.3;
+    letter-spacing: -0.015em;
+  }
+
+  .fit-summary {
+    margin-top: 12px;
+    font-size: 15px;
+    line-height: 1.75;
+    color: var(--color-muted);
+  }
+
+  .fit-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: auto;
+    padding-top: 24px;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.5;
+    color: var(--color-red-dark);
+  }
+
+  .fit-link svg {
+    transition: transform 150ms var(--ease-site);
+  }
+
+  .fit-card:hover .fit-link svg {
+    transform: translate(2px, -2px);
+  }
+
+  @media (max-width: 1023px) {
+    .fit-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .fit-card {
+      min-height: 0;
+    }
+  }
+
+  @media (max-width: 767px) {
+    .fit-card {
+      padding: 26px 24px 24px;
+    }
+
+    .fit-title {
+      font-size: 22px;
+    }
+  }
+</style>

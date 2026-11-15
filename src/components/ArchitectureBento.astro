@@ -1,0 +1,352 @@
+---
+import ReferenceArchitecturePlan from './ReferenceArchitecturePlan.astro';
+import SectionHeading from './SectionHeading.astro';
+import { controlPlanes, structuralNote, traceSteps } from '../data/architecture';
+import { homeSections } from '../data/homepage';
+
+const { architecture } = homeSections;
+---
+
+<section class="section arch-section" id="architecture" aria-labelledby="architecture-title">
+  <div class="container-site">
+    <SectionHeading
+      id="architecture-title"
+      kicker={architecture.kicker}
+      title={architecture.title}
+      lead={architecture.lead}
+    />
+
+    <div class="bento reveal">
+      <a
+        class="bento-card arch-card"
+        href="/architecture#overview"
+        aria-label="查看技术架构总览：5 层能力栈与 3 条控制面"
+      >
+        <ReferenceArchitecturePlan />
+      </a>
+
+      <a
+        class="bento-card trace-card"
+        href="/architecture#lifecycle"
+        aria-label="查看请求生命周期：一条任务从进入到输出"
+      >
+        <div class="trace-head">
+          <span>TRACE / 任务轨迹</span>
+          <span class="trace-state">
+            <i aria-hidden="true"></i>
+            HITL READY
+          </span>
+        </div>
+
+        <h3 class="trace-title">
+          一条任务，
+          <br />
+          从进入到留下什么。
+        </h3>
+
+        <div class="trace-log">
+          {traceSteps.map((step) => (
+            <div class:list={['trace-line', step.hitl && 'is-hitl']}>
+              <span class="t">{step.time}</span>
+              <span class="ev">{step.event}</span>
+              <span class="detail">{step.detail}</span>
+            </div>
+          ))}
+        </div>
+
+        <p class="trace-foot">
+          <b>每一步都有输入、输出、权限与评测记录。</b>
+          不是一段黑盒回答，而是一条可回放、可审计的执行链。
+        </p>
+        <p class="trace-note" data-structural-note>
+          {structuralNote}
+        </p>
+      </a>
+
+      {controlPlanes.map((plane) => (
+        <a
+          class="bento-card control-card"
+          href="/architecture#controls"
+          aria-label={`查看控制面：${plane.name}`}
+        >
+          <span class="control-code">{plane.code}</span>
+          <h3 class="control-title">{plane.name}</h3>
+          <p class="control-copy">{plane.summary}</p>
+          <div class="control-tags">
+            {plane.chips.map((chip) => (
+              <span class="chip">{chip}</span>
+            ))}
+          </div>
+        </a>
+      ))}
+    </div>
+
+    <p class="arch-foot">{architecture.footnote}</p>
+  </div>
+</section>
+
+<style>
+  .arch-section {
+    overflow: hidden;
+    background:
+      radial-gradient(60% 46% at 50% 100%, rgb(245 48 3 / 10%), transparent 72%), var(--color-paper);
+  }
+
+  .bento {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 16px;
+  }
+
+  .bento-card {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    border-radius: var(--radius-site-lg);
+    color: inherit;
+  }
+
+  .arch-card {
+    grid-column: span 7;
+  }
+
+  .arch-card:hover :global(.arch-panel) {
+    border-color: var(--color-line-strong);
+  }
+
+  .trace-card {
+    position: relative;
+    grid-column: span 5;
+    overflow: hidden;
+    padding: 30px 30px 24px;
+    border-radius: var(--radius-site-lg);
+    background:
+      radial-gradient(90% 80% at 100% 0%, rgb(245 48 3 / 16%), transparent 62%), var(--color-dark);
+    box-shadow: var(--shadow-site-sm);
+    color: #fff;
+    transition: box-shadow 150ms var(--ease-site);
+  }
+
+  .trace-card:hover {
+    box-shadow: 0 4px 16px rgb(0 0 0 / 16%);
+  }
+
+  .trace-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px 16px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    line-height: 1.5;
+    letter-spacing: 0.06em;
+    color: var(--color-red);
+    text-transform: uppercase;
+  }
+
+  .trace-state {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 24px;
+    padding: 0 8px;
+    border: 1px solid var(--color-dark-line);
+    border-radius: 4px;
+    font-size: 9px;
+    color: #fff;
+  }
+
+  .trace-state i {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--color-red);
+  }
+
+  .trace-title {
+    max-width: 420px;
+    margin-top: 24px;
+    font-size: 30px;
+    font-weight: 400;
+    line-height: 1.22;
+    letter-spacing: -0.02em;
+  }
+
+  .trace-log {
+    margin-top: 26px;
+    border-top: 1px solid var(--color-dark-line);
+  }
+
+  .trace-line {
+    display: grid;
+    grid-template-columns: 46px 82px minmax(0, 1fr);
+    gap: 8px;
+    align-items: baseline;
+    padding: 9px 0;
+    border-bottom: 1px solid #2a2a2a;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    line-height: 1.55;
+    letter-spacing: 0.01em;
+  }
+
+  .trace-line .t {
+    color: var(--color-dark-muted);
+  }
+
+  .trace-line .ev {
+    color: var(--color-red);
+  }
+
+  .trace-line .detail {
+    color: var(--color-dark-muted);
+  }
+
+  .trace-line.is-hitl {
+    margin-inline: -10px;
+    padding-inline: 10px;
+    border-left: 2px solid var(--color-red);
+    background: rgb(245 48 3 / 7%);
+  }
+
+  .trace-line.is-hitl .detail {
+    color: #fff;
+  }
+
+  .trace-foot {
+    margin-top: auto;
+    padding-top: 18px;
+    font-size: 12px;
+    line-height: 1.6;
+    color: var(--color-dark-muted);
+  }
+
+  .trace-foot b {
+    font-weight: 500;
+    color: #fff;
+  }
+
+  .trace-note {
+    margin-top: 10px;
+    font-family: var(--font-mono);
+    font-size: 9px;
+    line-height: 1.5;
+    letter-spacing: 0.04em;
+    color: var(--color-dark-muted);
+  }
+
+  .control-card {
+    position: relative;
+    grid-column: span 4;
+    min-height: 238px;
+    padding: 26px 26px 24px;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-site-lg);
+    background: var(--color-canvas);
+    box-shadow: var(--shadow-site-xs);
+    transition: border-color 150ms var(--ease-site);
+  }
+
+  .control-card::before {
+    content: '';
+    position: absolute;
+    top: -1px;
+    right: 26px;
+    left: 26px;
+    height: 2px;
+    background: var(--color-red);
+  }
+
+  .control-card:hover {
+    border-color: var(--color-line-strong);
+  }
+
+  .control-code {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    line-height: 1.5;
+    letter-spacing: 0.06em;
+    color: var(--color-red-dark);
+    text-transform: uppercase;
+  }
+
+  .control-title {
+    margin-top: 14px;
+    font-size: 24px;
+    font-weight: 500;
+    line-height: 1.3;
+    letter-spacing: -0.015em;
+  }
+
+  .control-copy {
+    margin-top: 12px;
+    font-size: 15px;
+    line-height: 1.7;
+    color: var(--color-muted);
+  }
+
+  .control-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: auto;
+    padding-top: 22px;
+  }
+
+  .arch-foot {
+    max-width: 720px;
+    margin: 24px auto 0;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    line-height: 1.7;
+    letter-spacing: 0.03em;
+    color: var(--color-muted);
+    text-align: center;
+  }
+
+  @media (max-width: 1023px) {
+    .arch-card,
+    .trace-card {
+      grid-column: span 12;
+    }
+
+    .control-card {
+      grid-column: span 6;
+    }
+  }
+
+  @media (max-width: 767px) {
+    .bento {
+      gap: 12px;
+    }
+
+    .trace-card {
+      padding: 24px 22px 22px;
+    }
+
+    .trace-title {
+      font-size: 24px;
+    }
+
+    .trace-line {
+      grid-template-columns: 38px 68px minmax(0, 1fr);
+      font-size: 10px;
+    }
+
+    .control-card {
+      grid-column: span 12;
+      min-height: 0;
+    }
+
+    .control-tags {
+      padding-top: 18px;
+    }
+  }
+
+  @media (max-width: 359px) {
+    .trace-line {
+      grid-template-columns: 34px 76px minmax(0, 1fr);
+    }
+  }
+</style>

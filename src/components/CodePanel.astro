@@ -1,0 +1,293 @@
+---
+import type { CodeFile } from '../data/methodologyCode';
+
+interface Props {
+  files: readonly CodeFile[];
+  label: string;
+  note: string;
+}
+
+const { files, label, note } = Astro.props;
+---
+
+<div class="code-panel" data-code-panel>
+  <div class="code-tabs" role="tablist" aria-label={label} data-code-tabs>
+    {files.map((file, index) => (
+      <button
+        class="code-tab"
+        type="button"
+        role="tab"
+        id={`tab-${file.id}`}
+        aria-selected={index === 0}
+        aria-controls={`panel-${file.id}`}
+        tabindex={index === 0 ? 0 : -1}
+      >
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+          <path d="M2 1.5h5l3 3v6H2z" stroke="currentColor" stroke-width="1"></path>
+          <path d="M7 1.5v3h3" stroke="currentColor" stroke-width="1"></path>
+        </svg>
+        <span>{file.name}</span>
+      </button>
+    ))}
+    <span class="code-tab-meta">READ ONLY</span>
+  </div>
+
+  {files.map((file, index) => (
+    <div
+      class="code-body"
+      id={`panel-${file.id}`}
+      role="tabpanel"
+      aria-labelledby={`tab-${file.id}`}
+      data-code-body
+      tabindex="0"
+      hidden={index !== 0}
+    >
+      {file.lines.map((line, lineIndex) => (
+        <div class="code-line">
+          <span class="ln" aria-hidden="true">
+            {String(lineIndex + 1).padStart(2, '0')}
+          </span>
+          <code>
+            {line.tokens.map((token) =>
+              token.kind ? <span class={token.kind}>{token.text}</span> : token.text,
+            )}
+          </code>
+        </div>
+      ))}
+    </div>
+  ))}
+
+  <div class="code-foot">
+    <span class="code-foot-fact">
+      <span class="dot" aria-hidden="true"></span>8 STAGES · 3 GATES
+    </span>
+    <span data-structural-note>{note}</span>
+  </div>
+</div>
+
+<script>
+  for (const tablist of document.querySelectorAll<HTMLElement>('[data-code-tabs]')) {
+    const tabs = Array.from(tablist.querySelectorAll<HTMLButtonElement>('[role="tab"]'));
+    if (tabs.length === 0) continue;
+
+    const select = (next: HTMLButtonElement, moveFocus: boolean) => {
+      for (const tab of tabs) {
+        const isSelected = tab === next;
+        tab.setAttribute('aria-selected', String(isSelected));
+        tab.tabIndex = isSelected ? 0 : -1;
+        const panel = document.getElementById(tab.getAttribute('aria-controls') ?? '');
+        if (panel) panel.hidden = !isSelected;
+      }
+      if (moveFocus) next.focus();
+    };
+
+    tablist.addEventListener('click', (event) => {
+      const tab = (event.target as HTMLElement).closest<HTMLButtonElement>('[role="tab"]');
+      if (tab) select(tab, false);
+    });
+
+    tablist.addEventListener('keydown', (event) => {
+      const index = tabs.indexOf(document.activeElement as HTMLButtonElement);
+      if (index === -1) return;
+
+      let nextIndex: number | null = null;
+      if (event.key === 'ArrowRight') nextIndex = (index + 1) % tabs.length;
+      if (event.key === 'ArrowLeft') nextIndex = (index - 1 + tabs.length) % tabs.length;
+      if (event.key === 'Home') nextIndex = 0;
+      if (event.key === 'End') nextIndex = tabs.length - 1;
+      if (nextIndex === null) return;
+
+      event.preventDefault();
+      select(tabs[nextIndex], true);
+    });
+  }
+</script>
+
+<style>
+  .code-panel {
+    position: relative;
+    z-index: 1;
+    overflow: hidden;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-site-lg);
+    background: var(--color-canvas);
+    box-shadow: var(--shadow-site-sm);
+  }
+
+  .code-tabs {
+    display: flex;
+    align-items: stretch;
+    min-width: 0;
+    overflow-x: auto;
+    border-bottom: 1px solid var(--color-line);
+    background: var(--color-paper);
+    scrollbar-width: thin;
+  }
+
+  .code-tab {
+    position: relative;
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    gap: 8px;
+    height: 46px;
+    padding: 0 18px;
+    border: 0;
+    border-right: 1px solid var(--color-line);
+    background: transparent;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    line-height: 1;
+    letter-spacing: 0.01em;
+    color: var(--color-muted);
+    white-space: nowrap;
+    cursor: pointer;
+    transition:
+      color 50ms ease-out,
+      background-color 50ms ease-out;
+  }
+
+  .code-tab svg {
+    color: var(--color-red);
+    opacity: 0.55;
+  }
+
+  .code-tab:hover {
+    color: var(--color-ink);
+  }
+
+  .code-tab[aria-selected='true'] {
+    background: var(--color-canvas);
+    color: var(--color-ink);
+  }
+
+  .code-tab[aria-selected='true'] svg {
+    opacity: 1;
+  }
+
+  .code-tab[aria-selected='true']::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    bottom: -1px;
+    left: 0;
+    height: 2px;
+    background: var(--color-red);
+  }
+
+  .code-tab-meta {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    margin-left: auto;
+    padding: 0 18px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    line-height: 1;
+    letter-spacing: 0.05em;
+    color: var(--color-muted);
+    white-space: nowrap;
+  }
+
+  .code-body {
+    padding: 18px 0 20px;
+    overflow-x: auto;
+    background: var(--color-canvas);
+    scrollbar-width: thin;
+  }
+
+  .code-body:focus-visible {
+    outline-offset: -3px;
+  }
+
+  .code-line {
+    display: grid;
+    grid-template-columns: 46px minmax(0, 1fr);
+    min-width: 560px;
+    padding-right: 18px;
+    font-family: var(--font-mono);
+    font-size: var(--type-code-size);
+    line-height: var(--type-code-line);
+  }
+
+  .code-line:hover {
+    background: #fafaf8;
+  }
+
+  .ln {
+    padding-right: 14px;
+    text-align: right;
+    color: #c8c8c4;
+    user-select: none;
+  }
+
+  .code-line code {
+    white-space: pre;
+    color: var(--color-ink-2);
+  }
+
+  .key {
+    color: var(--color-red-dark);
+  }
+
+  .str {
+    color: var(--color-ink);
+  }
+
+  .comment {
+    color: var(--color-muted);
+  }
+
+  .punct {
+    color: var(--color-muted);
+  }
+
+  .add {
+    color: var(--color-red-dark);
+  }
+
+  .code-foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px 16px;
+    padding: 11px 18px;
+    border-top: 1px solid var(--color-line);
+    background: var(--color-paper);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    line-height: 1.5;
+    letter-spacing: 0.05em;
+    color: var(--color-muted);
+    text-transform: uppercase;
+  }
+
+  .code-foot-fact {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .dot {
+    display: inline-block;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--color-red);
+  }
+
+  @media (max-width: 767px) {
+    .code-tab-meta {
+      display: none;
+    }
+  }
+
+  @media (max-width: 359px) {
+    .code-tab {
+      gap: 6px;
+      padding: 0 10px;
+      font-size: 11px;
+    }
+  }
+</style>

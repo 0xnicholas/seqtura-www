@@ -3,6 +3,11 @@ import { getEntry } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import HomeHero from '../components/HomeHero.astro';
 import ProofStrip from '../components/ProofStrip.astro';
+import MethodologyPreview from '../components/MethodologyPreview.astro';
+import ArchitectureBento from '../components/ArchitectureBento.astro';
+import DeliverySection from '../components/DeliverySection.astro';
+import FitSituations from '../components/FitSituations.astro';
+import CtaSection from '../components/CtaSection.astro';
 
 const home = await getEntry('pages', 'home');
 
@@ -16,4 +21,9 @@ const { title, description } = home.data;
 <BaseLayout title={title} description={description}>
   <HomeHero />
   <ProofStrip />
+  <MethodologyPreview />
+  <ArchitectureBento />
+  <DeliverySection />
+  <FitSituations />
+  <CtaSection />
 </BaseLayout>

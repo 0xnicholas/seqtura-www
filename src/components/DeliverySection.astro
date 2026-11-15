@@ -1,0 +1,213 @@
+---
+import ArrowUpRightIcon from './ArrowUpRightIcon.astro';
+import SectionHeading from './SectionHeading.astro';
+import { commitments, homeSections, processPreview } from '../data/homepage';
+
+const { delivery } = homeSections;
+---
+
+<section class="section delivery-section" id="delivery" aria-labelledby="delivery-title">
+  <div class="container-site">
+    <SectionHeading
+      id="delivery-title"
+      kicker={delivery.kicker}
+      title={delivery.title}
+      lead={delivery.lead}
+    />
+
+    <div class="commit-grid reveal">
+      {commitments.map((commitment) => (
+        <article class="commit-card" data-commitment={commitment.id}>
+          <span class="commit-code">{commitment.code}</span>
+          <h3 class="commit-title">{commitment.title}</h3>
+          <p class="commit-summary">{commitment.summary}</p>
+          <span class="commit-tag">{commitment.tag}</span>
+        </article>
+      ))}
+    </div>
+
+    <div class="process-preview reveal">
+      <div class="process-head">
+        <p class="process-label">{delivery.processLabel}</p>
+        <a class="text-link" href="/process#stages">
+          {delivery.processLinkLabel}
+          <ArrowUpRightIcon />
+        </a>
+      </div>
+
+      <ol class="process-list">
+        {processPreview.map((step) => (
+          <li class="process-step">
+            <span class="step-no">{step.no}</span>
+            <span class="step-title">{step.title}</span>
+            <p class="step-summary">{step.summary}</p>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </div>
+</section>
+
+<style>
+  .commit-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    border-top: 1px solid var(--color-line);
+    border-left: 1px solid var(--color-line);
+  }
+
+  .commit-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    padding: 32px 30px 28px;
+    border-right: 1px solid var(--color-line);
+    border-bottom: 1px solid var(--color-line);
+    background: var(--color-canvas);
+  }
+
+  .commit-card:nth-child(odd)::before {
+    content: '';
+    position: absolute;
+    top: -4px;
+    left: -4px;
+    width: 7px;
+    height: 7px;
+    background: var(--color-red);
+  }
+
+  .commit-code {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    line-height: 1.5;
+    letter-spacing: 0.06em;
+    color: var(--color-red-dark);
+    text-transform: uppercase;
+  }
+
+  .commit-title {
+    margin-top: 14px;
+    font-size: 24px;
+    font-weight: 500;
+    line-height: 1.3;
+    letter-spacing: -0.015em;
+  }
+
+  .commit-summary {
+    margin-top: 12px;
+    margin-bottom: 22px;
+    font-size: 15px;
+    line-height: 1.75;
+    color: var(--color-muted);
+  }
+
+  .commit-tag {
+    align-self: flex-start;
+    margin-top: auto;
+    padding: 4px 8px;
+    border: 1px solid var(--color-line);
+    border-radius: 4px;
+    background: var(--color-paper);
+    font-family: var(--font-mono);
+    font-size: 9px;
+    line-height: 1.5;
+    letter-spacing: 0.04em;
+    color: var(--color-ink-2);
+  }
+
+  .process-preview {
+    margin-top: 72px;
+  }
+
+  .process-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--color-line);
+  }
+
+  .process-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    line-height: 1.5;
+    letter-spacing: 0.06em;
+    color: var(--color-muted);
+    text-transform: uppercase;
+  }
+
+  .process-list {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    border-left: 1px solid var(--color-line);
+  }
+
+  .process-step {
+    padding: 24px 28px 26px;
+    border-right: 1px solid var(--color-line);
+    border-bottom: 1px solid var(--color-line);
+  }
+
+  .step-no {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    line-height: 1.5;
+    letter-spacing: 0.05em;
+    color: var(--color-red-dark);
+  }
+
+  .step-title {
+    display: block;
+    margin-top: 10px;
+    font-size: 18px;
+    font-weight: 500;
+    line-height: 1.4;
+  }
+
+  .step-summary {
+    margin-top: 8px;
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--color-muted);
+  }
+
+  @media (max-width: 1023px) {
+    .commit-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .process-list {
+      grid-template-columns: 1fr;
+    }
+
+    .process-step {
+      border-left: 0;
+    }
+  }
+
+  @media (max-width: 767px) {
+    .commit-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .commit-card {
+      padding: 26px 24px 24px;
+    }
+
+    .commit-title {
+      font-size: 22px;
+    }
+
+    .process-preview {
+      margin-top: 48px;
+    }
+
+    .process-step {
+      padding: 22px 24px;
+    }
+  }
+</style>

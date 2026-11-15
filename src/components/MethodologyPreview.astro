@@ -1,0 +1,265 @@
+---
+import ArrowIcon from './ArrowIcon.astro';
+import ArrowUpRightIcon from './ArrowUpRightIcon.astro';
+import CodePanel from './CodePanel.astro';
+import SectionHeading from './SectionHeading.astro';
+import { deliveryGroups, methodologyPrinciples } from '../data/delivery';
+import { codeFiles } from '../data/methodologyCode';
+import { homeSections } from '../data/homepage';
+import { structuralNote } from '../data/architecture';
+
+const { methodology } = homeSections;
+---
+
+<section class="section method-section" id="methodology" aria-labelledby="methodology-title">
+  <div class="container-site">
+    <SectionHeading
+      id="methodology-title"
+      kicker={methodology.kicker}
+      title={methodology.title}
+      lead={methodology.lead}
+    />
+
+    <div class="method-split reveal">
+      <div class="method-copy">
+        <h3 class="type-h3">{methodology.introTitle}</h3>
+        <p class="method-body">{methodology.introBody}</p>
+
+        <ul class="principle-list">
+          {methodologyPrinciples.map((principle) => (
+            <li>
+              <span class="principle-mark" aria-hidden="true"></span>
+              <div>
+                <div class="principle-head">
+                  <h4 class="principle-title">{principle.title}</h4>
+                  <span class="principle-label">{principle.label}</span>
+                </div>
+                <p class="principle-text">{principle.summary}</p>
+              </div>
+            </li>
+          ))}
+        </ul>
+
+        <a class="btn btn-ghost btn-sm method-link" href="/methodology">
+          {methodology.linkLabel}
+          <ArrowIcon />
+        </a>
+      </div>
+
+      <div class="code-wrap">
+        <CodePanel files={codeFiles} label="方法论文件" note={structuralNote} />
+      </div>
+    </div>
+
+    <div class="method-groups reveal">
+      {deliveryGroups.map((group) => (
+        <a class="method-group" href="/methodology#stages" data-method-group={group.id}>
+          <span class="method-range">{group.range}</span>
+          <h3 class="type-h3 method-group-title">{group.title}</h3>
+          <p class="method-group-summary">{group.summary}</p>
+          <span class="method-group-link">
+            {methodology.groupLinkLabel}
+            <ArrowUpRightIcon />
+          </span>
+        </a>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .method-split {
+    display: grid;
+    grid-template-columns: minmax(0, 0.82fr) minmax(0, 1.18fr);
+    gap: 72px;
+    align-items: start;
+  }
+
+  .method-section :global(.section-title) {
+    word-break: keep-all;
+  }
+
+  .method-copy {
+    max-width: 480px;
+    min-width: 0;
+  }
+
+  .method-body {
+    margin-top: 18px;
+    color: var(--color-muted);
+  }
+
+  .principle-list {
+    margin-top: 28px;
+    border-top: 1px solid var(--color-line);
+  }
+
+  .principle-list li {
+    display: grid;
+    grid-template-columns: 18px minmax(0, 1fr);
+    gap: 10px;
+    padding: 13px 0;
+    border-bottom: 1px solid var(--color-line);
+  }
+
+  .principle-mark {
+    width: 7px;
+    height: 7px;
+    margin-top: 7px;
+    background: var(--color-red);
+  }
+
+  .principle-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 8px;
+  }
+
+  .principle-title {
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 1.5;
+  }
+
+  .principle-label {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    font-weight: 400;
+    letter-spacing: 0.04em;
+    color: var(--color-muted);
+    text-transform: uppercase;
+  }
+
+  .principle-text {
+    margin-top: 3px;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--color-muted);
+  }
+
+  .method-link {
+    margin-top: 26px;
+  }
+
+  .code-wrap {
+    position: relative;
+    min-width: 0;
+  }
+
+  .code-wrap::before {
+    content: '';
+    position: absolute;
+    inset: 4% -4% -8% 8%;
+    background: radial-gradient(closest-side, rgb(245 48 3 / 13%), rgb(245 48 3 / 0%) 72%);
+    pointer-events: none;
+  }
+
+  .method-groups {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin-top: 96px;
+    border-top: 1px solid var(--color-line);
+    border-left: 1px solid var(--color-line);
+  }
+
+  .method-group {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    padding: 40px 44px 36px;
+    border-right: 1px solid var(--color-line);
+    border-bottom: 1px solid var(--color-line);
+    transition: background-color 150ms var(--ease-site);
+  }
+
+  .method-group:hover {
+    background: var(--color-paper);
+  }
+
+  .method-group:nth-child(odd)::before {
+    content: '';
+    position: absolute;
+    top: -4px;
+    left: -4px;
+    width: 7px;
+    height: 7px;
+    background: var(--color-red);
+  }
+
+  .method-range {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    line-height: 1.5;
+    letter-spacing: 0.06em;
+    color: var(--color-red-dark);
+    text-transform: uppercase;
+  }
+
+  .method-group-title {
+    margin-top: 12px;
+    font-size: 24px;
+    letter-spacing: -0.015em;
+  }
+
+  .method-group-summary {
+    margin-top: 12px;
+    font-size: 15px;
+    line-height: 1.75;
+    color: var(--color-muted);
+  }
+
+  .method-group-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: auto;
+    padding-top: 24px;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.5;
+    color: var(--color-red-dark);
+  }
+
+  .method-group-link svg {
+    transition: transform 150ms var(--ease-site);
+  }
+
+  .method-group:hover .method-group-link svg {
+    transform: translate(2px, -2px);
+  }
+
+  @media (max-width: 1023px) {
+    .method-split {
+      grid-template-columns: 1fr;
+      gap: 44px;
+    }
+
+    .method-copy {
+      max-width: 640px;
+    }
+
+    .method-groups {
+      margin-top: 72px;
+    }
+  }
+
+  @media (max-width: 767px) {
+    .method-groups {
+      grid-template-columns: 1fr;
+      margin-top: 48px;
+    }
+
+    .method-group {
+      padding: 28px 24px 26px;
+    }
+
+    .method-group:nth-child(odd)::before {
+      left: -4px;
+    }
+
+    .method-group-title {
+      font-size: 22px;
+    }
+  }
+</style>

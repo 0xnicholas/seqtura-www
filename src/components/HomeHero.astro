@@ -2,42 +2,46 @@
 import ArrowIcon from './ArrowIcon.astro';
 import IsometricCapabilityStack from './IsometricCapabilityStack.astro';
 import { site } from '../config/site';
+import { homeHero } from '../data/homepage';
+import { structuralNote } from '../data/architecture';
 ---
 
 <section class="hero" id="top" aria-labelledby="hero-title">
   <div class="container-site hero-grid">
     <div class="hero-copy">
-      <p class="kicker">企业 AI Agent 定制交付</p>
+      <p class="kicker">{homeHero.kicker}</p>
       <h1 id="hero-title" class="type-h1 hero-title">
-        <span class="title-line">
-          把 <span class="latin">AI Agent</span>
-        </span>{' '}
-        <span class="title-line">从演示做到上线。</span>
+        <span class="title-line">{homeHero.titleLead}</span>{' '}
+        <span class="title-line">{homeHero.titleTail}</span>
       </h1>
-      <p class="hero-lead type-lead">
-        从业务问题出发，用 8 阶段交付方法把 Agent 接进真实流程。可私有化、可审计、模型可替换。
-      </p>
+      <p class="hero-lead type-lead">{homeHero.lead}</p>
       <div class="cta-row hero-actions">
-        <a class="btn btn-primary" href={site.bookingPath}>
-          预约 30 分钟沟通
+        <a class="btn btn-primary" href={site.bookingPath} data-primary-cta>
+          {homeHero.primaryCta}
           <ArrowIcon />
         </a>
         <a class="btn btn-ghost" href="/methodology">
-          看工作方法论
+          {homeHero.secondaryCta}
         </a>
       </div>
       <p class="hero-facts">
-        <span>8 个交付阶段</span>
-        <span class="sep" aria-hidden="true"></span>
-        <span>5 层能力栈</span>
-        <span class="sep" aria-hidden="true"></span>
-        <span>3 条控制面</span>
+        {homeHero.facts.map((fact, index) => (
+          <>
+            {index > 0 && <span class="sep" aria-hidden="true"></span>}
+            <span>{fact}</span>
+          </>
+        ))}
       </p>
     </div>
 
-    <div class="hero-art">
+    <div class="hero-art" data-hero-art>
       <IsometricCapabilityStack />
-      <p class="art-caption">交付参考架构 / 5 层能力栈 + 3 条控制面</p>
+      <p class="art-caption">
+        <span>{homeHero.caption}</span>
+        <span class="art-note" data-structural-note>
+          {structuralNote}
+        </span>
+      </p>
     </div>
   </div>
 </section>
@@ -141,14 +145,21 @@ import { site } from '../config/site';
 
   .art-caption {
     position: relative;
+    display: grid;
+    gap: 2px;
     margin-top: 4px;
     text-align: right;
     font-family: var(--font-mono);
     font-size: 10px;
     line-height: 1.5;
     letter-spacing: 0.06em;
-    color: var(--color-faint);
+    color: var(--color-muted);
     text-transform: uppercase;
+  }
+
+  .art-note {
+    font-size: 9px;
+    color: var(--color-muted);
   }
 
   .hero-copy > * {
