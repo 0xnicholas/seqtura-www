@@ -58,7 +58,7 @@ export function toContactLead(payload: ContactPayload): ContactLead {
     company: payload.company,
     email: payload.email,
     need: payload.need,
-    wechatPhone: payload.wechatPhone,
+    wechatPhone: payload.wechatPhone || undefined,
     consent: payload.consent,
     consentAt: payload.consentAt,
     privacyVersion: payload.privacyVersion,

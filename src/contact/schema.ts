@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod/mini';
 
 export const contactLimits = {
   name: 40,
@@ -33,45 +33,59 @@ export const contactMessages = {
 export const contactFormSchema = z.object({
   name: z
     .string()
-    .trim()
-    .min(1, { error: contactMessages.nameRequired })
-    .max(contactLimits.name, { error: contactMessages.nameTooLong }),
+    .check(
+      z.trim(),
+      z.minLength(1, { error: contactMessages.nameRequired }),
+      z.maxLength(contactLimits.name, { error: contactMessages.nameTooLong }),
+    ),
   company: z
     .string()
-    .trim()
-    .min(1, { error: contactMessages.companyRequired })
-    .max(contactLimits.company, { error: contactMessages.companyTooLong }),
+    .check(
+      z.trim(),
+      z.minLength(1, { error: contactMessages.companyRequired }),
+      z.maxLength(contactLimits.company, { error: contactMessages.companyTooLong }),
+    ),
   email: z
     .string()
-    .trim()
-    .min(1, { error: contactMessages.emailRequired })
-    .max(contactLimits.email, { error: contactMessages.emailTooLong })
-    .pipe(z.email({ error: contactMessages.emailInvalid })),
+    .check(
+      z.trim(),
+      z.minLength(1, { error: contactMessages.emailRequired }),
+      z.maxLength(contactLimits.email, { error: contactMessages.emailTooLong }),
+      z.email({ error: contactMessages.emailInvalid }),
+    ),
   need: z
     .string()
-    .trim()
-    .min(contactLimits.needMin, { error: contactMessages.needTooShort })
-    .max(contactLimits.needMax, { error: contactMessages.needTooLong }),
-  wechatPhone: z
-    .string()
-    .trim()
-    .max(contactLimits.wechatPhone, { error: contactMessages.wechatPhoneTooLong })
-    .optional()
-    .transform((value) => value || undefined),
+    .check(
+      z.trim(),
+      z.minLength(contactLimits.needMin, { error: contactMessages.needTooShort }),
+      z.maxLength(contactLimits.needMax, { error: contactMessages.needTooLong }),
+    ),
+  wechatPhone: z.optional(
+    z
+      .string()
+      .check(
+        z.trim(),
+        z.maxLength(contactLimits.wechatPhone, { error: contactMessages.wechatPhoneTooLong }),
+      ),
+  ),
   consent: z.literal(true, { error: contactMessages.consentRequired }),
 });
 
-export const contactPayloadSchema = contactFormSchema.extend({
+export const contactPayloadSchema = z.extend(contactFormSchema, {
   consentAt: z.iso.datetime({ offset: true, error: contactMessages.consentAtInvalid }),
   privacyVersion: z
     .string()
-    .trim()
-    .min(1, { error: contactMessages.privacyVersionRequired })
-    .max(32),
-  website: z.string().optional(),
+    .check(
+      z.trim(),
+      z.minLength(1, { error: contactMessages.privacyVersionRequired }),
+      z.maxLength(32),
+    ),
+  website: z.optional(z.string()),
   startedAt: z
     .number({ error: contactMessages.startedAtInvalid })
-    .refine((value) => Number.isFinite(value), { error: contactMessages.startedAtInvalid }),
+    .check(
+      z.refine((value) => Number.isFinite(value), { error: contactMessages.startedAtInvalid }),
+    ),
 });
 
 export type ContactFormValues = z.infer<typeof contactFormSchema>;
@@ -87,7 +101,12 @@ export const contactFields = [
   'consent',
 ] as const satisfies readonly ContactField[];
 
-export function contactFieldErrors(error: z.ZodError): Record<string, string> {
+interface ContactIssue {
+  readonly path: readonly PropertyKey[];
+  readonly message: string;
+}
+
+export function contactFieldErrors(error: { readonly issues: readonly ContactIssue[] }) {
   const fields: Record<string, string> = {};
   for (const issue of error.issues) {
     const field = issue.path[0];
