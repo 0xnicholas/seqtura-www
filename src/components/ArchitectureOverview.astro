@@ -32,7 +32,11 @@ const { overview } = architectureCopy;
     <ul class="legend reveal" aria-label="图例">
       {architectureLegend.map((item) => (
         <li class="legend-item" data-legend-item>
-          <span class:list={['legend-swatch', `swatch-${item.marker}`]} aria-hidden="true">
+          <span
+            class:list={['legend-swatch', `swatch-${item.marker}`]}
+            data-legend-marker={item.marker}
+            aria-hidden="true"
+          >
             {item.marker === 'lock' && '锁'}
             {item.marker === 'human' && '人'}
             {item.marker === 'record' && '记'}
