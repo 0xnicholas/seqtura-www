@@ -6,10 +6,11 @@ interface Props {
 const { footer = false } = Astro.props;
 ---
 
-<a class:list={['brand', footer && 'brand-footer']} href="/" aria-label="Seqtura AI 首页">
+<a class:list={['brand', footer && 'brand-footer']} href="/">
   <span class="brand-mark" aria-hidden="true"></span>
   <span class="brand-name">Seqtura</span>
   <span class="brand-cn">序构 AI</span>
+  <span class="visually-hidden">首页</span>
 </a>
 
 <style>

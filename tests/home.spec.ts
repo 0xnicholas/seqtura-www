@@ -162,17 +162,19 @@ test('architecture bento shows the capability stack, trace and control planes', 
     await expect(section.getByRole('heading', { name })).toBeVisible();
   }
 
-  await expect(
-    section.getByRole('link', { name: '查看技术架构总览：5 层能力栈与 3 条控制面' }),
-  ).toHaveAttribute('href', '/architecture#overview');
-  await expect(
-    section.getByRole('link', { name: '查看请求生命周期：一条任务从进入到输出' }),
-  ).toHaveAttribute('href', '/architecture#lifecycle');
+  await expect(section.locator('a[href="/architecture#overview"]')).toHaveAttribute(
+    'href',
+    '/architecture#overview',
+  );
+  await expect(section.locator('a[href="/architecture#lifecycle"]')).toHaveAttribute(
+    'href',
+    '/architecture#lifecycle',
+  );
 
   const controlLinks = section.locator('a[href="/architecture#controls"]');
   await expect(controlLinks).toHaveCount(3);
   for (const name of ['身份与权限', '评测与可观测', '策略与审计']) {
-    await expect(section.getByRole('link', { name: `查看控制面：${name}` })).toBeVisible();
+    await expect(controlLinks.filter({ hasText: name })).toBeVisible();
   }
 });
 
@@ -361,15 +363,9 @@ test.describe('home at 390px', () => {
     const codePanel = await page.locator('section#methodology [data-code-panel]').boundingBox();
     expect(codePanel!.y).toBeGreaterThan(methodCopy!.y + methodCopy!.height);
 
-    const archCard = await page
-      .getByRole('link', { name: '查看技术架构总览：5 层能力栈与 3 条控制面' })
-      .boundingBox();
-    const traceCard = await page
-      .getByRole('link', { name: '查看请求生命周期：一条任务从进入到输出' })
-      .boundingBox();
-    const firstControl = await page
-      .getByRole('link', { name: '查看控制面：身份与权限' })
-      .boundingBox();
+    const archCard = await page.locator('a.arch-card').boundingBox();
+    const traceCard = await page.locator('a.trace-card').boundingBox();
+    const firstControl = await page.locator('a.control-card').first().boundingBox();
 
     expect(traceCard!.y).toBeGreaterThanOrEqual(archCard!.y + archCard!.height - 1);
     expect(firstControl!.y).toBeGreaterThanOrEqual(traceCard!.y + traceCard!.height - 1);

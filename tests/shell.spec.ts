@@ -156,7 +156,7 @@ test('focus is visible for keyboard users', async ({ page }) => {
 
   const outline = await page
     .getByRole('banner')
-    .getByRole('link', { name: 'Seqtura AI 首页' })
+    .getByRole('link', { name: /Seqtura.*首页/ })
     .evaluate((element) => {
       const style = getComputedStyle(element);
       return { style: style.outlineStyle, width: style.outlineWidth };
@@ -175,4 +175,35 @@ test('reduced motion turns off the hero entrance animation', async ({ page }) =>
     .first()
     .evaluate((element) => getComputedStyle(element).animationName);
   expect(animation).toBe('none');
+});
+
+test('200% zoom approximation stays usable without page-level overflow', async ({ page }) => {
+  await page.setViewportSize({ width: 720, height: 900 });
+
+  for (const route of [
+    '/',
+    '/methodology',
+    '/architecture',
+    '/process',
+    '/contact',
+    '/legal/privacy',
+    '/legal/terms',
+  ]) {
+    await page.goto(route);
+
+    const overflow = await page.evaluate(
+      () => document.documentElement.scrollWidth - window.innerWidth,
+    );
+    expect(overflow, `${route} overflows at 200% zoom`).toBeLessThanOrEqual(0);
+    await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+    await expect(page.getByRole('banner')).toBeVisible();
+    await expect(page.getByRole('contentinfo')).toBeVisible();
+  }
+
+  await page.goto('/contact');
+  await expect(page.getByLabel('姓名', { exact: true })).toBeVisible();
+  const submit = page.getByRole('button', { name: '提交预约' });
+  await expect(submit).toBeVisible();
+  const box = await submit.boundingBox();
+  expect(box?.height ?? 0).toBeGreaterThanOrEqual(44);
 });

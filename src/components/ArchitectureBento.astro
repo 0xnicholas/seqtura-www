@@ -17,19 +17,11 @@ const { architecture } = homeSections;
     />
 
     <div class="bento reveal">
-      <a
-        class="bento-card arch-card"
-        href="/architecture#overview"
-        aria-label="查看技术架构总览：5 层能力栈与 3 条控制面"
-      >
+      <a class="bento-card arch-card" href="/architecture#overview">
         <ReferenceArchitecturePlan />
       </a>
 
-      <a
-        class="bento-card trace-card"
-        href="/architecture#lifecycle"
-        aria-label="查看请求生命周期：一条任务从进入到输出"
-      >
+      <a class="bento-card trace-card" href="/architecture#lifecycle">
         <div class="trace-head">
           <span>TRACE / 任务轨迹</span>
           <span class="trace-state">
@@ -64,11 +56,7 @@ const { architecture } = homeSections;
       </a>
 
       {controlPlanes.map((plane) => (
-        <a
-          class="bento-card control-card"
-          href="/architecture#controls"
-          aria-label={`查看控制面：${plane.name}`}
-        >
+        <a class="bento-card control-card" href="/architecture#controls">
           <span class="control-code">{plane.code}</span>
           <h3 class="control-title">{plane.name}</h3>
           <p class="control-copy">{plane.summary}</p>
