@@ -1,6 +1,8 @@
 ---
+import type { MarkdownHeading } from 'astro';
 import BaseLayout from './BaseLayout.astro';
 import { showPlaceholderMarks } from '../config/placeholders';
+import { missingLegalPlaceholders } from '../config/legal';
 
 interface Props {
   title: string;
@@ -9,13 +11,24 @@ interface Props {
   effectiveAt: Date;
   updatedAt: Date;
   version: string;
+  headings?: readonly MarkdownHeading[];
 }
 
-const { title, heading = title, description, effectiveAt, updatedAt, version } = Astro.props;
+const {
+  title,
+  heading = title,
+  description,
+  effectiveAt,
+  updatedAt,
+  version,
+  headings = [],
+} = Astro.props;
 
-const dateFormat = new Intl.DateTimeFormat('zh-CN', { dateStyle: 'long' });
+const dateFormat = new Intl.DateTimeFormat('zh-CN', { dateStyle: 'long', timeZone: 'UTC' });
 const formatDate = (date: Date) => dateFormat.format(date);
 const isoDate = (date: Date) => date.toISOString().slice(0, 10);
+const tocHeadings = headings.filter((item) => item.depth === 2);
+const sectionLabel = (text: string) => text.replace(/^\d+\.\s*/, '');
 ---
 
 <BaseLayout title={title} description={description}>
@@ -25,7 +38,7 @@ const isoDate = (date: Date) => date.toISOString().slice(0, 10);
         <header class="legal-head">
           <p class="kicker">法务</p>
           <h1 class="legal-title">{heading}</h1>
-          <dl class="legal-meta">
+          <dl class="legal-meta" data-legal-meta>
             <div>
               <dt>生效日期</dt>
               <dd>
@@ -43,11 +56,31 @@ const isoDate = (date: Date) => date.toISOString().slice(0, 10);
               <dd>{version}</dd>
             </div>
           </dl>
-          {showPlaceholderMarks && (
-            <p class="preview-note">预览占位：正文与日期将在后续实现票中补全。</p>
+          {showPlaceholderMarks && missingLegalPlaceholders.length > 0 && (
+            <p class="preview-note" data-placeholder-note>
+              预览：以下法务字段尚未配置——{missingLegalPlaceholders.join('、')}
+              。生产构建会使用中性措辞或省略。
+            </p>
           )}
         </header>
-        <div class="legal-prose">
+
+        {tocHeadings.length > 0 && (
+          <nav class="legal-toc" aria-label="隐私政策目录" data-legal-toc>
+            <p class="legal-toc-title">目录</p>
+            <ol>
+              {tocHeadings.map((item, index) => (
+                <li>
+                  <a href={`#${item.slug}`}>
+                    <span class="legal-toc-index">{String(index + 1).padStart(2, '0')}</span>
+                    <span>{sectionLabel(item.text)}</span>
+                  </a>
+                </li>
+              ))}
+            </ol>
+          </nav>
+        )}
+
+        <div class="legal-prose" data-legal-prose>
           <slot />
         </div>
       </div>
@@ -93,7 +126,7 @@ const isoDate = (date: Date) => date.toISOString().slice(0, 10);
   }
 
   .legal-meta dt {
-    color: var(--color-faint);
+    color: var(--color-muted);
   }
 
   .preview-note {
@@ -109,11 +142,64 @@ const isoDate = (date: Date) => date.toISOString().slice(0, 10);
     color: var(--color-muted);
   }
 
+  .legal-toc {
+    margin-top: 32px;
+    padding: 22px 0 8px;
+    border-top: 1px solid var(--color-line);
+    border-bottom: 1px solid var(--color-line);
+  }
+
+  .legal-toc-title {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    line-height: 1.6;
+    letter-spacing: 0.08em;
+    color: var(--color-muted);
+  }
+
+  .legal-toc ol {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0 40px;
+    margin-top: 12px;
+    padding: 0;
+    list-style: none;
+  }
+
+  .legal-toc a {
+    display: flex;
+    gap: 12px;
+    padding: 8px 0;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--color-ink-2);
+    transition: color 150ms var(--ease-site);
+  }
+
+  .legal-toc a:hover {
+    color: var(--color-red-dark);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .legal-toc-index {
+    flex: none;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    line-height: 1.9;
+    color: var(--color-muted);
+  }
+
   .legal-prose {
     padding-top: 40px;
     font-size: 16px;
     line-height: 1.75;
     color: var(--color-ink-2);
+  }
+
+  .legal-prose :global(h2),
+  .legal-prose :global(h3) {
+    scroll-margin-top: calc(var(--header-h) + 24px);
   }
 
   .legal-prose :global(h2) {
@@ -134,6 +220,7 @@ const isoDate = (date: Date) => date.toISOString().slice(0, 10);
   .legal-prose :global(ul),
   .legal-prose :global(ol) {
     margin-top: 16px;
+    overflow-wrap: anywhere;
   }
 
   .legal-prose :global(ul) {
@@ -163,6 +250,11 @@ const isoDate = (date: Date) => date.toISOString().slice(0, 10);
   @media (max-width: 767px) {
     .legal {
       padding: 56px 0 72px;
+    }
+
+    .legal-toc ol {
+      grid-template-columns: 1fr;
+      gap: 0;
     }
   }
 </style>

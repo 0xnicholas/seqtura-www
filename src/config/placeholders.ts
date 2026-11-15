@@ -23,6 +23,8 @@ export const placeholders = {
   launchDate: envValue('PUBLIC_LAUNCH_DATE', ''),
   emailProvider: envValue('PUBLIC_EMAIL_PROVIDER', ''),
   hostingProvider: envValue('PUBLIC_HOSTING_PROVIDER', ''),
+  hostingLocation: envValue('PUBLIC_HOSTING_LOCATION', ''),
+  operatorLocation: envValue('PUBLIC_OPERATOR_LOCATION', ''),
   privacyVersion: envValue('PUBLIC_PRIVACY_VERSION', '1.0'),
 } as const satisfies Record<string, PlaceholderValue>;
 

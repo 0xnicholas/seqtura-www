@@ -13,6 +13,8 @@ interface ImportMetaEnv {
   readonly PUBLIC_LAUNCH_DATE?: string;
   readonly PUBLIC_EMAIL_PROVIDER?: string;
   readonly PUBLIC_HOSTING_PROVIDER?: string;
+  readonly PUBLIC_HOSTING_LOCATION?: string;
+  readonly PUBLIC_OPERATOR_LOCATION?: string;
   readonly PUBLIC_PRIVACY_VERSION?: string;
   readonly PUBLIC_SHOW_PLACEHOLDERS?: string;
   readonly SITE_URL?: string;

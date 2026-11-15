@@ -24,6 +24,7 @@ const legal = defineCollection({
     effectiveAt: z.coerce.date(),
     updatedAt: z.coerce.date(),
     version: z.string(),
+    toc: z.boolean().default(false),
     draft: z.boolean().default(false),
   }),
 });

@@ -1,6 +1,7 @@
 ---
 import { getCollection, render, type CollectionEntry } from 'astro:content';
 import LegalPage from '../../layouts/LegalPage.astro';
+import { legal } from '../../config/legal';
 
 export async function getStaticPaths() {
   const entries = await getCollection('legal', ({ data }) => !data.draft);
@@ -16,16 +17,20 @@ interface Props {
 }
 
 const { entry } = Astro.props;
-const { Content } = await render(entry);
+const { Content, headings } = await render(entry);
+const effectiveAt = legal.effectiveAt ?? entry.data.effectiveAt;
+const updatedAt = legal.updatedAt ?? entry.data.updatedAt;
+const version = entry.id === 'privacy' ? legal.privacyVersion : entry.data.version;
 ---
 
 <LegalPage
   title={entry.data.title}
   heading={entry.data.heading}
   description={entry.data.description}
-  effectiveAt={entry.data.effectiveAt}
-  updatedAt={entry.data.updatedAt}
-  version={entry.data.version}
+  effectiveAt={effectiveAt}
+  updatedAt={updatedAt}
+  version={version}
+  headings={entry.data.toc ? headings : []}
 >
   <Content />
 </LegalPage>
