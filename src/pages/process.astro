@@ -1,7 +1,11 @@
 ---
 import { getEntry } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
+import SectionHeading from '../components/SectionHeading.astro';
 import ProcessHero from '../components/ProcessHero.astro';
+import ProcessFlow from '../components/ProcessFlow.astro';
+import ProcessStageTable from '../components/ProcessStageTable.astro';
+import { processStagesCopy } from '../data/process';
 
 const entry = await getEntry('pages', 'process');
 
@@ -14,4 +18,17 @@ const { title, description } = entry.data;
 
 <BaseLayout title={title} description={description}>
   <ProcessHero />
+
+  <section class="section process-stages" id="stages" aria-labelledby="stages-title">
+    <div class="container-site">
+      <SectionHeading
+        id="stages-title"
+        kicker={processStagesCopy.kicker}
+        title={processStagesCopy.title}
+        lead={processStagesCopy.lead}
+      />
+      <ProcessFlow />
+      <ProcessStageTable />
+    </div>
+  </section>
 </BaseLayout>
