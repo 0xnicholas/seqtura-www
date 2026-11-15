@@ -1,0 +1,229 @@
+---
+import Brand from './Brand.astro';
+import { footerColumns, site } from '../config/site';
+import { placeholders, showPlaceholderMarks } from '../config/placeholders';
+
+const year = new Date().getFullYear();
+const icpNumber = placeholders.icpNumber.value;
+const psbNumber = placeholders.psbNumber.value;
+const psbCode = psbNumber.match(/\d{6,}/)?.[0] ?? psbNumber;
+const psbHref = `https://beian.mps.gov.cn/#/query/webSearch?code=${encodeURIComponent(psbCode)}`;
+---
+
+<footer class="footer">
+  <div class="container-site">
+    <div class="footer-main">
+      <div class="footer-brand">
+        <Brand footer />
+        <p class="footer-tagline">{site.tagline}</p>
+        <a class="footer-mail" href={`mailto:${placeholders.contactEmail.value}`}>
+          {placeholders.contactEmail.value}
+        </a>
+        {showPlaceholderMarks && placeholders.contactEmail.isPlaceholder && (
+          <p class="footer-note">占位邮箱，上线前由 owner 替换。</p>
+        )}
+      </div>
+
+      {footerColumns.map((column) => (
+        <div class="footer-col">
+          <h2 class="footer-col-title">{column.title}</h2>
+          <ul>
+            {column.links.map((link) => (
+              <li>
+                <a href={link.href}>{link.label}</a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </div>
+
+    <div class="footer-meta">
+      <span>© {year} Seqtura AI · 序构 AI</span>
+      <nav aria-label="法务与备案">
+        <a href="/legal/privacy">隐私政策</a>
+        <a href="/legal/terms">服务条款</a>
+        {icpNumber && (
+          <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener">
+            {icpNumber}
+          </a>
+        )}
+        {psbNumber && (
+          <a href={psbHref} target="_blank" rel="noopener">
+            {psbNumber}
+          </a>
+        )}
+      </nav>
+    </div>
+
+    <div class="footer-mark" aria-hidden="true">
+      <span>Seqtura</span>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    position: relative;
+    overflow: hidden;
+    background: var(--color-canvas);
+  }
+
+  .footer-main {
+    display: grid;
+    grid-template-columns: 1.9fr repeat(3, 1fr);
+    gap: 56px;
+    padding: 80px 0 64px;
+  }
+
+  .footer-tagline {
+    max-width: 300px;
+    margin-top: 20px;
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 1.55;
+    letter-spacing: -0.01em;
+    color: var(--color-red-dark);
+  }
+
+  .footer-mail {
+    display: inline-block;
+    margin-top: 22px;
+    border-bottom: 1px solid var(--color-line-strong);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.02em;
+    color: var(--color-ink-2);
+    overflow-wrap: anywhere;
+    transition:
+      color 150ms var(--ease-site),
+      border-color 150ms var(--ease-site);
+  }
+
+  .footer-mail:hover {
+    border-bottom-color: var(--color-red);
+    color: var(--color-red-dark);
+  }
+
+  .footer-note {
+    margin-top: 10px;
+    font-family: var(--font-mono);
+    font-size: 9px;
+    line-height: 1.5;
+    letter-spacing: 0.03em;
+    color: var(--color-faint);
+  }
+
+  .footer-col-title {
+    margin-bottom: 16px;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.5;
+  }
+
+  .footer-col ul {
+    display: grid;
+    gap: 11px;
+  }
+
+  .footer-col a {
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--color-muted);
+    transition: color 150ms var(--ease-site);
+  }
+
+  .footer-col a:hover {
+    color: var(--color-ink);
+  }
+
+  .footer-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px 24px;
+    padding: 22px 0;
+    border-top: 1px solid var(--color-line);
+    font-size: 12px;
+    line-height: 1.6;
+    color: var(--color-faint);
+  }
+
+  .footer-meta nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 20px;
+  }
+
+  .footer-meta a {
+    transition: color 150ms var(--ease-site);
+  }
+
+  .footer-meta a:hover {
+    color: var(--color-ink);
+  }
+
+  .footer-mark {
+    margin-top: 24px;
+    font-size: clamp(96px, 29vw, 418px);
+    font-weight: 500;
+    line-height: 0.8;
+    letter-spacing: -0.055em;
+    color: var(--color-red);
+    white-space: nowrap;
+    user-select: none;
+    transform: translateY(2%);
+  }
+
+  .footer-mark span {
+    display: inline-block;
+  }
+
+  @media (max-width: 1023px) {
+    .footer-main {
+      grid-template-columns: 1.6fr 1fr 1fr;
+      gap: 40px;
+    }
+
+    .footer-brand {
+      grid-column: 1 / -1;
+    }
+  }
+
+  @media (max-width: 767px) {
+    .footer-main {
+      grid-template-columns: 1fr 1fr;
+      gap: 36px 24px;
+      padding: 56px 0 48px;
+    }
+
+    .footer-brand {
+      grid-column: 1 / -1;
+    }
+
+    .footer-tagline {
+      font-size: 15px;
+    }
+
+    .footer-meta {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .footer-mark {
+      font-size: 23vw;
+      line-height: 0.8;
+    }
+  }
+
+  @media (max-width: 359px) {
+    .footer-main {
+      grid-template-columns: 1fr;
+    }
+
+    .footer-mark {
+      font-size: 22vw;
+    }
+  }
+</style>

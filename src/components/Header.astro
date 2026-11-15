@@ -1,0 +1,261 @@
+---
+import Brand from './Brand.astro';
+import { navItems, site } from '../config/site';
+import { placeholders } from '../config/placeholders';
+
+const pathname = Astro.url.pathname;
+
+function isActive(href: string): boolean {
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
+---
+
+<header class="site-header" data-header>
+  <div class="container-site header-inner">
+    <Brand />
+
+    <nav class="desktop-nav" aria-label="主导航">
+      {navItems.map((item) => (
+        <a href={item.href} aria-current={isActive(item.href) ? 'page' : undefined}>
+          {item.label}
+        </a>
+      ))}
+    </nav>
+
+    <div class="header-actions">
+      <a class="header-email" href={`mailto:${placeholders.contactEmail.value}`}>
+        {placeholders.contactEmail.value}
+      </a>
+      <a class="btn btn-primary btn-sm header-cta" href={site.bookingPath}>
+        预约沟通
+      </a>
+      <a class="btn btn-primary btn-sm header-cta-compact" href={site.bookingPath}>
+        预约
+      </a>
+      <button
+        class="menu-toggle"
+        type="button"
+        aria-expanded="false"
+        aria-controls="mobile-menu"
+        aria-label="打开菜单"
+        data-menu-toggle
+      >
+        <span aria-hidden="true"></span>
+      </button>
+    </div>
+  </div>
+
+  <div class="mobile-menu" id="mobile-menu" data-mobile-menu hidden>
+    <nav aria-label="移动端主导航">
+      {navItems.map((item) => (
+        <a href={item.href} aria-current={isActive(item.href) ? 'page' : undefined}>
+          {item.label}
+        </a>
+      ))}
+    </nav>
+  </div>
+</header>
+
+<script is:inline src="/scripts/site.js" defer></script>
+
+<style>
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 60;
+    height: var(--header-h);
+    border-bottom: 1px solid transparent;
+    background: rgb(255 255 255 / 88%);
+    backdrop-filter: blur(8px);
+    transition: border-color 150ms var(--ease-site);
+  }
+
+  .site-header.is-scrolled {
+    border-bottom-color: rgb(0 0 0 / 9%);
+  }
+
+  .header-inner {
+    display: flex;
+    align-items: center;
+    gap: 36px;
+    height: var(--header-h);
+  }
+
+  .desktop-nav {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    margin-left: 4px;
+  }
+
+  .desktop-nav a {
+    position: relative;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.5;
+    color: var(--color-ink-2);
+    transition: color 150ms var(--ease-site);
+  }
+
+  .desktop-nav a:hover,
+  .desktop-nav a[aria-current='page'] {
+    color: var(--color-ink);
+  }
+
+  .desktop-nav a::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    bottom: -22px;
+    left: 0;
+    height: 2px;
+    background: var(--color-red);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 150ms var(--ease-site);
+  }
+
+  .desktop-nav a:hover::after,
+  .desktop-nav a[aria-current='page']::after {
+    transform: scaleX(1);
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    margin-left: auto;
+  }
+
+  .header-email {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.03em;
+    color: var(--color-muted);
+    transition: color 150ms var(--ease-site);
+  }
+
+  .header-email:hover {
+    color: var(--color-red-dark);
+  }
+
+  .header-cta-compact {
+    display: none;
+  }
+
+  .menu-toggle {
+    display: none;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-site-sm);
+    background: var(--color-canvas);
+    cursor: pointer;
+  }
+
+  .menu-toggle span {
+    position: relative;
+    display: block;
+    width: 16px;
+    height: 1px;
+    background: var(--color-ink);
+  }
+
+  .menu-toggle span::before,
+  .menu-toggle span::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    width: 16px;
+    height: 1px;
+    background: var(--color-ink);
+    transition:
+      transform 150ms var(--ease-site),
+      top 150ms var(--ease-site);
+  }
+
+  .menu-toggle span::before {
+    top: -5px;
+  }
+
+  .menu-toggle span::after {
+    top: 5px;
+  }
+
+  .menu-toggle[aria-expanded='true'] span {
+    background: transparent;
+  }
+
+  .menu-toggle[aria-expanded='true'] span::before {
+    top: 0;
+    transform: rotate(45deg);
+  }
+
+  .menu-toggle[aria-expanded='true'] span::after {
+    top: 0;
+    transform: rotate(-45deg);
+  }
+
+  .mobile-menu {
+    position: absolute;
+    top: var(--header-h);
+    right: 0;
+    left: 0;
+    padding: 8px var(--gutter) 20px;
+    border-bottom: 1px solid var(--color-line);
+    background: var(--color-canvas);
+    box-shadow: 0 12px 24px rgb(0 0 0 / 6%);
+  }
+
+  .mobile-menu a {
+    display: flex;
+    align-items: center;
+    height: 48px;
+    border-bottom: 1px solid var(--color-line);
+    font-size: 16px;
+    font-weight: 500;
+  }
+
+  .mobile-menu a[aria-current='page'] {
+    color: var(--color-red-dark);
+  }
+
+  @media (max-width: 1023px) {
+    .desktop-nav,
+    .header-email,
+    .header-cta {
+      display: none;
+    }
+
+    .header-cta-compact,
+    .menu-toggle {
+      display: inline-flex;
+    }
+
+    .header-inner {
+      gap: 16px;
+    }
+
+    .header-actions {
+      gap: 12px;
+    }
+  }
+
+  @media (max-width: 767px) {
+    .header-inner {
+      gap: 12px;
+    }
+
+    .header-actions {
+      gap: 8px;
+    }
+
+    .header-cta-compact {
+      height: 34px;
+      padding: 0 14px;
+    }
+  }
+</style>

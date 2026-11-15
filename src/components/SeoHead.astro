@@ -1,0 +1,72 @@
+---
+import { site } from '../config/site';
+
+interface Props {
+  title?: string;
+  description?: string;
+  canonicalPath?: string;
+  noindex?: boolean;
+  ogImage?: string;
+}
+
+const {
+  title = site.defaultTitle,
+  description = site.description,
+  canonicalPath = Astro.url.pathname,
+  noindex = false,
+  ogImage = '/og-default.png',
+} = Astro.props;
+
+const siteUrl = Astro.site ?? new URL('https://seqtura.ai');
+const canonical = new URL(canonicalPath, siteUrl);
+const ogImageUrl = new URL(ogImage, siteUrl);
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'Organization',
+      '@id': `${siteUrl.origin}/#organization`,
+      name: site.name,
+      alternateName: site.nameCn,
+      url: siteUrl.origin,
+      logo: ogImageUrl.toString(),
+    },
+    {
+      '@type': 'WebSite',
+      '@id': `${siteUrl.origin}/#website`,
+      url: siteUrl.origin,
+      name: `${site.name}（${site.nameCn}）`,
+      inLanguage: 'zh-CN',
+      publisher: { '@id': `${siteUrl.origin}/#organization` },
+    },
+  ],
+};
+---
+
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>{title}</title>
+<meta name="description" content={description} />
+<link rel="canonical" href={canonical} />
+<meta name="color-scheme" content="light" />
+<meta name="theme-color" content="#FFFFFF" />
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+{noindex && <meta name="robots" content="noindex" />}
+
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content={`${site.name}（${site.nameCn}）`} />
+<meta property="og:locale" content="zh_CN" />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:url" content={canonical} />
+<meta property="og:image" content={ogImageUrl} />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={ogImageUrl} />
+
+<script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />

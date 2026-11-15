@@ -1,0 +1,19 @@
+---
+import { getEntry } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import HomeHero from '../components/HomeHero.astro';
+import ProofStrip from '../components/ProofStrip.astro';
+
+const home = await getEntry('pages', 'home');
+
+if (!home || home.data.draft) {
+  throw new Error('Missing published content entry: pages/home');
+}
+
+const { title, description } = home.data;
+---
+
+<BaseLayout title={title} description={description}>
+  <HomeHero />
+  <ProofStrip />
+</BaseLayout>

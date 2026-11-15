@@ -1,0 +1,301 @@
+<svg class="stack-art" viewBox="0 0 720 640" role="img" aria-labelledby="stack-title stack-desc">
+  <title id="stack-title">Seqtura 交付参考架构</title>
+  <desc id="stack-desc">
+    五层能力栈的等距示意图，三条控制面横切五层；左侧标出任务进入、工具调用与人工审批节点。
+  </desc>
+  <defs>
+    <radialGradient id="iso-glow" cx="50%" cy="46%" r="52%">
+      <stop offset="0%" stop-color="#F53003" stop-opacity=".16"></stop>
+      <stop offset="58%" stop-color="#F53003" stop-opacity=".06"></stop>
+      <stop offset="100%" stop-color="#F53003" stop-opacity="0"></stop>
+    </radialGradient>
+    <linearGradient id="slab-red" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#F53003" stop-opacity=".36"></stop>
+      <stop offset="100%" stop-color="#F53003" stop-opacity=".14"></stop>
+    </linearGradient>
+    <linearGradient id="slab-peach" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#FF8A65" stop-opacity=".4"></stop>
+      <stop offset="100%" stop-color="#FF8A65" stop-opacity=".16"></stop>
+    </linearGradient>
+    <filter id="slab-shadow" x="-20%" y="-20%" width="140%" height="150%">
+      <feDropShadow
+        dx="0"
+        dy="10"
+        stdDeviation="10"
+        flood-color="#F53003"
+        flood-opacity=".12"
+      ></feDropShadow>
+    </filter>
+  </defs>
+
+  <ellipse cx="380" cy="344" rx="330" ry="266" fill="url(#iso-glow)"></ellipse>
+
+  <g aria-hidden="true">
+    <rect x="292" y="80" width="16" height="524" fill="#F53003" opacity=".045"></rect>
+    <rect x="372" y="80" width="16" height="524" fill="#F53003" opacity=".045"></rect>
+    <rect x="452" y="80" width="16" height="524" fill="#F53003" opacity=".045"></rect>
+    <line
+      x1="300"
+      y1="82"
+      x2="300"
+      y2="602"
+      stroke="#F53003"
+      stroke-opacity=".3"
+      stroke-dasharray="3 6"
+    ></line>
+    <line
+      x1="380"
+      y1="82"
+      x2="380"
+      y2="602"
+      stroke="#F53003"
+      stroke-opacity=".3"
+      stroke-dasharray="3 6"
+    ></line>
+    <line
+      x1="460"
+      y1="82"
+      x2="460"
+      y2="602"
+      stroke="#F53003"
+      stroke-opacity=".3"
+      stroke-dasharray="3 6"
+    ></line>
+  </g>
+
+  <g
+    font-family="'IBM Plex Mono', 'SF Mono', Menlo, monospace"
+    font-size="9"
+    fill="#C42602"
+    letter-spacing=".06em"
+    aria-hidden="true"
+  >
+    <text x="300" y="70" text-anchor="middle">
+      C1
+    </text>
+    <text x="380" y="70" text-anchor="middle">
+      C2
+    </text>
+    <text x="460" y="70" text-anchor="middle">
+      C3
+    </text>
+  </g>
+
+  <g
+    stroke="#171717"
+    stroke-opacity=".18"
+    stroke-width="1"
+    filter="url(#slab-shadow)"
+    aria-hidden="true"
+  >
+    <g>
+      <polygon points="380,100 565,204 380,308 195,204" fill="url(#slab-red)"></polygon>
+      <polygon points="195,204 380,308 380,342 195,238" fill="#F53003" fill-opacity=".10"></polygon>
+      <polygon points="380,308 565,204 565,238 380,342" fill="#F53003" fill-opacity=".13"></polygon>
+    </g>
+    <g>
+      <polygon points="380,164 565,268 380,372 195,268" fill="url(#slab-peach)"></polygon>
+      <polygon points="195,268 380,372 380,406 195,302" fill="#FF8A65" fill-opacity=".14"></polygon>
+      <polygon points="380,372 565,268 565,302 380,406" fill="#FF8A65" fill-opacity=".18"></polygon>
+    </g>
+    <g>
+      <polygon points="380,228 565,332 380,436 195,332" fill="#171717" fill-opacity=".12"></polygon>
+      <polygon points="195,332 380,436 380,470 195,366" fill="#171717" fill-opacity=".07"></polygon>
+      <polygon points="380,436 565,332 565,366 380,470" fill="#171717" fill-opacity=".09"></polygon>
+    </g>
+    <g>
+      <polygon points="380,292 565,396 380,500 195,396" fill="url(#slab-peach)"></polygon>
+      <polygon points="195,396 380,500 380,534 195,430" fill="#FF8A65" fill-opacity=".14"></polygon>
+      <polygon points="380,500 565,396 565,430 380,534" fill="#FF8A65" fill-opacity=".18"></polygon>
+    </g>
+    <g>
+      <polygon points="380,356 565,460 380,564 195,460" fill="url(#slab-red)"></polygon>
+      <polygon points="195,460 380,564 380,598 195,494" fill="#F53003" fill-opacity=".12"></polygon>
+      <polygon points="380,564 565,460 565,494 380,598" fill="#F53003" fill-opacity=".15"></polygon>
+    </g>
+  </g>
+
+  <g font-family="-apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif" aria-hidden="true">
+    <g>
+      <rect
+        x="425"
+        y="316"
+        width="162"
+        height="26"
+        rx="4"
+        fill="#FFFFFF"
+        fill-opacity=".9"
+        stroke="#171717"
+        stroke-opacity=".09"
+      ></rect>
+      <text x="437" y="333" font-size="12" fill="#171717">
+        运行时与部署
+      </text>
+      <text
+        x="575"
+        y="333"
+        text-anchor="end"
+        font-family="'IBM Plex Mono', 'SF Mono', Menlo, monospace"
+        font-size="9"
+        fill="#C42602"
+      >
+        L5
+      </text>
+    </g>
+    <g>
+      <rect
+        x="425"
+        y="380"
+        width="162"
+        height="26"
+        rx="4"
+        fill="#FFFFFF"
+        fill-opacity=".9"
+        stroke="#171717"
+        stroke-opacity=".09"
+      ></rect>
+      <text x="437" y="397" font-size="12" fill="#171717">
+        知识与记忆
+      </text>
+      <text
+        x="575"
+        y="397"
+        text-anchor="end"
+        font-family="'IBM Plex Mono', 'SF Mono', Menlo, monospace"
+        font-size="9"
+        fill="#C42602"
+      >
+        L4
+      </text>
+    </g>
+    <g>
+      <rect x="425" y="444" width="162" height="26" rx="4" fill="#F53003"></rect>
+      <text x="437" y="461" font-size="12" fill="#FFFFFF">
+        工具与系统集成
+      </text>
+      <text
+        x="575"
+        y="461"
+        text-anchor="end"
+        font-family="'IBM Plex Mono', 'SF Mono', Menlo, monospace"
+        font-size="9"
+        fill="#FFFFFF"
+        fill-opacity=".8"
+      >
+        L3
+      </text>
+    </g>
+    <g>
+      <rect x="425" y="508" width="162" height="26" rx="4" fill="#171717"></rect>
+      <text x="437" y="525" font-size="12" fill="#FFFFFF">
+        模型
+      </text>
+      <text
+        x="575"
+        y="525"
+        text-anchor="end"
+        font-family="'IBM Plex Mono', 'SF Mono', Menlo, monospace"
+        font-size="9"
+        fill="#FFFFFF"
+        fill-opacity=".7"
+      >
+        L2
+      </text>
+    </g>
+    <g>
+      <rect
+        x="425"
+        y="572"
+        width="162"
+        height="26"
+        rx="4"
+        fill="#FFFFFF"
+        fill-opacity=".94"
+        stroke="#171717"
+        stroke-opacity=".09"
+      ></rect>
+      <text x="437" y="589" font-size="12" fill="#171717">
+        接入与编排
+      </text>
+      <text
+        x="575"
+        y="589"
+        text-anchor="end"
+        font-family="'IBM Plex Mono', 'SF Mono', Menlo, monospace"
+        font-size="9"
+        fill="#C42602"
+      >
+        L1
+      </text>
+    </g>
+  </g>
+
+  <g font-family="-apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif" aria-hidden="true">
+    <path d="M58 286 H126 L176 322" fill="none" stroke="#171717" stroke-opacity=".22"></path>
+    <circle cx="58" cy="286" r="4" fill="#171717"></circle>
+    <rect x="22" y="247" width="74" height="24" rx="4" fill="#fff" stroke="#E5E5E5"></rect>
+    <text x="59" y="263" text-anchor="middle" font-size="10" fill="#404040">
+      任务进入
+    </text>
+
+    <path d="M58 438 H132 L176 452" fill="none" stroke="#F53003" stroke-opacity=".55"></path>
+    <circle cx="58" cy="438" r="4" fill="#F53003"></circle>
+    <rect x="18" y="399" width="80" height="24" rx="4" fill="#fff" stroke="#E5E5E5"></rect>
+    <text x="58" y="415" text-anchor="middle" font-size="10" fill="#404040">
+      工具调用
+    </text>
+
+    <path
+      d="M88 550 H142 L176 532"
+      fill="none"
+      stroke="#F53003"
+      stroke-opacity=".42"
+      stroke-dasharray="3 4"
+    ></path>
+    <path
+      d="M88 543 L95 550 L88 557 L81 550 Z"
+      fill="none"
+      stroke="#F53003"
+      stroke-width="1.4"
+    ></path>
+    <rect x="18" y="568" width="86" height="24" rx="4" fill="#fff" stroke="#E5E5E5"></rect>
+    <text x="61" y="584" text-anchor="middle" font-size="10" fill="#404040">
+      HITL gate
+    </text>
+  </g>
+
+  <g
+    font-family="'IBM Plex Mono', 'SF Mono', Menlo, monospace"
+    font-size="9"
+    fill="#737373"
+    letter-spacing=".04em"
+    aria-hidden="true"
+  >
+    <rect x="425" y="608" width="58" height="22" rx="4" fill="#fff" stroke="#E5E5E5"></rect>
+    <circle cx="437" cy="619" r="2.5" fill="#F53003"></circle>
+    <text x="444" y="622">
+      身份
+    </text>
+    <rect x="491" y="608" width="58" height="22" rx="4" fill="#fff" stroke="#E5E5E5"></rect>
+    <circle cx="503" cy="619" r="2.5" fill="#F53003"></circle>
+    <text x="510" y="622">
+      评测
+    </text>
+    <rect x="557" y="608" width="58" height="22" rx="4" fill="#fff" stroke="#E5E5E5"></rect>
+    <circle cx="569" cy="619" r="2.5" fill="#F53003"></circle>
+    <text x="576" y="622">
+      审计
+    </text>
+  </g>
+</svg>
+
+<style>
+  .stack-art {
+    position: relative;
+    width: 108%;
+    max-width: none;
+    height: auto;
+    margin-left: -4%;
+    overflow: visible;
+  }
+</style>

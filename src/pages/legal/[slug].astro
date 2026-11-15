@@ -1,0 +1,31 @@
+---
+import { getCollection, render, type CollectionEntry } from 'astro:content';
+import LegalPage from '../../layouts/LegalPage.astro';
+
+export async function getStaticPaths() {
+  const entries = await getCollection('legal', ({ data }) => !data.draft);
+
+  return entries.map((entry) => ({
+    params: { slug: entry.id },
+    props: { entry },
+  }));
+}
+
+interface Props {
+  entry: CollectionEntry<'legal'>;
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+---
+
+<LegalPage
+  title={entry.data.title}
+  heading={entry.data.heading}
+  description={entry.data.description}
+  effectiveAt={entry.data.effectiveAt}
+  updatedAt={entry.data.updatedAt}
+  version={entry.data.version}
+>
+  <Content />
+</LegalPage>

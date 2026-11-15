@@ -1,0 +1,62 @@
+---
+interface Props {
+  footer?: boolean;
+}
+
+const { footer = false } = Astro.props;
+---
+
+<a class:list={['brand', footer && 'brand-footer']} href="/" aria-label="Seqtura AI 首页">
+  <span class="brand-mark" aria-hidden="true"></span>
+  <span class="brand-name">Seqtura</span>
+  <span class="brand-cn">序构 AI</span>
+</a>
+
+<style>
+  .brand {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .brand-mark {
+    position: relative;
+    flex: none;
+    width: 16px;
+    height: 16px;
+    background: var(--color-red);
+  }
+
+  .brand-mark::after {
+    content: '';
+    position: absolute;
+    inset: 4px;
+    background: var(--color-canvas);
+  }
+
+  .brand-name {
+    font-size: 19px;
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: -0.03em;
+  }
+
+  .brand-cn {
+    font-size: 10px;
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: 0.1em;
+    color: var(--color-muted);
+  }
+
+  .brand-footer .brand-name {
+    font-size: 22px;
+  }
+
+  @media (max-width: 767px) {
+    .brand-cn {
+      display: none;
+    }
+  }
+</style>

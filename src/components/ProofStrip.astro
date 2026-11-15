@@ -1,0 +1,165 @@
+---
+const facts = [
+  { value: '8', unit: 'STAGES', label: '8 个交付阶段', sub: 'FDE 交付方法 · 4 组' },
+  { value: '5', unit: 'LAYERS', label: '5 层能力栈', sub: '接入到运行时' },
+  { value: '3', unit: 'PLANES', label: '3 条控制面', sub: '身份 / 评测 / 审计' },
+  { value: '1', unit: 'ENTRY', label: '1 个主转化', sub: '预约 30 分钟沟通' },
+];
+---
+
+<section class="proof-strip" aria-label="交付事实">
+  <div class="container-site proof-grid">
+    <div class="proof-intro">
+      <p class="proof-label">
+        Built for production
+        <br />
+        面向企业生产环境
+      </p>
+    </div>
+    {facts.map((fact) => (
+      <div class="proof-cell" data-proof-fact>
+        <p class="proof-value" aria-hidden="true">
+          {fact.value} <span class="unit">{fact.unit}</span>
+        </p>
+        <p class="proof-sub">
+          <span class="proof-fact-label">{fact.label}</span>
+          <span class="proof-fact-detail"> · {fact.sub}</span>
+        </p>
+      </div>
+    ))}
+  </div>
+</section>
+
+<style>
+  .proof-strip {
+    border-bottom: 1px solid var(--color-line);
+    background: var(--color-canvas);
+  }
+
+  .proof-grid {
+    display: grid;
+    grid-template-columns: 1.3fr repeat(4, 1fr);
+  }
+
+  .proof-cell,
+  .proof-intro {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-width: 0;
+    min-height: 129px;
+    padding: 24px 26px;
+    border-right: 1px solid var(--color-line);
+  }
+
+  .proof-cell:last-child {
+    border-right: 0;
+  }
+
+  .proof-cell::before,
+  .proof-intro::before {
+    content: '';
+    position: absolute;
+    top: -4px;
+    left: -4px;
+    width: 7px;
+    height: 7px;
+    background: var(--color-red);
+  }
+
+  .proof-intro::before {
+    left: 0;
+  }
+
+  .proof-label {
+    max-width: 210px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    line-height: 1.7;
+    letter-spacing: 0.06em;
+    color: var(--color-muted);
+    text-transform: uppercase;
+  }
+
+  .proof-value {
+    font-size: 28px;
+    font-weight: 400;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+  }
+
+  .proof-value .unit {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    color: var(--color-faint);
+  }
+
+  .proof-sub {
+    margin-top: 5px;
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--color-muted);
+  }
+
+  .proof-fact-label {
+    color: var(--color-ink-2);
+  }
+
+  .proof-fact-detail {
+    color: var(--color-muted);
+  }
+
+  @media (max-width: 1023px) {
+    .proof-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .proof-cell {
+      border-right: 0;
+      border-bottom: 1px solid var(--color-line);
+    }
+
+    .proof-cell:nth-child(even) {
+      border-right: 1px solid var(--color-line);
+    }
+
+    .proof-cell:nth-last-child(-n + 2) {
+      border-bottom: 0;
+    }
+
+    .proof-intro {
+      grid-column: 1 / -1;
+      min-height: 96px;
+      border-right: 0;
+      border-bottom: 1px solid var(--color-line);
+    }
+  }
+
+  @media (max-width: 767px) {
+    .proof-cell {
+      min-height: 96px;
+      padding: 20px 18px;
+    }
+
+    .proof-value {
+      font-size: 24px;
+    }
+
+    .proof-label {
+      font-size: 10px;
+    }
+
+    .proof-sub {
+      font-size: 11px;
+    }
+  }
+
+  @media (max-width: 359px) {
+    .proof-value {
+      font-size: 21px;
+    }
+  }
+</style>

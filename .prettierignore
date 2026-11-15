@@ -1,0 +1,7 @@
+node_modules/
+dist/
+.astro/
+pnpm-lock.yaml
+prototype/
+test-results/
+playwright-report/

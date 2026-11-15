@@ -1,0 +1,168 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import { showPlaceholderMarks } from '../config/placeholders';
+
+interface Props {
+  title: string;
+  heading?: string;
+  description: string;
+  effectiveAt: Date;
+  updatedAt: Date;
+  version: string;
+}
+
+const { title, heading = title, description, effectiveAt, updatedAt, version } = Astro.props;
+
+const dateFormat = new Intl.DateTimeFormat('zh-CN', { dateStyle: 'long' });
+const formatDate = (date: Date) => dateFormat.format(date);
+const isoDate = (date: Date) => date.toISOString().slice(0, 10);
+---
+
+<BaseLayout title={title} description={description}>
+  <article class="legal">
+    <div class="container-site">
+      <div class="legal-inner">
+        <header class="legal-head">
+          <p class="kicker">法务</p>
+          <h1 class="legal-title">{heading}</h1>
+          <dl class="legal-meta">
+            <div>
+              <dt>生效日期</dt>
+              <dd>
+                <time datetime={isoDate(effectiveAt)}>{formatDate(effectiveAt)}</time>
+              </dd>
+            </div>
+            <div>
+              <dt>最后更新</dt>
+              <dd>
+                <time datetime={isoDate(updatedAt)}>{formatDate(updatedAt)}</time>
+              </dd>
+            </div>
+            <div>
+              <dt>版本</dt>
+              <dd>{version}</dd>
+            </div>
+          </dl>
+          {showPlaceholderMarks && (
+            <p class="preview-note">预览占位：正文与日期将在后续实现票中补全。</p>
+          )}
+        </header>
+        <div class="legal-prose">
+          <slot />
+        </div>
+      </div>
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  .legal {
+    padding: 80px 0 96px;
+  }
+
+  .legal-inner {
+    max-width: 720px;
+    margin-inline: auto;
+  }
+
+  .legal-title {
+    margin-top: 20px;
+    font-size: var(--type-legal-h1-size);
+    font-weight: 400;
+    line-height: var(--type-legal-h1-line);
+    letter-spacing: -0.02em;
+  }
+
+  .legal-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 28px;
+    margin-top: 28px;
+    padding: 14px 0;
+    border-top: 1px solid var(--color-line);
+    border-bottom: 1px solid var(--color-line);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    line-height: 1.6;
+    color: var(--color-muted);
+  }
+
+  .legal-meta div {
+    display: flex;
+    gap: 8px;
+  }
+
+  .legal-meta dt {
+    color: var(--color-faint);
+  }
+
+  .preview-note {
+    display: inline-block;
+    margin-top: 20px;
+    padding: 6px 10px;
+    border: 1px dashed var(--color-line-strong);
+    border-radius: var(--radius-site-sm);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    line-height: 1.5;
+    letter-spacing: 0.03em;
+    color: var(--color-muted);
+  }
+
+  .legal-prose {
+    padding-top: 40px;
+    font-size: 16px;
+    line-height: 1.75;
+    color: var(--color-ink-2);
+  }
+
+  .legal-prose :global(h2) {
+    margin-top: 40px;
+    font-size: var(--type-legal-h2-size);
+    font-weight: 500;
+    line-height: var(--type-legal-h2-line);
+  }
+
+  .legal-prose :global(h3) {
+    margin-top: 28px;
+    font-size: var(--type-legal-h3-size);
+    font-weight: 500;
+    line-height: var(--type-legal-h3-line);
+  }
+
+  .legal-prose :global(p),
+  .legal-prose :global(ul),
+  .legal-prose :global(ol) {
+    margin-top: 16px;
+  }
+
+  .legal-prose :global(ul) {
+    list-style: disc;
+    padding-left: 1.4em;
+  }
+
+  .legal-prose :global(ol) {
+    list-style: decimal;
+    padding-left: 1.5em;
+  }
+
+  .legal-prose :global(li) {
+    margin-top: 6px;
+  }
+
+  .legal-prose :global(a) {
+    border-bottom: 1px solid transparent;
+    color: var(--color-red-dark);
+    overflow-wrap: anywhere;
+  }
+
+  .legal-prose :global(a:hover) {
+    border-bottom-color: currentColor;
+  }
+
+  @media (max-width: 767px) {
+    .legal {
+      padding: 56px 0 72px;
+    }
+  }
+</style>
