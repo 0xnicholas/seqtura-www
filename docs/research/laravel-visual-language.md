@@ -33,16 +33,16 @@ laravel.com 不是靠「渐变 + 玻璃拟态」营造高级感，而是靠**一
 
 实测阶梯（桌面 ≥1024px / 移动 390px）：
 
-| 角色 | 桌面 | 行高 | 字距 | 字重 | 说明 |
-|---|---|---|---|---|---|
-| H1 | 72px | 72px（1.0） | -3.6px（-5%） | 400 | 实测 746×144，两行 |
-| H2 | 60px | 60px（1.0） | -3px（-5%） | 400 | 居中，`max-width:768px` |
-| H3 | 36px | 40px（1.11） | -1.8px（-5%） | 400 | 移动端 H1 用 36/40 |
-| H4 | 24px | 32px | -0.6px | 500 | |
-| 导语 | 20px | 28px | -0.5px | 400/500 | `max-width:672px` |
-| 正文 | 16px | 24px（1.5） | 0 | 400 | 占绝对多数（231 节点） |
-| 小字 | 14px | 20–22.75px | 0 | 400/500 | |
-| 微标 | 12px | 16px | 0 | 500 | 徽标、状态胶囊 |
+| 角色 | 桌面 | 行高         | 字距          | 字重    | 说明                    |
+| ---- | ---- | ------------ | ------------- | ------- | ----------------------- |
+| H1   | 72px | 72px（1.0）  | -3.6px（-5%） | 400     | 实测 746×144，两行      |
+| H2   | 60px | 60px（1.0）  | -3px（-5%）   | 400     | 居中，`max-width:768px` |
+| H3   | 36px | 40px（1.11） | -1.8px（-5%） | 400     | 移动端 H1 用 36/40      |
+| H4   | 24px | 32px         | -0.6px        | 500     |                         |
+| 导语 | 20px | 28px         | -0.5px        | 400/500 | `max-width:672px`       |
+| 正文 | 16px | 24px（1.5）  | 0             | 400     | 占绝对多数（231 节点）  |
+| 小字 | 14px | 20–22.75px   | 0             | 400/500 |                         |
+| 微标 | 12px | 16px         | 0             | 500     | 徽标、状态胶囊          |
 
 断点沿用 Tailwind v4 默认值：`40rem(640) / 48rem(768) / 64rem(1024) / 80rem(1280) / 96rem(1536)`。字距 token：`--tracking-heading: -2%`、`--tracking-heading-tighter: -5%`；`--tracking-tighter: -0.05em`。
 
@@ -104,129 +104,156 @@ laravel.com 不是靠「渐变 + 玻璃拟态」营造高级感，而是靠**一
 
 ```css
 :root {
-  --font-sans: "Inter", "PingFang SC", "Hiragino Sans GB",
-               "Noto Sans SC", "Microsoft YaHei", system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", "IBM Plex Mono", ui-monospace,
-               "SF Mono", Menlo, monospace;
+  --font-sans:
+    'Inter', 'PingFang SC', 'Hiragino Sans GB', 'Noto Sans SC', 'Microsoft YaHei', system-ui,
+    sans-serif;
+  --font-mono: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, monospace;
 
   /* 中文版阶梯：比 Laravel 更重、更松、不收字距 */
-  --fs-display: 64px; --lh-display: 1.06; --ls-display: -0.02em;
-  --fs-h2: 48px; --lh-h2: 1.12;
-  --fs-h3: 32px; --lh-h3: 1.25;
-  --fs-h4: 24px; --lh-h4: 1.35;
-  --fs-lead: 20px; --lh-lead: 1.6;
-  --fs-body: 16px; --lh-body: 1.75;
-  --fs-caption: 14px; --lh-caption: 1.55;
-  --fs-micro: 12px; --lh-micro: 1.5;
-  --fs-mono: 14px; --lh-mono: 1.65;
+  --fs-display: 64px;
+  --lh-display: 1.06;
+  --ls-display: -0.02em;
+  --fs-h2: 48px;
+  --lh-h2: 1.12;
+  --fs-h3: 32px;
+  --lh-h3: 1.25;
+  --fs-h4: 24px;
+  --lh-h4: 1.35;
+  --fs-lead: 20px;
+  --lh-lead: 1.6;
+  --fs-body: 16px;
+  --lh-body: 1.75;
+  --fs-caption: 14px;
+  --lh-caption: 1.55;
+  --fs-micro: 12px;
+  --lh-micro: 1.5;
+  --fs-mono: 14px;
+  --lh-mono: 1.65;
 
-  --fw-display: 500; --fw-body: 400; --fw-emphasis: 600;
+  --fw-display: 500;
+  --fw-body: 400;
+  --fw-emphasis: 600;
 
-  --radius-xs: 2px;  --radius-sm: 6px; --radius-md: 8px;
-  --radius-lg: 12px; --radius-xl: 20px; --radius-pill: 9999px;
+  --radius-xs: 2px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 20px;
+  --radius-pill: 9999px;
 
-  --gutter: 24px; --container: 1280px;
-  --section-y: 96px;           /* 移动端 64px */
+  --gutter: 24px;
+  --container: 1280px;
+  --section-y: 96px; /* 移动端 64px */
   --hairline: 1px;
-  --tick: 7px;                 /* 栅格交点刻度块 */
+  --tick: 7px; /* 栅格交点刻度块 */
 
-  --ease-out: cubic-bezier(.22, .61, .36, 1);
-  --dur-tap: 60ms; --dur-hover: 150ms; --dur-enter: 600ms;
+  --ease-out: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --dur-tap: 60ms;
+  --dur-hover: 150ms;
+  --dur-enter: 600ms;
 }
 
-@media (min-width: 1024px) { :root { --gutter: 80px; } }
+@media (min-width: 1024px) {
+  :root {
+    --gutter: 80px;
+  }
+}
 @media (max-width: 640px) {
-  :root { --fs-display: 40px; --fs-h2: 32px; --fs-h3: 26px; --section-y: 64px; }
+  :root {
+    --fs-display: 40px;
+    --fs-h2: 32px;
+    --fs-h3: 26px;
+    --section-y: 64px;
+  }
 }
 ```
 
 ### A. 深色（主推，dark-first）
 
 ```css
-[data-theme="dark"] {
+[data-theme='dark'] {
   color-scheme: dark;
-  --bg:            #0B0F14;
-  --bg-subtle:     #0F141A;
-  --surface:       #12171E;
-  --surface-raised:#171D25;
-  --line:          #232A33;   /* hairline */
-  --line-strong:   #2E3742;
-  --grid-line:     #1A212A;   /* 24px 网格纹 */
+  --bg: #0b0f14;
+  --bg-subtle: #0f141a;
+  --surface: #12171e;
+  --surface-raised: #171d25;
+  --line: #232a33; /* hairline */
+  --line-strong: #2e3742;
+  --grid-line: #1a212a; /* 24px 网格纹 */
 
-  --text:          #F2F5F8;
-  --text-muted:    #9AA6B2;   /* 7.56:1 */
-  --text-faint:    #6B7684;   /* 仅装饰性标签 */
+  --text: #f2f5f8;
+  --text-muted: #9aa6b2; /* 7.56:1 */
+  --text-faint: #6b7684; /* 仅装饰性标签 */
 
-  --accent:        #38BDF8;   /* 8.97:1 */
-  --accent-hover:  #5CCBFA;
-  --accent-ink:    #04141D;   /* 强调色块上的文字 */
-  --accent-soft:   rgba(56, 189, 248, .14);
+  --accent: #38bdf8; /* 8.97:1 */
+  --accent-hover: #5ccbfa;
+  --accent-ink: #04141d; /* 强调色块上的文字 */
+  --accent-soft: rgba(56, 189, 248, 0.14);
 
-  --btn-bg: var(--accent); --btn-fg: var(--accent-ink);
+  --btn-bg: var(--accent);
+  --btn-fg: var(--accent-ink);
   --btn-ghost-bg: transparent;
   --btn-ghost-border: var(--line-strong);
 
-  --shadow-card: 0 1px 0 rgba(255,255,255,.04) inset,
-                 0 12px 32px rgba(0,0,0,.45);
-  --glow: radial-gradient(60% 55% at 50% 0%,
-          rgba(56,189,248,.14), rgba(56,189,248,0) 70%);
+  --shadow-card: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 12px 32px rgba(0, 0, 0, 0.45);
+  --glow: radial-gradient(60% 55% at 50% 0%, rgba(56, 189, 248, 0.14), rgba(56, 189, 248, 0) 70%);
 }
 ```
 
 ### B. 浅色（light）
 
 ```css
-[data-theme="light"] {
+[data-theme='light'] {
   color-scheme: light;
-  --bg:            #FFFFFF;
-  --bg-subtle:     #F7F8FA;
-  --surface:       #FFFFFF;
-  --surface-raised:#FCFCFD;
-  --line:          #E6E8EC;
-  --line-strong:   #D7DAE0;
-  --grid-line:     #EFEFF3;
+  --bg: #ffffff;
+  --bg-subtle: #f7f8fa;
+  --surface: #ffffff;
+  --surface-raised: #fcfcfd;
+  --line: #e6e8ec;
+  --line-strong: #d7dae0;
+  --grid-line: #efeff3;
 
-  --text:          #11181C;
-  --text-muted:    #5B6470;   /* 6.7:1 */
-  --text-faint:    #8B93A1;
+  --text: #11181c;
+  --text-muted: #5b6470; /* 6.7:1 */
+  --text-faint: #8b93a1;
 
-  --accent:        #0E7490;   /* 5.36:1 */
-  --accent-hover:  #0B5F76;
-  --accent-soft:   #E6F4F7;
+  --accent: #0e7490; /* 5.36:1 */
+  --accent-hover: #0b5f76;
+  --accent-soft: #e6f4f7;
 
   /* 主 CTA 用墨黑而非强调色——Laravel Cloud 的做法，更 B2B */
-  --btn-bg:        #11181C; --btn-fg: #FFFFFF;
-  --btn-ghost-bg:  #FFFFFF; --btn-ghost-border: var(--line);
+  --btn-bg: #11181c;
+  --btn-fg: #ffffff;
+  --btn-ghost-bg: #ffffff;
+  --btn-ghost-border: var(--line);
 
-  --shadow-card: 0 0 1px rgba(16,24,40,.03),
-                 0 1px 2px rgba(16,24,40,.06);
-  --glow: radial-gradient(70% 70% at 50% 90%,
-          rgba(14,116,144,.10), rgba(14,116,144,0) 70%);
+  --shadow-card: 0 0 1px rgba(16, 24, 40, 0.03), 0 1px 2px rgba(16, 24, 40, 0.06);
+  --glow: radial-gradient(70% 70% at 50% 90%, rgba(14, 116, 144, 0.1), rgba(14, 116, 144, 0) 70%);
 }
 ```
 
 ### C. 混合（hybrid：浅色画布 + 深色产品带）
 
 ```css
-[data-theme="hybrid"] {
+[data-theme='hybrid'] {
   /* 默认继承 light */
-  --band-dark: #0B0F14;
+  --band-dark: #0b0f14;
 }
 
 /* 深色带只包裹「代码 / 终端 / Agent 执行轨迹」这类产品证据区 */
 .surface-invert {
   color-scheme: dark;
-  --bg:            #0B0F14;
-  --surface:       #12171E;
-  --line:          #232A33;
-  --text:          #F2F5F8;
-  --text-muted:    #9AA6B2;
-  --accent:        #38BDF8;
-  --accent-soft:   rgba(56,189,248,.14);
-  --btn-bg:        #38BDF8; --btn-fg: #04141D;
-  --shadow-card:   0 12px 32px rgba(0,0,0,.45);
-  --glow: radial-gradient(60% 55% at 50% 0%,
-          rgba(56,189,248,.14), rgba(56,189,248,0) 70%);
+  --bg: #0b0f14;
+  --surface: #12171e;
+  --line: #232a33;
+  --text: #f2f5f8;
+  --text-muted: #9aa6b2;
+  --accent: #38bdf8;
+  --accent-soft: rgba(56, 189, 248, 0.14);
+  --btn-bg: #38bdf8;
+  --btn-fg: #04141d;
+  --shadow-card: 0 12px 32px rgba(0, 0, 0, 0.45);
+  --glow: radial-gradient(60% 55% at 50% 0%, rgba(56, 189, 248, 0.14), rgba(56, 189, 248, 0) 70%);
 
   background: var(--bg);
   color: var(--text);
@@ -239,15 +266,15 @@ laravel.com 不是靠「渐变 + 玻璃拟态」营造高级感，而是靠**一
 
 抓取与核验时间：**2026-11-15**（Asia/Shanghai）。线上站点会持续改版，带哈希的产物文件名每日可能变化。
 
-| 来源 | 用途 |
-|---|---|
-| `https://laravel.com/`（HTTP 200，532,728 B，`x-powered-by: Statamic`） | 首页 DOM、标题层级、类名、内联 JSON |
-| `https://laravel.com/build/assets/app-CbmKlInb.css`（622,008 B） | 全部 CSS 自定义属性、色阶、字体 @font-face、断点、圆角、动画 |
-| `https://laravel.com/build/assets/page-DJDQ5Krl.css`（48,806 B） | 仅含 Mapbox 样式，与视觉语言无关（负结果） |
-| `https://laravel.com/build/manifest.json` | 资源依赖图，确认页面级 CSS 只有两份 |
-| `https://laravel.com/cloud` | 子品牌换色实证：黑 CTA、`#0057FF` 只作功能性蓝 |
-| `https://laravel.com/legal/trademark` | 商标使用边界（商业用途需授权） |
-| `https://fonts.bunny.net/css?family=merriweather:400&display=swap` | 确认 Merriweather 被加载但首页未使用 |
-| Headless Chrome 157 + CDP `getComputedStyle`，1440×1000 / 390×844 | 全部「实测」数值（字号、字距、行高、圆角、阴影、渐变、按钮尺寸、刻度坐标） |
+| 来源                                                                    | 用途                                                                       |
+| ----------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| `https://laravel.com/`（HTTP 200，532,728 B，`x-powered-by: Statamic`） | 首页 DOM、标题层级、类名、内联 JSON                                        |
+| `https://laravel.com/build/assets/app-CbmKlInb.css`（622,008 B）        | 全部 CSS 自定义属性、色阶、字体 @font-face、断点、圆角、动画               |
+| `https://laravel.com/build/assets/page-DJDQ5Krl.css`（48,806 B）        | 仅含 Mapbox 样式，与视觉语言无关（负结果）                                 |
+| `https://laravel.com/build/manifest.json`                               | 资源依赖图，确认页面级 CSS 只有两份                                        |
+| `https://laravel.com/cloud`                                             | 子品牌换色实证：黑 CTA、`#0057FF` 只作功能性蓝                             |
+| `https://laravel.com/legal/trademark`                                   | 商标使用边界（商业用途需授权）                                             |
+| `https://fonts.bunny.net/css?family=merriweather:400&display=swap`      | 确认 Merriweather 被加载但首页未使用                                       |
+| Headless Chrome 157 + CDP `getComputedStyle`，1440×1000 / 390×844       | 全部「实测」数值（字号、字距、行高、圆角、阴影、渐变、按钮尺寸、刻度坐标） |
 
 复现方法：`curl -A "Mozilla/5.0 … Chrome/157" https://laravel.com/` 取 HTML，再取其中 `<link rel=stylesheet>` 指向的 CSS，搜索 `--color-laravel-red`、`--tracking-heading`、`--breakpoint-`、`@font-face`；渲染值用 Chrome DevTools 或 CDP 的 `Runtime.evaluate` + `getComputedStyle` 读取，均可复现本文表格。

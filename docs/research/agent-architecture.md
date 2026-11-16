@@ -13,17 +13,17 @@
 
 ## 典型分层
 
-| 层 | 公开文档里的对应物 | 架构页要讲清什么 |
-|---|---|---|
-| 接入与编排 | LangGraph 的 graph/state/nodes/edges [S17]；OpenAI 的 agents 与 handoffs [S11]；Foundry 的 Agent Runtime 与 Publishing [S1] | 下一步由代码决定还是模型决定；单 agent 还是多 agent |
-| 模型层 | Foundry 的 model catalog 与 model router [S1]、[S5]；ADK 的模型无关适配 [S3] | 模型路由、fallback、私有模型接入，而非模型清单 |
-| 工具与系统集成 | MCP 的 host/client/server 与 tools/resources/prompts [S14]；Foundry Toolboxes 的托管 MCP 端点 [S1]；AgentCore Gateway 把 API 转成 MCP 工具 [S2] | 工具是权限边界，不只是 API 列表 |
-| 知识与检索 | Bedrock 托管知识库的检索时 ACL、引用与 rerank [S6]；LlamaIndex 的 connectors/indexes/query engines [S24] | RAG 是可被 agent 调用的工具，检索必须带权限过滤 |
-| 记忆 | LangGraph 的 checkpointer 与 store [S18]；semantic/episodic/procedural 三类记忆 [S19]；OpenAI sessions [S13] | 会话状态与长期记忆分开；长期记忆涉及保留、删除与合规 |
-| 评测 | LangSmith 的 offline/online evaluation [S21]；Ragas 的 faithfulness、context precision/recall、tool call accuracy [S25]；AgentCore Evaluations [S2] | 分别评检索、工具调用、任务完成，不能只报一个准确率 |
-| 可观测性 | LangSmith 的 run/trace/thread/trajectory [S22]；AgentCore Observability 的 OTel 兼容遥测 [S2]；Langfuse 基于 OpenTelemetry [S26] | trace 用于排障，audit 用于合规，两者不能互替 |
-| 权限与审计 | MCP 的 OAuth 2.1 授权与 audience 绑定 [S15]；Foundry 的 Entra agent identity 与 RBAC [S1]；CloudTrail [S7] | agent 要有独立身份；权限落到每次工具调用 |
-| 部署形态 | Foundry 的 prompt/hosted agent、VNet 与 BYO VNet [S1]；LangSmith 自托管 [S23]；ADK 容器化或 Agent Runtime/Cloud Run/GKE [S3] | 部署形态决定数据边界、运维责任与成本结构 |
+| 层             | 公开文档里的对应物                                                                                                                                  | 架构页要讲清什么                                     |
+| -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
+| 接入与编排     | LangGraph 的 graph/state/nodes/edges [S17]；OpenAI 的 agents 与 handoffs [S11]；Foundry 的 Agent Runtime 与 Publishing [S1]                         | 下一步由代码决定还是模型决定；单 agent 还是多 agent  |
+| 模型层         | Foundry 的 model catalog 与 model router [S1]、[S5]；ADK 的模型无关适配 [S3]                                                                        | 模型路由、fallback、私有模型接入，而非模型清单       |
+| 工具与系统集成 | MCP 的 host/client/server 与 tools/resources/prompts [S14]；Foundry Toolboxes 的托管 MCP 端点 [S1]；AgentCore Gateway 把 API 转成 MCP 工具 [S2]     | 工具是权限边界，不只是 API 列表                      |
+| 知识与检索     | Bedrock 托管知识库的检索时 ACL、引用与 rerank [S6]；LlamaIndex 的 connectors/indexes/query engines [S24]                                            | RAG 是可被 agent 调用的工具，检索必须带权限过滤      |
+| 记忆           | LangGraph 的 checkpointer 与 store [S18]；semantic/episodic/procedural 三类记忆 [S19]；OpenAI sessions [S13]                                        | 会话状态与长期记忆分开；长期记忆涉及保留、删除与合规 |
+| 评测           | LangSmith 的 offline/online evaluation [S21]；Ragas 的 faithfulness、context precision/recall、tool call accuracy [S25]；AgentCore Evaluations [S2] | 分别评检索、工具调用、任务完成，不能只报一个准确率   |
+| 可观测性       | LangSmith 的 run/trace/thread/trajectory [S22]；AgentCore Observability 的 OTel 兼容遥测 [S2]；Langfuse 基于 OpenTelemetry [S26]                    | trace 用于排障，audit 用于合规，两者不能互替         |
+| 权限与审计     | MCP 的 OAuth 2.1 授权与 audience 绑定 [S15]；Foundry 的 Entra agent identity 与 RBAC [S1]；CloudTrail [S7]                                          | agent 要有独立身份；权限落到每次工具调用             |
+| 部署形态       | Foundry 的 prompt/hosted agent、VNet 与 BYO VNet [S1]；LangSmith 自托管 [S23]；ADK 容器化或 Agent Runtime/Cloud Run/GKE [S3]                        | 部署形态决定数据边界、运维责任与成本结构             |
 
 这九层是"能力视图"；Azure Architecture Center 还提供按编排模式切的视图：sequential、concurrent、group chat、handoff、magentic [S4]。两种视图可以叠加使用。
 
@@ -71,16 +71,16 @@
 
 ## 对 Seqtura 架构页的建议结构
 
-| 区块 | 要回答的买方问题 | 建议图示 |
-|---|---|---|
-| 一页总览 | 平台由哪几块组成？ | 把上表九层合并成 5 层能力栈 + 3 条横切控制面（身份、观测/评测、策略/审计） |
-| 请求生命周期 | 一次任务从进来到交付发生了什么？ | 时序图：ingress → 编排 → 模型 → 工具/知识 → HITL gate → 输出 |
-| 编排内核 | workflow 还是 agent？多 agent 怎么协作？ | graph/state 图 + sequential/handoff 两种模式 |
-| 模型层 | 支持哪些模型？怎么选、怎么降级、怎么控成本？ | 路由决策图（质量/成本/时延）+ fallback |
-| 工具与集成 | 怎么接现有系统？权限怎么控？ | MCP/OpenAPI 接入图，工具调用处标权限检查点 |
-| 知识与记忆 | RAG 怎么做？记忆存什么、存多久？ | ingestion → 解析 → 索引 → 检索 → 引用；记忆分短期/长期 |
-| 企业控制面 | 私有化、数据驻留、审计、评测怎么保证？ | 控制面/数据面分离 + 部署三档 |
-| 交付与指标 | 怎么证明上线后有效？ | 任务成功率、工具调用正确率、P95 时延、单任务成本 |
+| 区块         | 要回答的买方问题                             | 建议图示                                                                   |
+| ------------ | -------------------------------------------- | -------------------------------------------------------------------------- |
+| 一页总览     | 平台由哪几块组成？                           | 把上表九层合并成 5 层能力栈 + 3 条横切控制面（身份、观测/评测、策略/审计） |
+| 请求生命周期 | 一次任务从进来到交付发生了什么？             | 时序图：ingress → 编排 → 模型 → 工具/知识 → HITL gate → 输出               |
+| 编排内核     | workflow 还是 agent？多 agent 怎么协作？     | graph/state 图 + sequential/handoff 两种模式                               |
+| 模型层       | 支持哪些模型？怎么选、怎么降级、怎么控成本？ | 路由决策图（质量/成本/时延）+ fallback                                     |
+| 工具与集成   | 怎么接现有系统？权限怎么控？                 | MCP/OpenAPI 接入图，工具调用处标权限检查点                                 |
+| 知识与记忆   | RAG 怎么做？记忆存什么、存多久？             | ingestion → 解析 → 索引 → 检索 → 引用；记忆分短期/长期                     |
+| 企业控制面   | 私有化、数据驻留、审计、评测怎么保证？       | 控制面/数据面分离 + 部署三档                                               |
+| 交付与指标   | 怎么证明上线后有效？                         | 任务成功率、工具调用正确率、P95 时延、单任务成本                           |
 
 写作原则：
 
@@ -91,38 +91,38 @@
 
 ## 术语表（中英对照）
 
-| 中文 | English | 一句话解释 | 参考 |
-|---|---|---|---|
-| 智能体 | Agent | LLM 在循环中自主调用工具、根据环境反馈推进任务 | [S9] |
-| 智能体工作流 | Agentic workflow | 用预定义代码路径编排 LLM 与工具，可预测性更高 | [S9] |
-| 编排 | Orchestration | 决定下一步由谁做、做什么、何时停 | [S17]、[S4] |
-| 工具 | Tool | 模型可调用的外部能力，通常有 JSON Schema | [S14] |
-| 模型上下文协议 | MCP | host/client/server 架构，统一暴露 tools/resources/prompts | [S14] |
-| 智能体间协议 | A2A | 独立 agent 之间发现、委派、交换任务与产物 | [S16] |
-| 移交 | Handoff | 一个 agent 把任务与上下文转给另一个 agent | [S11] |
-| 护栏 | Guardrail | 对输入、输出或工具调用做校验，可中断执行 | [S12] |
-| 会话 / 线程 | Session / Thread | 一次多轮交互的上下文边界 | [S13]、[S17] |
-| 短期 / 长期记忆 | Short-term / Long-term memory | 线程内状态 vs 跨会话持久数据 | [S18]、[S19] |
-| 检查点 | Checkpointer | 持久化图状态，用于恢复、回放与 HITL | [S18] |
-| 检索增强生成 | RAG | 先检索私有数据，再把结果放进上下文生成 | [S6]、[S24] |
-| 离线 / 在线评测 | Offline / Online evaluation | 用数据集测 vs 用生产流量测 | [S21] |
-| 追踪 / 跨度 | Trace / Span | 一次请求的调用树；树中的一个工作单元 | [S22] |
-| 人在回路 | Human-in-the-loop | 在关键动作前暂停，等待人审批或修改 | [S20] |
-| 智能体身份 | Agent identity | 每个 agent 独立于用户的身份与凭证 | [S1]、[S2] |
-| 模型路由 | Model routing | 按请求特征选择模型，平衡质量、成本、时延 | [S5] |
-| 数据驻留 | Data residency | 数据存储与处理的地理/法域约束 | [S1]、[S7] |
+| 中文            | English                       | 一句话解释                                                | 参考         |
+| --------------- | ----------------------------- | --------------------------------------------------------- | ------------ |
+| 智能体          | Agent                         | LLM 在循环中自主调用工具、根据环境反馈推进任务            | [S9]         |
+| 智能体工作流    | Agentic workflow              | 用预定义代码路径编排 LLM 与工具，可预测性更高             | [S9]         |
+| 编排            | Orchestration                 | 决定下一步由谁做、做什么、何时停                          | [S17]、[S4]  |
+| 工具            | Tool                          | 模型可调用的外部能力，通常有 JSON Schema                  | [S14]        |
+| 模型上下文协议  | MCP                           | host/client/server 架构，统一暴露 tools/resources/prompts | [S14]        |
+| 智能体间协议    | A2A                           | 独立 agent 之间发现、委派、交换任务与产物                 | [S16]        |
+| 移交            | Handoff                       | 一个 agent 把任务与上下文转给另一个 agent                 | [S11]        |
+| 护栏            | Guardrail                     | 对输入、输出或工具调用做校验，可中断执行                  | [S12]        |
+| 会话 / 线程     | Session / Thread              | 一次多轮交互的上下文边界                                  | [S13]、[S17] |
+| 短期 / 长期记忆 | Short-term / Long-term memory | 线程内状态 vs 跨会话持久数据                              | [S18]、[S19] |
+| 检查点          | Checkpointer                  | 持久化图状态，用于恢复、回放与 HITL                       | [S18]        |
+| 检索增强生成    | RAG                           | 先检索私有数据，再把结果放进上下文生成                    | [S6]、[S24]  |
+| 离线 / 在线评测 | Offline / Online evaluation   | 用数据集测 vs 用生产流量测                                | [S21]        |
+| 追踪 / 跨度     | Trace / Span                  | 一次请求的调用树；树中的一个工作单元                      | [S22]        |
+| 人在回路        | Human-in-the-loop             | 在关键动作前暂停，等待人审批或修改                        | [S20]        |
+| 智能体身份      | Agent identity                | 每个 agent 独立于用户的身份与凭证                         | [S1]、[S2]   |
+| 模型路由        | Model routing                 | 按请求特征选择模型，平衡质量、成本、时延                  | [S5]         |
+| 数据驻留        | Data residency                | 数据存储与处理的地理/法域约束                             | [S1]、[S7]   |
 
 ## 来源
 
 ### 可借鉴的公开页面 / 图示（5 个）
 
-| 页面 | 可借鉴什么 | 复用提醒 |
-|---|---|---|
-| [Anthropic: Building effective agents][S9] | augmented LLM 与五种 workflow 模式图 | 版权归 Anthropic；只重绘结构，不复制原图与文案 |
-| [MCP Architecture][S14] | host/client/server 的信任边界与能力协商 | 规范文本可引用；图表复用前核对仓库与文档站许可证 |
-| [Foundry Agent Service 概览][S1] | "Agent Service at a glance" 组件表、prompt/hosted agent 分层 | 转述可以；产品图标与商标不可直接复用，使用条款以页面为准 |
-| [AWS Bedrock AgentCore 概览][S2] | 运行时、记忆、网关、身份、观测的模块化画法 | AWS 文档未声明可复用，按默认版权处理；只借鉴能力划分，不复制图 |
-| [Azure AI agent orchestration patterns][S4] | sequential/concurrent/group chat/handoff/magentic 五种模式图 | Microsoft 文档；重绘并标注"参考"来源，不复制原图 |
+| 页面                                        | 可借鉴什么                                                   | 复用提醒                                                       |
+| ------------------------------------------- | ------------------------------------------------------------ | -------------------------------------------------------------- |
+| [Anthropic: Building effective agents][S9]  | augmented LLM 与五种 workflow 模式图                         | 版权归 Anthropic；只重绘结构，不复制原图与文案                 |
+| [MCP Architecture][S14]                     | host/client/server 的信任边界与能力协商                      | 规范文本可引用；图表复用前核对仓库与文档站许可证               |
+| [Foundry Agent Service 概览][S1]            | "Agent Service at a glance" 组件表、prompt/hosted agent 分层 | 转述可以；产品图标与商标不可直接复用，使用条款以页面为准       |
+| [AWS Bedrock AgentCore 概览][S2]            | 运行时、记忆、网关、身份、观测的模块化画法                   | AWS 文档未声明可复用，按默认版权处理；只借鉴能力划分，不复制图 |
+| [Azure AI agent orchestration patterns][S4] | sequential/concurrent/group chat/handoff/magentic 五种模式图 | Microsoft 文档；重绘并标注"参考"来源，不复制原图               |
 
 ### 完整来源
 
