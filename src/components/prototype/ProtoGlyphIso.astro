@@ -1,0 +1,43 @@
+---
+// PROTOTYPE graphic-language (#29), variant A mini glyph: three-slab isometric
+// stack, red accent position rotates with `index`.
+interface Props {
+  index?: number;
+  class?: string;
+}
+const { index = 0, class: className } = Astro.props;
+const accent = index % 3;
+const slabs = [0, 1, 2].map((i) => {
+  const ty = 8 + i * 12;
+  return { ty, red: i === accent };
+});
+---
+
+<svg
+  class={className}
+  viewBox="0 0 72 56"
+  role="img"
+  aria-label="等距栈小图"
+>
+  {
+    slabs.map(({ ty, red }) => (
+      <g stroke="#171717" stroke-opacity=".18" aria-hidden="true">
+        <polygon
+          points={`36,${ty} 62,${ty + 10} 36,${ty + 20} 10,${ty + 10}`}
+          fill={red ? '#F53003' : '#171717'}
+          fill-opacity={red ? '.85' : '.1'}
+        />
+        <polygon
+          points={`10,${ty + 10} 36,${ty + 20} 36,${ty + 24} 10,${ty + 14}`}
+          fill={red ? '#F53003' : '#171717'}
+          fill-opacity={red ? '.5' : '.06'}
+        />
+        <polygon
+          points={`36,${ty + 20} 62,${ty + 10} 62,${ty + 14} 36,${ty + 24}`}
+          fill={red ? '#F53003' : '#171717'}
+          fill-opacity={red ? '.65' : '.08'}
+        />
+      </g>
+    ))
+  }
+</svg>

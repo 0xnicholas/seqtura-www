@@ -1,0 +1,26 @@
+---
+// PROTOTYPE graphic-language (#29): dev-only floating variant switcher.
+// Three rough drafts of the signature graphic language, switchable via
+// ?variant= on / (hero) and /methodology (stages section). State is applied
+// client-side by /scripts/prototype-graphic-language.js (Astro strips query
+// params server-side on static pages). Throwaway — drop with the prototype.
+import './graphic-language.css';
+---
+
+{
+  import.meta.env.DEV && (
+    <nav class="gl-switcher" data-gl-switcher aria-label="图形语言原型切换">
+      <span class="gl-tag">PROTO</span>
+      <a href="?" data-gl-prev aria-label="上一个方案" rel="nofollow">
+        ←
+      </a>
+      <span class="gl-current" data-gl-label aria-live="polite">
+        现状
+      </span>
+      <a href="?" data-gl-next aria-label="下一个方案" rel="nofollow">
+        →
+      </a>
+      <script is:inline src="/scripts/prototype-graphic-language.js" defer />
+    </nav>
+  )
+}

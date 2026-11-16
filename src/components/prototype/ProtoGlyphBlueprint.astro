@@ -1,0 +1,46 @@
+---
+// PROTOTYPE graphic-language (#29), variant B mini glyph: orthographic stack
+// wireframe with centerline, dimension line, crosshair and sheet number.
+interface Props {
+  index?: number;
+  class?: string;
+}
+const { index = 0, class: className } = Astro.props;
+const sheet = `SHEET 0${index + 1}`;
+---
+
+<svg
+  class={className}
+  viewBox="0 0 72 56"
+  role="img"
+  aria-label="蓝图线稿小图"
+>
+  <g fill="none" stroke="#171717" stroke-opacity=".65" aria-hidden="true">
+    <rect x="18" y="8" width="36" height="10"></rect>
+    <rect x="18" y="18" width="36" height="10"></rect>
+    <rect x="18" y="28" width="36" height="10"></rect>
+  </g>
+  <line
+    x1="36"
+    y1="4"
+    x2="36"
+    y2="42"
+    stroke="#F53003"
+    stroke-opacity=".4"
+    stroke-dasharray="6 2 1 2"
+    aria-hidden="true"></line>
+  <g stroke="#171717" stroke-opacity=".5" fill="none" aria-hidden="true">
+    <line x1="12" y1="8" x2="12" y2="38"></line>
+    <line x1="9" y1="8" x2="15" y2="8"></line>
+    <line x1="9" y1="38" x2="15" y2="38"></line>
+    <path d="M4 50 H10 M7 47 V53"></path>
+  </g>
+  <text
+    x="18"
+    y="51"
+    font-family="'SF Mono', 'JetBrains Mono', ui-monospace, Menlo, monospace"
+    font-size="7"
+    fill="#737373"
+    letter-spacing=".04em"
+    aria-hidden="true">{sheet}</text>
+</svg>

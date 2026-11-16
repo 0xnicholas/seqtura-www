@@ -1,0 +1,21 @@
+---
+// PROTOTYPE graphic-language (#29), variant B card chrome: drawing-sheet
+// corner brackets plus a bottom title strip. Throwaway — drop with the
+// prototype.
+interface Props {
+  sheet: string;
+  code: string;
+  range: string;
+}
+const { sheet, code, range } = Astro.props;
+---
+
+<span class="proto-ch proto-ch-tl" aria-hidden="true"></span>
+<span class="proto-ch proto-ch-tr" aria-hidden="true"></span>
+<span class="proto-ch proto-ch-bl" aria-hidden="true"></span>
+<span class="proto-ch proto-ch-br" aria-hidden="true"></span>
+<div class="proto-sheet-strip">
+  <span>{sheet}</span>
+  <span>{code}</span>
+  <span>{range}</span>
+</div>

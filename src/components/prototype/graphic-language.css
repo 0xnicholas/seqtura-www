@@ -1,0 +1,179 @@
+/* PROTOTYPE graphic-language (#29): styles for the three graphic-language
+   variants (iso / bp / mix) and the dev-only switcher. Round 2: hero stays
+   untouched; the variants re-skin the methodology stages section. Throwaway —
+   drop with the prototype. */
+
+/* --- dev-only floating switcher -------------------------------------- */
+
+.gl-switcher {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: #171717;
+  color: #ffffff;
+  box-shadow: 0 10px 28px rgb(0 0 0 / 28%);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1;
+  letter-spacing: 0.03em;
+}
+
+.gl-switcher a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 12%);
+  color: #ffffff;
+  font-size: 14px;
+  text-decoration: none;
+}
+
+.gl-switcher a:hover {
+  background: var(--color-red);
+}
+
+.gl-switcher .gl-current {
+  white-space: nowrap;
+}
+
+.gl-switcher .gl-tag {
+  padding: 3px 6px;
+  border-radius: 3px;
+  background: var(--color-red);
+  color: #ffffff;
+  font-size: 9px;
+  letter-spacing: 0.08em;
+}
+
+/* --- section heading treatments ---------------------------------------- */
+
+.proto-heading-glyph {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.proto-heading-glyph svg {
+  width: 120px;
+  height: auto;
+}
+
+/* variant B heading extra: dimension rule under the section lead */
+.proto-bp-rule {
+  position: relative;
+  max-width: 480px;
+  margin: -34px auto 34px;
+  border-top: 1px solid var(--color-line-strong);
+}
+
+.proto-bp-rule::before,
+.proto-bp-rule::after {
+  content: '';
+  position: absolute;
+  top: -4px;
+  width: 1px;
+  height: 9px;
+  background: var(--color-line-strong);
+}
+
+.proto-bp-rule::before {
+  left: 0;
+}
+
+.proto-bp-rule::after {
+  right: 0;
+}
+
+.proto-bp-rule span {
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  padding: 0 10px;
+  transform: translateX(-50%);
+  background: var(--color-canvas);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  line-height: 16px;
+  letter-spacing: 0.05em;
+  color: var(--color-muted);
+  white-space: nowrap;
+}
+
+/* --- per-card treatments ------------------------------------------------ */
+
+/* variants A / C: diagram strip at the top of the card */
+.proto-card-diagram {
+  margin: 2px 0 24px;
+}
+
+.proto-card-diagram svg {
+  width: 100%;
+  max-width: 440px;
+  height: auto;
+}
+
+/* variant B: drawing-sheet chrome */
+.proto-sheet {
+  margin-top: auto;
+}
+
+.proto-ch {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  pointer-events: none;
+}
+
+.proto-ch-tl {
+  top: 8px;
+  left: 8px;
+  border-top: 1px solid var(--color-line-strong);
+  border-left: 1px solid var(--color-line-strong);
+}
+
+.proto-ch-tr {
+  top: 8px;
+  right: 8px;
+  border-top: 1px solid var(--color-line-strong);
+  border-right: 1px solid var(--color-line-strong);
+}
+
+.proto-ch-bl {
+  bottom: 8px;
+  left: 8px;
+  border-bottom: 1px solid var(--color-line-strong);
+  border-left: 1px solid var(--color-line-strong);
+}
+
+.proto-ch-br {
+  right: 8px;
+  bottom: 8px;
+  border-bottom: 1px solid var(--color-line-strong);
+  border-right: 1px solid var(--color-line-strong);
+}
+
+.proto-sheet-strip {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 24px;
+  padding-top: 10px;
+  border-top: 1px solid var(--color-line);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  line-height: 1.5;
+  letter-spacing: 0.05em;
+  color: var(--color-muted);
+  text-transform: uppercase;
+}

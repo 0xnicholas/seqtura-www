@@ -1,0 +1,57 @@
+---
+// PROTOTYPE graphic-language (#29), variant C card strip: wireframe isometric
+// step pair with leader-line labels; gate stage is the single red-filled slab.
+// Throwaway — drop with the prototype.
+interface Props {
+  stages: readonly { no: string; nameCn: string }[];
+  gate?: number;
+}
+const { stages, gate = -1 } = Astro.props;
+const slabs = stages.map((stage, i) => ({
+  cx: 90 + i * 200,
+  stage,
+  red: i === gate,
+}));
+---
+
+<svg viewBox="0 0 480 100" role="img" aria-label="阶段线框等距示意图">
+  {
+    slabs.map(({ cx, stage, red }) => (
+      <g aria-hidden="true">
+        <g
+          fill="none"
+          stroke={red ? '#F53003' : '#171717'}
+          stroke-opacity={red ? '1' : '.5'}
+        >
+          <polygon points={`${cx},28 ${cx + 58},52 ${cx},76 ${cx - 58},52`} />
+          <path
+            d={`M${cx - 58},52 L${cx},76 L${cx},86 L${cx - 58},62 Z M${cx},76 L${cx + 58},52 L${cx + 58},62 L${cx},86`}
+          />
+        </g>
+        {red && (
+          <polygon points={`${cx},28 ${cx + 58},52 ${cx},76 ${cx - 58},52`} fill="#F53003" />
+        )}
+        <text
+          x={cx}
+          y="56"
+          text-anchor="middle"
+          font-family="'SF Mono', 'JetBrains Mono', ui-monospace, Menlo, monospace"
+          font-size="10"
+          fill={red ? '#FFFFFF' : '#C42602'}
+        >
+          {stage.no}
+        </text>
+        <line x1={cx + 58} y1="52" x2={cx + 76} y2="52" stroke="#171717" stroke-opacity=".4" />
+        <text
+          x={cx + 82}
+          y="56"
+          font-family="-apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif"
+          font-size="11"
+          fill="#404040"
+        >
+          {stage.nameCn}
+        </text>
+      </g>
+    ))
+  }
+</svg>

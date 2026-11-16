@@ -1,6 +1,12 @@
 ---
 import SectionHeading from './SectionHeading.astro';
 import MethodologyStageCard from './MethodologyStageCard.astro';
+import ProtoGlyphIso from './prototype/ProtoGlyphIso.astro';
+import ProtoGlyphBlueprint from './prototype/ProtoGlyphBlueprint.astro';
+import ProtoGlyphMix from './prototype/ProtoGlyphMix.astro';
+import ProtoCardIso from './prototype/ProtoCardIso.astro';
+import ProtoCardMix from './prototype/ProtoCardMix.astro';
+import ProtoSheetChrome from './prototype/ProtoSheetChrome.astro';
 import {
   deliveryGroups,
   deliveryStages,
@@ -15,20 +21,56 @@ function stagesForGroup(group: DeliveryGroup) {
     .map((anchor) => deliveryStages.find((stage) => stage.anchor === anchor))
     .filter((stage): stage is (typeof deliveryStages)[number] => Boolean(stage));
 }
+
+// PROTOTYPE graphic-language (#29): gate stages get the red slab.
+const GATE_STAGES = ['Define', 'Validate', 'Deploy'];
+function gateIndexFor(group: DeliveryGroup) {
+  return stagesForGroup(group).findIndex((stage) => GATE_STAGES.includes(stage.name));
+}
 ---
 
 <section class="section stages-overview" id="stages" aria-labelledby="stages-title">
   <div class="container-site">
+    {/* PROTOTYPE graphic-language (#29): glyphs revealed client-side via
+        ?variant= by /scripts/prototype-graphic-language.js; dev-only DOM. */}
+    {import.meta.env.DEV && (
+      <div class="proto-heading-glyph" aria-hidden="true" hidden>
+        <span data-gl-glyph="iso" hidden>
+          <ProtoGlyphIso index={1} />
+        </span>
+        <span data-gl-glyph="bp" hidden>
+          <ProtoGlyphBlueprint index={0} />
+        </span>
+        <span data-gl-glyph="mix" hidden>
+          <ProtoGlyphMix index={1} />
+        </span>
+      </div>
+    )}
     <SectionHeading
       id="stages-title"
       kicker={stages.kicker}
       title={stages.title}
       lead={stages.lead}
     />
+    {import.meta.env.DEV && (
+      <div class="proto-bp-rule" data-gl-glyph="bp" hidden>
+        <span>SHT-01 · 阶段总览</span>
+      </div>
+    )}
 
     <div class="group-grid reveal">
-      {deliveryGroups.map((group) => (
+      {deliveryGroups.map((group, groupIndex) => (
         <article class="group-card" data-stage-group={group.id}>
+          {import.meta.env.DEV && (
+            <>
+              <div class="proto-card-diagram" data-gl-glyph="iso" hidden>
+                <ProtoCardIso stages={stagesForGroup(group)} gate={gateIndexFor(group)} />
+              </div>
+              <div class="proto-card-diagram" data-gl-glyph="mix" hidden>
+                <ProtoCardMix stages={stagesForGroup(group)} gate={gateIndexFor(group)} />
+              </div>
+            </>
+          )}
           <span class="group-range">{group.range}</span>
           <h3 class="group-title">{group.titleCn}</h3>
           <p class="group-en">{group.title}</p>
@@ -45,6 +87,15 @@ function stagesForGroup(group: DeliveryGroup) {
               </li>
             ))}
           </ul>
+          {import.meta.env.DEV && (
+            <div class="proto-sheet" data-gl-glyph="bp" hidden>
+              <ProtoSheetChrome
+                sheet={`SHEET 0${groupIndex + 1}`}
+                code={group.id}
+                range={group.range}
+              />
+            </div>
+          )}
         </article>
       ))}
     </div>
