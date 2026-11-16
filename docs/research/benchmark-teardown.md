@@ -1,15 +1,15 @@
 # 对标拆解:laravel.com / Linear / Stripe 视觉细节模式
 
-> 研究简报 · 2026-11-16 · 对应 ticket #26(wayfinder research,纯研究,不改产品代码)
+> 研究简报 · 2026-11-16(同日二轮修订:Linear 一节由二手数据升级为 linear.app 一手产物)· 对应 ticket #26(wayfinder research,纯研究,不改产品代码)
 > **检查方式**:用 `curl`(Chrome UA)抓取三站首页与内页的 HTML/CSS 产物并直接检索字体声明、CSS 变量、class 名;辅以设计测量/拆解文章交叉验证。文中 S1–S14 编号为可点击来源,完整列表见文末。
-> **重要局限**:本次调研机器的网络将 `linear.com` 重定向到了无关站点(`www.analog.com`,DNS/CDN 层劫持),`web.archive.org` 与 `r.jina.ai` 代理均超时——**Linear 一节全部来自第三方实测提取([S7] 声明数值取自 live DOM/CSSOM)、字阶提取服务 [S9] 与分析文章 [S10],未做一手复核,相关条目均标注「推断」**。laravel.com 与 stripe.com 的数值均来自当日一手构建产物。内置浏览器在本调研环境中不可用,所有「渲染效果」类判断结合了抓取到的 CSS 与文献,未逐像素截图验证。
+> **局限与补救**:本次调研机器的网络将 `linear.com` 重定向到了无关站点(`www.analog.com`,DNS/CDN 层劫持),`web.archive.org`、`r.jina.ai` 及各 CORS 代理均不可用。补救:**同一营销构建由 `linear.app` 直接服务**(首页标题与 linear.com 当前版一致,CSS/字体托管在 `static.linear.app`),已于 2026-11-16 抓取其一手产物,Linear 一节数值除标注外均来自该一手数据;[S7][S9][S10] 等第三方实测提取仅作互证。laravel.com 与 stripe.com 的数值均来自当日一手构建产物。内置浏览器在本调研环境中不可用,所有「渲染效果」类判断结合了抓取到的 CSS 与文献,未逐像素截图验证。
 > laravel.com 的逐像素拆解已有一份更详细的内部报告 [S15](2026-11-15,CDP 实测计算值),本文 Laravel 一节只做要点归纳与补充,避免重复。
 
 ## 结论先行
 
 1. **三家的「高级感」都来自约束而非堆料**:每家只选一个材质层做品牌载体——Laravel 是「制图语法」(hairline + 红色刻度 + 代码面板),Linear 是「暗室 + 噪点 + 自家产品截图」,Stripe 是「流动渐变 + 轻字重排版」。没有任何一家同时用两种以上质感层。
-2. **字体是品牌资产,不是排版工具**:Stripe 花商业授权用 Söhne 单一可变字体打全站六年不换 [S11];Linear 用 Inter Variable 的 510 这种「非标准字重」制造辨识 [S10];Laravel 用 Instrument Sans 全家桶(含 Condensed 变体)+ 三种等宽字体分工 [S2]。**对比之下,本站 `--font-sans` 首位声明了 Instrument Sans 却没有任何加载机制(`src/` 全库无 `@font-face`/字体 link/preload,已核实),实际渲染系统字体——这是与三家最大的差距,也是收益最大的单点修复。**
-3. **字距是「工程感」的最廉价来源**:Linear 的展示标题按尺寸比例收紧字距(72px→-1.584px、48px→-1.056px、32px→-0.704px,恒等于约 -0.022em)[S10];Laravel hero 用 `tracking-tighter = -0.05em` [S1][S2];本站已有 -0.025em,方向正确,只需字体落地后才会真正显现。
+2. **字体是品牌资产,不是排版工具**:Stripe 花商业授权用 Söhne 单一可变字体打全站六年不换 [S11];Linear 用 Inter Variable 的 510/590 这种「非标准字重」制造辨识(命名 token 实测 [S17]);Laravel 用 Instrument Sans 全家桶(含 Condensed 变体)+ 三种等宽字体分工 [S2]。**对比之下,本站 `--font-sans` 首位声明了 Instrument Sans 却没有任何加载机制(`src/` 全库无 `@font-face`/字体 link/preload,已核实),实际渲染系统字体——这是与三家最大的差距,也是收益最大的单点修复。**
+3. **字距是「工程感」的最廉价来源**:Linear 的展示标题按尺寸比例收紧字距(32px 起统一 -0.022em,72px→-1.584px,token 实测 [S17];文献 [S10] 互证);Laravel hero 用 `tracking-tighter = -0.05em` [S1][S2];本站已有 -0.025em,方向正确,只需字体落地后才会真正显现。
 4. **动效全部是 token 化、短时长、ease-out 系**:Stripe 把每类动效的 duration/easing 都命名成 CSS 变量 [S5];Laravel 首页 `ease-out` 出现 55 次、`duration-100` 出现 62 次 [S1];Linear 的卡片 hover 只是 `brightness(120%)`、active 是 `scale(0.97)` [S7]。**没有一家用弹性/回弹曲线做营销页交互。**
 5. **CJK 策略只有 Stripe 有,且手法可直接照抄**:`:lang(zh)` 下字重压档(bold→500)、hero 字号封顶下调、行高放宽到 1.2,且**不加载任何 CJK webfont**,全靠系统回退 [S5]。Laravel 与 Linear 的营销站均无中文版本 [S1][推断]。
 
@@ -63,48 +63,57 @@
 
 ---
 
-## 二、Linear(linear.com)— 全部为二手测量,标注「推断」
+## 二、Linear(linear.com;一手数据经同源 linear.app 获取)
 
-> 一手页面未能获取(网络劫持,见文首局限)。以下来自:[S7](声明数值实测自 live DOM/CSSOM,含 z-index、@media、keyframes 等硬证据)、[S9] 字阶提取、[S10] 分析文章(引用了 Typ.io 的实际 CSS 抽取)、[S14] 品牌色汇总表。
+> 2026-11-16 抓取 `linear.app/`(1,269,833 字节 [S16])、**50 个 CSS 产物(合计 330,174 字节 [S17])**、`linear.app/method`(403,917 字节 [S18])、`linear.app/changelog`(2,014,323 字节)。linear.app 与 linear.com 是否逐字节同一构建未验证(推断同源,见 §六);第三方提取 [S7][S9][S10] 与品牌色汇总 [S14] 仅作互证。
 
 ### 字体
 
-- UI:**Inter Variable**(`--font-primary: "Inter Variable", system-ui, sans-serif`)[S9];回退链含 "SF Pro Display" [S7]。代码:**Berkeley Mono**(商业授权字体,一个创业项目为等宽字体付费,本身即品牌信号)[S7]。`--font-variations: "opsz" auto`(启用光学尺寸轴)[S7]。
-- 字阶(两来源互证):display 64/56/40,H 级 24/21,正文 16,小字 13/10 [S9];[S7] 的层级表为 64(display, w590, lh1.1, -0.02em)/ 48(H1)/ 24(H2, w510)/ 20(H3)/ 16(body, 400, lh1.5, -0.011em)/ 13(small)/ 12(caption)。
-- **字重签名 510/538/590**:可变字体才允许的「非标字重」,用于导航与主 UI 标签;[S10] 引 Typ.io 实测指出真实页面还混用 400/600/800,510 是「品牌的脸」上的象征性选择——「叫不喊的控えめな强调」。
-- **比例化负字距**:72px→-1.584px、48px→-1.056px、32px→-0.704px,恒定约 **-0.022em**,随尺寸等比收紧 [S10]。
-- 行高:标题 1.1–1.4,正文/小字 1.5 [S7]。
+- **三个字体家族,全部自托管可变 woff2、`font-display: swap`** [S17]:
+  - UI:**Inter Variable**(字重轴 100–900,正体 + 斜体两个文件,首页 `<link rel="preload">` 预载正体 [S16]);栈为 `"Inter Variable", "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", …` [S17]。
+  - 代码:**Berkeley Mono Variable**(100–900,商业授权——为等宽字体付费本身即品牌信号),回退 `ui-monospace, "SF Mono", "Menlo"` [S17]。
+  - 编辑展示:**Tiempos Headline** 衬线(仅 400 一档,注册为 `--font-serif-display`),只用于 `/method` 这类编辑式页面 [S17][S18]。
+- **OpenType 特性是身份的一部分**:全局 `--font-settings: "cv01", "ss03"`(单层 a、几何化字形)+ 文本强制 `"zero"`(斜杠零);`--font-variations: "opsz" auto` 启用光学尺寸轴 [S17]。
+- **五级字重签名(命名 token 实测)**:`light:300 / normal:400 / medium:510 / semibold:590 / bold:680` [S17]。510/590 是可变字体才允许的「非标档」细粒度强调;第三方对 510/538/590 覆盖率的争议([S7][S9][S10])可据此裁决——**三档都在 token 体系里,bold 上限是 680，不存在 800**。
+- **标题字阶(token 实测 [S17])**:九档 `--title-1` 17px/1.4 → `--title-9` 72px/1.0(17/20/24/32/40/48/56/64/72px)。行高随尺寸收:24px 以下 1.33–1.4,32px 档 1.125,40/56px 档 1.1,48/72px 档 1.0。字距两档制:title-1~3 为 `-0.012em`,title-4(32px)起统一 **`-0.022em`**——72px×0.022=1.584px,与 [S10] 描述的「比例化负字距」精确吻合。
+- **正文双密度并存**:regular 15/16px、small 13/14px、mini 12/13px、micro 11/12px(推断对应营销/产品两种密度语境 [S17]);正文行高 1.5。
+- hero 标题移动端实测 38px(桌面端走 title-8/9 即 64/72px,推断),入场初始态 `opacity:0; filter:blur(10px); transform:translateY(20%)` [S16]。
 
 ### 间距节奏
 
-- **严格 4px 基网**:4/8/12/16/20/24/32,不许出现 10px、18px 之类的网外值 [S7]。
-- 容器:营销页上限约 1440px,内容常收在约 1100px 中央列(推断,[S7] 未从源码提取到容器值)。
-- Section 纵向 64/96px(推断 [S7]);实测断点 640/768/1024/1280 [S7]。
-- 圆角只有 4/6/12/9999 四档 [S7]。
-- 留白哲学:不追求「空气感」,而是用一致间距把高密度信息切块 [S7]。
+- **圆角实测分布**(全部 CSS 产物,按出现次数):8px×37、6px×24、4px×18、12px×11、9px/5px 各 6、22px×4、20px×3 [S17]——**8px 是真正的主力圆角**,22px 给大面板;[S7] 「仅 4/6/12/9999 四档」的转述与产物不符,予以纠正。
+- **边框不用实色线,用白色透明度阶梯**:`#ffffff05`(subtle)→ `#ffffff08`(standard)→ `#ffffff14`(header-border);亮色语境反转为 `#00000014` [S17]。
+- 阴影三档 token 化且极轻:`--shadow-low: 0 2px 4px #0000001a`、`--shadow-medium: 0 4px 24px #0003`、`--shadow-high: 0 7px 32px #00000059` [S17]。
+- 基网 4px(4–32 七档 [S7]);实测断点 640/768/1024/1280 [S7]。容器上限与 section 纵向间距未以全局 token 形式存在于产物(组件级散落),沿用 [S7] 的 ~1440px 上限 / ~1100px 内容列 / 64–96px 段距(推断)。
 
 ### 第二图层
 
-- **暗色即原生**:`#08090a`/`#0f1011` 近黑画布(不是后涂的深色模式),文字 `#f7f8f8`、次级 `#8a8f98`、hairline `#2a2e33` [S7][S14]。
-- **噪点(grain)**:实测存在 `Grain_grain / Grain_grainSubtle` 组件(z-index 3)——全站胶片噪点覆层 [S7]。这是暗底不发「闷」的关键。
-- **不用投影用内线**:层级靠 1px 边框 + `rgba(0,0,0,0.2) 0 0 12px inset` 内阴影,而非 drop shadow [S7]。
-- **自家产品 UI 截图当主视觉**:密集、工具感的界面截图本身就是 hero 素材 [S7]。
+- **暗色即原生,且分四级亮度**:画布 `--color-bg-level-0:#08090a / level-1:#0f1011 / level-2:#141516 / level-3:#191a1b`——层级靠「更亮一档的灰」而非投影表达 [S17]。文字 `#f7f8f8`(非纯白);品牌底色 `#5e6ad2`、交互强调 `#7170ff`、链接 hover `#828fff` [S17]。
+- **噪点(grain)一手确认**:`*.grainOverlay{opacity:.25; z-index:2; background-image:url(…cdn-cgi/imagedelivery…)}`——一张经 Cloudflare 图像管线分发的噪点图,以 25% 透明度覆层 [S17](与 [S7] 提取到的 `Grain_grain/Grain_grainSubtle` 组件互证)。这是大面积暗底不发「闷」的关键。
+- **卡片边缘高光系统**(一手,二手文献未见记录):64 处径向渐变构成 edge-glow / edge-highlight / shine-beam 三件套——`radial-gradient(ellipse var(--edge-highlight-width,17.18%) …)`、顶部高光色 `#ffffff1f`、光晕底色 `#ffffff08` [S17]。「暗室里悬浮的玻璃仪器面板」观感的真实来源。
+- **静态柔光斑**:`radial-gradient(circle,#ffffff14 0%,#0000 50%)`、`radial-gradient(50% 50%,#ffffff0a 0%,#fff0 100%)` 等,白色 4–8% 透明度,不闪不动 [S17]。
+- **代码语法高亮用暖粉彩对冲冷灰底**:keyword `#e391cf`、string `#ffdf9f`、entity `#83dcdc`、variable `#f7bf8b`、constant `#8fa6ff` [S17]。
+- **自家产品 UI 是主视觉**:hero 下方是可动的 Linear issue 界面(HTML 内嵌 ENG-2085/2092/2094 等编号 [S16]),与 [S10] 描述的「Codex agent 自动接任务」live demo 互证。
+- **图纸式标注**:首页 HTML 存在 `Fig 0.1 / 0.2 / 0.3` 编号标签 [S16]——与 Laravel 的 7px 刻度点异曲同工的「技术图纸」暗示。
 
 ### 交互与动效
 
+- **hero 动能排版(一手)**:标题 "The product development system for teams and agents" 中 `teams`/`agents` 两词滚动互换——keyframes `suffixEnter/suffixExit` 专为词换命名 [S17],与 [S10] 的描述互证;标题行入场为 blur(10px) + translateY(20%) 淡入 [S16]。
+- **其余 keyframes 全部功能向**:`shimmerSweep`(骨架扫光)、`cursorBlink`(光标闪烁)、`dotIn`(状态点)、`pillarHeroPulse`(hero 立柱脉动)、`scroll/scroll-vertical`(无缝滚动带)、菜单/对话框/工具提示的 slide+scale 进出 [S17];第三方统计全站 @keyframes 约 20 个 [S7]——数量克制,无一为纯装饰循环。
 - 卡片 hover 实测 CSS:`filter: brightness(120%)`(统计卡 125%),`transition-duration: var(--speed-highlightFadeIn)` [S7]。
 - active 态统一 `transform: scale(0.97)` [S7]。
-- 全站 150+ CSS 动画声明(实测提取 20 个 @keyframes,如 `Blink_blink`、`CTA_fadeIn`、`Collapsible_slideDown`),但单个动作都极短促 [S7]。
 - 按钮过渡:0.1–0.15s ease/ease-out [S7]。
 - focus 环:`0 0 0 3px rgba(94,106,210,0.3)`(品牌色 30%)[S7]。
 
 ### 品牌辨识度载体
 
-暗底 + indigo(`#5e6ad2`,只给交互态用)+ grain + 产品截图 + 键盘文化(Cmd+K)。**没有 logo 之外的品牌图形元素,辨识度全部来自「暗室里的精密工具」氛围** [S7][S10]。
+暗室四级灰 + indigo(`#5e6ad2`/`#7170ff`,只给交互态)+ grain 噪点 + 卡片边缘高光 + hero 动能排版 + 键盘文化(Cmd+K)。**辨识度不依赖 logo 之外的图形元素,全部来自「暗室里的精密仪器」氛围** [S16][S17]。
+
+**内页对照(一手)**:`/method` 是完全相反的编辑式表面——白底(`background:#fff`)、**Tiempos Headline 衬线大标题,H1 实测 128px/行高 1.0、字重 400**,经 RSC 负载 `{"as":"h1","font":"serif-display",…"children":"Practices for building"}` 确认 [S18]。暗色「仪器」与白色「杂志」互为正反,构成双面品牌。`/changelog` 同栈服务(2,014,323 字节,推断为产品更新流)。营销 CSS 中未发现 `data-theme` 或 `prefers-color-scheme` 切换逻辑 [S17]——**暗不是「模式」,是默认**;白底只作为个别页面的刻意反差存在。
 
 ### CJK 策略
 
-营销站仅英文(推断——一手路由未能验证;其官网从未提供本地化营销页,产品内有多语言但与营销站无关)。
+无。营销站仅英文;三个字体家族均不含 CJK 字形,回退系统栈;产物中未发现 `:lang(zh)` 类规则(与 Stripe 的成体系 CJK 策略形成对照)[S17]。
 
 ---
 
@@ -156,25 +165,25 @@
 
 - `docs.stripe.com`:同一套 sohne-var + Source Code Pro/Menlo,独立「sail」设计系统 CSS [S6]。营销与文档字体完全一致,品牌无断层。
 - Laravel `/docs/12.x`:同一 CSS 产物,`max-w-prose` + 2em 段前距节奏 [S3]。
-- Linear 内页:未能一手获取(推断与其产品 UI 共用 token 体系,[S7] 的实测样本里已含产品内视图 class)。
+- Linear 内页(一手):`/method` 反转为白底 + Tiempos Headline 衬线 128px 标题的编辑式表面 [S18];`/changelog` 同栈 [S16]。营销暗底与编辑白底互为正反(详见 §二)。
 
 ---
 
 ## 四、横向速查表
 
-| 维度 | Laravel | Linear(二手/推断) | Stripe |
+| 维度 | Laravel | Linear | Stripe |
 |---|---|---|---|
-| 正文字体 | InstrumentSans(自托管静态) [S2] | Inter Variable [S9] | sohne-var(单文件可变,商业授权) [S5][S11] |
-| 等宽 | IBM Plex Mono / Geist Mono [S2] | Berkeley Mono(商业) [S7] | Source Code Pro / Menlo [S4][S6] |
-| 加载策略 | 自托管 + `font-display: swap` [S2] | 推断自托管 + variable | preload + **`font-display: block`** [S4][S5] |
-| 展示标题 | 36→72px,400,-0.05em [S1][S2] | 64px,590,-0.022em 比例字距 [S7][S10] | 48px(6lvh 流式+语种封顶),**300**,lh1.03 [S5][S8] |
-| 字重层级 | 400/500 两级 [S15] | 400/510/590 [S7] | 300/400 两级 [S8] |
-| 基网/容器 | 4px;1280px [S2] | 严格 4px;~1440/1100 [S7] | 4px;~1280 [S8] |
-| 第二图层 | 红径向光晕 + 代码面板 + 画框 [S1][S2] | 暗底 + grain 噪点 + 内阴影 [S7] | CSS 渐变(时段变体)+ 蓝紫影 + 数字 ticker [S4][S5][S10] |
+| 正文字体 | InstrumentSans(自托管静态) [S2] | Inter Variable 100–900(自托管可变) [S17] | sohne-var(单文件可变,商业授权) [S5][S11] |
+| 等宽 | IBM Plex Mono / Geist Mono [S2] | Berkeley Mono Variable(商业) [S17] | Source Code Pro / Menlo [S4][S6] |
+| 加载策略 | 自托管 + `font-display: swap` [S2] | preload + swap,可变单文件 [S16][S17] | preload + **`font-display: block`** [S4][S5] |
+| 展示标题 | 36→72px,400,-0.05em [S1][S2] | 72px 封顶,510/590,-0.022em 比例字距 [S17] | 48px(6lvh 流式+语种封顶),**300**,lh1.03 [S5][S8] |
+| 字重层级 | 400/500 两级 [S15] | 300/400/510/590/680 五级 [S17] | 300/400 两级 [S8] |
+| 基网/容器 | 4px;1280px [S2] | 严格 4px;~1440/1100(推断) [S7] | 4px;~1280 [S8] |
+| 第二图层 | 红径向光晕 + 代码面板 + 画框 [S1][S2] | 四级暗灰 + grain(.25)+ 卡片边缘高光 + 暖粉彩语法色 [S17] | CSS 渐变(时段变体)+ 蓝紫影 + 数字 ticker [S4][S5][S10] |
 | hover | 100–150ms ease-out 换色 [S1] | brightness(120%),active scale(.97) [S7] | 上浮 1–2px + 影加深,250ms [S8] |
 | 缓动 | ease-out 系 [S1] | ease/ease-out 0.1–0.15s [S7] | cubic-bezier token 化(0.25,1,0.5,1 等) [S5] |
-| 品牌载体 | 红 + 刻度 + mono kicker + 画框 [S1][S2] | 暗室 + indigo + grain + 产品截图 [S7] | 渐变 + 轻字重 + 表格数字 [S5][S10] |
-| CJK | 无(英文站) [S1] | 无(推断) | :lang(zh) 字重压档 + 字号封顶 + 行高放宽,无 CJK 字体 [S5] |
+| 品牌载体 | 红 + 刻度 + mono kicker + 画框 [S1][S2] | 暗室 + indigo + grain + 动能排版 + 产品 demo [S16][S17] | 渐变 + 轻字重 + 表格数字 [S5][S10] |
+| CJK | 无(英文站) [S1] | 无 [S17] | :lang(zh) 字重压档 + 字号封顶 + 行高放宽,无 CJK 字体 [S5] |
 
 ---
 
@@ -231,11 +240,34 @@
    - 为什么有效:不依赖分隔线,纯靠节奏;与本站 legal/methodology 长文页现有的 token 体系(`--type-legal-*`)直接兼容。
    - 本站位置:`methodology`、`process` 页正文容器与标题间距。
 
+### 材质层(仅在引入深色产品带时启用,配合 [S15] 的 hybrid 方案 C)
+
+10. **噪点覆层(grain)**
+    - 模式:Linear 的 `grainOverlay`——一张平铺噪点图,25% 透明度、z-index 覆层、经图像 CDN 分发 [S17]。
+    - 为什么有效:大面积纯色暗底在屏上显「闷」,噪点提供胶片颗粒级微观纹理,是暗色高级感的最廉价来源(一张小图,零 JS,零布局成本)。
+    - 本站位置:未来 `.surface-invert` 深色带的全局覆层;浅色区若用,透明度降到 3–5% 做「纸纹」。须 `pointer-events: none`,并核验覆层不侵蚀文字对比度。
+
+11. **卡片边缘高光(edge-highlight)**
+    - 模式:Linear 卡片的「顶部 1px 白 12% 高光 + 17% 宽椭圆径向光晕(白 3–8%)」,由 64 处径向渐变组成系统(edge-glow / edge-highlight / shine-beam 三件套)[S17]。
+    - 为什么有效:暗底上外投影几乎不可见,「顶边被光照亮」是表达浮起的唯一可读线索;与本站 hairline 语言兼容——等于把 hairline 变成「受光面」。
+    - 本站位置:`ArchitectureBento`、`DeliverySection` 卡片的深色变体;浅色卡片不需要(现有 `--shadow-site-sm` 已够)。
+
 ### 品牌资产层面
 
-10. **把「7px 红方块」当作注册商标来经营**
+12. **把「7px 红方块」当作注册商标来经营**
     - 模式对照:Laravel 的辨识度 = 红 + 刻度 + mono kicker;Linear = 暗室 + indigo + grain;Stripe = 渐变 + 轻字重 [S1][S7][S10]。**每家只有一个图形签名**。本站已有红方块(`.kicker::before`、`.section::before/after`、`hero-art::after` 三处),这是正确的收敛方向。
     - 可加强:给 `IsometricCapabilityStack.astro` 的等距 SVG 加 Laravel 式 `@keyframes dashes`(stroke-dashoffset 描边动画 [S2]),让静态线稿有「正在制图」的生命感——与等距线稿的制图语言自洽,且是 SVG 纯 CSS 动画,无性能负担(记得 `prefers-reduced-motion` 守卫,与 `global.css:420-437` 一致)。
+
+13. **hero 关键词轮换(可选实验)**
+    - 模式:Linear hero 标题 "The product development system for teams and agents" 中 teams/agents 两词滚动互换(keyframes 直接命名 `suffixEnter/suffixExit` [S17])。
+    - 为什么有效:一个词位的轮换让静态标题有「系统正在运行」的生命感,且同一句子承载两个受众。**但它是 Linear 当前的辨识度核心,只能借机制、不能借措辞**,否则立刻读成「类 Linear」。
+    - 本站位置:`HomeHero.astro` 标题中的单个名词位(如「团队 / Agent」);克制实现:只换一个词位、≥2.5s 间隔、`prefers-reduced-motion` 下静态。优先级低于第 1 项(字体落地)。
+
+14. **编辑式衬线页(双面品牌,属品牌决策)**
+    - 模式:Linear `/method` 反转为白底 + Tiempos Headline 衬线 128px/1.0 大标题,与暗色产品站互为正反 [S18]。
+    - 为什么有效:在全是黑体的中文 B2B 红海里,「方法论用杂志衬线、产品证据用仪器黑体」的双面策略辨识度极高;methodology 恰是本站叙事最重的页。
+    - 风险:中文衬线(思源宋/系统宋)在 Windows 低 DPI 下屏显较差,需真机实测;这是品牌方向决策而非纯样式决策。
+    - 本站位置:`methodology` 页 H1/H2 引入 display-serif 族,mono kicker 与红方块保留不变。
 
 ### 明确不借鉴(反向结论同样重要)
 
@@ -249,12 +281,12 @@
 
 ## 六、存疑与未验证项
 
-1. **Linear 全节为一手缺失的二手数据**:本机网络把 `linear.com`/`www.linear.com` 301 到了 `www.analog.com`(AkamaiGHost → TencentEdgeOne 链路),`web.archive.org`、`r.jina.ai` 均超时,内置浏览器在本调研环境不可用。[S7] 声明其数值实测自 live CSSOM(含 z-index、@media、真实 hover 规则等硬证据),可信度高,但未经我们复核;`Berkeley Mono`、grain 组件、brightness hover 等结论标注「推断」。
+1. **Linear 数据的同源性问题**:linear.com 在本机被 DNS/CDN 层劫持(301 至 `www.analog.com`,AkamaiGHost → TencentEdgeOne 链路);一轮调研时只能靠第三方提取,二轮改为抓取 `linear.app`(HTTP 200,首页标题与 linear.com 当前版一致 "Linear – The system for product development",产物托管 `static.linear.app` [S16][S17])。**残留不确定:linear.com 与 linear.app 是否逐字节同一构建未验证**(推断:同一 Next.js 产物的双域服务);他人复核请用正常网络同时抓取两域比对哈希。
 2. **Laravel 品牌红取值**:其 CSS token `--color-laravel-red` 实测为 `#f53003`(配套 `#c42602`/`#ffe2dd`,与本站红色三件套逐值相同)[S2];与经典品牌红 `#FF2D20` 的关系未核对(logo SVG 颜色未逐一验证,推断 logo 仍为 FF2D20、界面 token 已换为 F53003;也可能该 CSS 产物与 Laravel Cloud 共享导致 token 名与实际用途有偏差)。ticket 上下文里「laravel 是 #FF2D20」的说法与当前构建产物不符,以 token 实测为准存疑待核。
 3. **Laravel hero 的 `font-display` 工具类**未在 CSS 中找到对应定义(可能经 Tailwind `@utility` 编译成其他形态),推断其映射到 InstrumentSans(或其 Condensed 变体)。
 4. **Stripe 观察色偏差**:第三方实测的 `#533afd`/`#061b31` 与官方品牌资产 `#635BFF`/`#0A2540` 不一致([S10] 已明确指出),本文引用时两个值都给出。
 5. **Stripe 当前 hero 渐变的渲染方式**:2020 版为 WebGL/canvas([S11][S12] 记述);本次抓取只在轮播组件发现 1 个 `<canvas>`,hero 渐变从 CSS 看是静态渐变 + 白昼/黄昏变体(`stats-animation-gradient--daytime/--dusk`),「时段变化」的触发机制(JS 判断本地时间?)未验证。
-6. **Linear 字重 510 的实际覆盖率**:[S10] 引 Typ.io 指出真实页面混用 400/600/800,510 集中在导航/主标签;[S7] 的 590/510 层级表与 [S9] 的提取值(400/510/538)存在差异,未裁决。
+6. **Linear 字重争议已裁决**:命名 token 实测为 300/400/510/590/680 五级 [S17],不存在 [S10] 引 Typ.io 所说的 800;但各档在渲染页面的实际覆盖率未经渲染统计(无截图条件),510「象征性大于普适」的判断仍存疑。
 7. **各站移动端表现**:除断点与字号 token 外,未在移动视口逐一验证(无截图条件)。
 
 ## 来源
@@ -274,3 +306,6 @@
 - [S13] [Laravel News — Laravel News 2025 Recap](https://laravel-news.com/laravel-news-2025-recap)(2025 年 2 月「new Laravel website」上线记录)
 - [S14] [awesome-claude-design 品牌 tokens 汇总](https://github.com/rohitg00/awesome-claude-design)(Linear `#08090a`/`#5e6ad2`/Inter;Stripe `#0a2540`/`#635bff`/Söhne)
 - [S15] 内部报告 [laravel-visual-language.md](./laravel-visual-language.md)(2026-11-15,CDP 计算值实测)
+- [S16] [linear.app 首页 HTML](https://linear.app/)(2026-11-16 抓取,1,269,833 字节;标题 "Linear – The system for product development" 与 linear.com 当前版一致)
+- [S17] static.linear.app CSS 产物(首页 47 份 + /method 增量 3 份,合计 330,174 字节)与字体文件(`InterVariable.woff2?v=4.1`、`InterVariable-Italic.woff2?v=4.1`、`Berkeley-Mono-Variable.woff2?v=3.2`、`Tiempos/tiempos-headline-regular.woff2`)
+- [S18] [linear.app/method](https://linear.app/method)(2026-11-16 抓取,403,917 字节;RSC 负载确认衬线 H1)及 [linear.app/changelog](https://linear.app/changelog)(2,014,323 字节)
