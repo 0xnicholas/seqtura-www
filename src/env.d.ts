@@ -2,10 +2,9 @@
 
 interface ImportMetaEnv {
   readonly PUBLIC_CONTACT_EMAIL?: string;
-  readonly PUBLIC_CONTACT_ENDPOINT?: string;
   readonly PUBLIC_PRIVACY_EMAIL?: string;
   readonly PUBLIC_FEISHU_URL?: string;
-  readonly PUBLIC_WECHAT_QR?: string;
+  readonly PUBLIC_WECOM_QR?: string;
   readonly PUBLIC_ICP_NUMBER?: string;
   readonly PUBLIC_PSB_NUMBER?: string;
   readonly PUBLIC_OPERATOR_NAME?: string;

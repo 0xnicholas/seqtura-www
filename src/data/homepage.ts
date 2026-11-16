@@ -11,7 +11,7 @@ export const homeHero = {
   titleLead: '企业 AI Agent 的',
   titleTail: '工程化交付',
   lead: '把业务场景做成可验收、可私有化、可维护的 AI Agent。',
-  primaryCta: '预约 30 分钟沟通',
+  primaryCta: '预约沟通',
   secondaryCta: '看工作方法论',
   facts: ['8 个交付阶段', '5 层能力栈', '3 条控制面'],
   caption: '交付参考架构 / 5 层能力栈 + 3 条控制面',
@@ -55,10 +55,10 @@ export const homeSections = {
   cta: {
     kicker: '下一步',
     title: '先聊一个具体场景。',
-    lead: '30 分钟，带一个真实的业务流程来。我们一起判断值不值得做、先做哪一步，以及第一个验证切片长什么样。',
-    primaryCta: '预约 30 分钟沟通',
+    lead: '带一个真实的业务流程来。我们一起判断值不值得做、先做哪一步，以及第一个验证切片长什么样。',
+    primaryCta: '预约沟通',
     secondaryCta: '写邮件给我们',
-    note: '30 分钟 · 不收费 · 不推销',
+    note: '不收费 · 不推销',
   },
 } as const;
 

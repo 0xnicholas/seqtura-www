@@ -54,6 +54,3 @@ export const missingLegalPlaceholders: readonly string[] = [
   !placeholders.hostingLocation.value && '托管所在地',
   !placeholders.operatorLocation.value && '运营主体所在地',
 ].filter((value): value is string => Boolean(value));
-
-export const privacyConsentPath = legal.privacyPath;
-export const privacyConsentVersion = legal.privacyVersion;

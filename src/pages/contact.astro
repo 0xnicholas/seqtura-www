@@ -2,7 +2,6 @@
 import { publishedPage } from '../content/entry';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import ContactHero from '../components/ContactHero.astro';
-import ContactBooking from '../components/ContactBooking.astro';
 import ContactChannels from '../components/ContactChannels.astro';
 import ContactAbout from '../components/ContactAbout.astro';
 
@@ -12,7 +11,6 @@ const { title, description } = data;
 
 <BaseLayout title={title} description={description}>
   <ContactHero />
-  <ContactBooking />
   <ContactChannels />
   <ContactAbout />
 </BaseLayout>

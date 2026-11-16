@@ -4,11 +4,11 @@ import { contactChannels } from '../data/contact';
 import { placeholders, showPlaceholderMarks } from '../config/placeholders';
 
 const email = placeholders.contactEmail.value;
-const wechatQr = placeholders.wechatQr.value;
+const wecomQr = placeholders.wecomQr.value;
 const feishuUrl = placeholders.feishuUrl.value;
 
 const availability = {
-  wechat: { configured: Boolean(wechatQr), placeholder: placeholders.wechatQr.isPlaceholder },
+  wecom: { configured: Boolean(wecomQr), placeholder: placeholders.wecomQr.isPlaceholder },
   feishu: { configured: Boolean(feishuUrl), placeholder: placeholders.feishuUrl.isPlaceholder },
   email: { configured: true, placeholder: placeholders.contactEmail.isPlaceholder },
 } as const;
@@ -39,13 +39,13 @@ const availability = {
             </div>
             <h3 class="type-h3 channel-title">{channel.title}</h3>
 
-            {channel.id === 'wechat' &&
-              (wechatQr ? (
+            {channel.id === 'wecom' &&
+              (wecomQr ? (
                 <>
                   <img
                     class="channel-qr"
-                    src={wechatQr}
-                    alt="微信二维码"
+                    src={wecomQr}
+                    alt="企业微信二维码"
                     width="168"
                     height="168"
                     loading="lazy"

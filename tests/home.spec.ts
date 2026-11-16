@@ -7,9 +7,9 @@ test('home states the positioning and routes both hero actions', async ({ page }
   await expect(page.locator('h1')).toHaveCount(1);
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('企业 AI Agent 的工程化交付');
   await expect(page.getByText('把业务场景做成可验收、可私有化、可维护的 AI Agent。')).toBeVisible();
-  await expect(page.getByRole('link', { name: '预约 30 分钟沟通' }).first()).toHaveAttribute(
+  await expect(page.getByRole('link', { name: '预约沟通' }).first()).toHaveAttribute(
     'href',
-    '/contact#book',
+    '/contact#channels',
   );
   await expect(page.getByRole('link', { name: '看工作方法论' }).first()).toHaveAttribute(
     'href',
@@ -230,30 +230,32 @@ test('fit situations describe who the delivery model suits and link to the proce
   }
 });
 
-test('closing CTA sends visitors to the booking form with an email fallback', async ({ page }) => {
+test('closing CTA sends visitors to the contact channels with an email fallback', async ({
+  page,
+}) => {
   await page.goto('/');
 
   const section = page.locator('section#next-step');
   await expect(section.getByRole('heading', { level: 2 })).toHaveText('先聊一个具体场景。');
   await expect(section.getByText(/带一个真实的业务流程来/)).toBeVisible();
-  await expect(section.getByRole('link', { name: '预约 30 分钟沟通' })).toHaveAttribute(
+  await expect(section.getByRole('link', { name: '预约沟通' })).toHaveAttribute(
     'href',
-    '/contact#book',
+    '/contact#channels',
   );
   await expect(section.getByRole('link', { name: '写邮件给我们' })).toHaveAttribute(
     'href',
     'mailto:hello@seqtura.ai',
   );
-  await expect(section.getByText('30 分钟 · 不收费 · 不推销')).toBeVisible();
+  await expect(section.getByText('不收费 · 不推销')).toBeVisible();
 });
 
-test('every primary CTA on the home page lands on the booking anchor', async ({ page }) => {
+test('every primary CTA on the home page lands on the contact channels', async ({ page }) => {
   await page.goto('/');
 
   const primaryCtas = page.locator('[data-primary-cta]');
   await expect(primaryCtas).toHaveCount(4);
   for (const cta of await primaryCtas.all()) {
-    await expect(cta).toHaveAttribute('href', '/contact#book');
+    await expect(cta).toHaveAttribute('href', '/contact#channels');
   }
 });
 

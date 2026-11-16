@@ -15,7 +15,7 @@ test('process hero frames the six-stage cooperation path and routes both actions
   ).toBeVisible();
   await expect(main.getByRole('link', { name: '开始第一次沟通' })).toHaveAttribute(
     'href',
-    '/contact#book',
+    '/contact#channels',
   );
   await expect(main.getByRole('link', { name: '看技术架构' })).toHaveAttribute(
     'href',
@@ -44,7 +44,7 @@ test('process flow shows six nodes with typical durations, client roles and thre
     '交付与验收',
     '上线后支持',
   ];
-  const durations = ['30 分钟', '1–2 周', '3–5 个工作日', '1–2 周', '4–12 周', '按合同'];
+  const durations = ['1 次', '1–2 周', '3–5 个工作日', '1–2 周', '4–12 周', '按合同'];
   const roles = [
     '业务发起人',
     '业务专家 + IT + sponsor',
@@ -97,7 +97,7 @@ test('process stage table carries cycle, participants, client input, outputs, bo
     {
       id: 'intro',
       name: '初次沟通',
-      cycle: '30 分钟，1 次',
+      cycle: '1 次沟通',
       client: '业务发起人，技术对接人可同来',
       copy: '围绕一个具体业务场景，说明现状、瓶颈与预期结果。沟通结束给出判断：是否值得进入评估。',
     },
@@ -211,7 +211,7 @@ test('process page stays within its scope and resolves all three anchors', async
   await expect(main.locator('a[data-primary-cta]')).toHaveCount(1);
   await expect(main.getByRole('link', { name: '开始第一次沟通' })).toHaveAttribute(
     'href',
-    '/contact#book',
+    '/contact#channels',
   );
 
   for (const bannedHeading of ['不承诺什么', '首次沟通方式']) {
@@ -290,7 +290,7 @@ test.describe('process at 390px', () => {
     await first.locator('summary').click();
     await expect(first).toHaveAttribute('open', '');
     await expect(first.getByText('不出方案、不报价、不做技术验证')).toBeVisible();
-    await expect(first.locator('summary').getByText('30 分钟')).toBeVisible();
+    await expect(first.locator('summary').getByText('1 次沟通')).toBeVisible();
 
     const second = cards.nth(1);
     await second.locator('summary').focus();
