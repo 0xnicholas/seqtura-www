@@ -34,9 +34,8 @@ export const footerColumns: readonly FooterColumn[] = [
   {
     title: '联系',
     links: [
-      { href: '/contact#book', label: '预约 30 分钟' },
+      { href: '/contact#channels', label: '预约沟通' },
       { href: '/contact#about', label: '关于我们' },
-      { href: '/contact#channels', label: '飞书 / 微信' },
       { href: `mailto:${placeholders.contactEmail.value}`, label: '邮箱' },
     ],
   },
@@ -48,5 +47,5 @@ export const site = {
   tagline: '把 AI Agent 从演示做到上线。',
   defaultTitle: 'Seqtura AI（序构 AI）｜企业 AI Agent 的工程化交付',
   description: '把 AI Agent 从演示做到上线：8 阶段交付方法、可私有化的参考架构、可审计的工程边界。',
-  bookingPath: '/contact#book',
+  contactPath: '/contact#channels',
 } as const;

@@ -2,7 +2,7 @@
 
 本表是 #24 的发布门禁：所有勾选项必须由 owner 在正式上线前确认。未确认的交付承诺、周期、角色、架构能力与法务事实，一律保持代码中的默认写法，不得改写成既成事实。
 
-- 默认文案来源：`src/data/delivery.ts`、`src/data/process.ts`、`src/data/architecture.ts`、`src/data/homepage.ts`、`src/config/placeholders.ts`、`src/config/legal.ts`。
+- 默认文案来源：`src/data/delivery.ts`、`src/data/process.ts`、`src/data/architecture.ts`、`src/data/homepage.ts`、`src/data/contact.ts`、`src/config/placeholders.ts`、`src/config/legal.ts`。
 - 环境变量清单：`.env.example`。
 - 自动化门禁：`pnpm lint`、`pnpm check`、`pnpm build`、`pnpm check:links`、`pnpm check:sentinels`、`pnpm test`、`pnpm lighthouse`。
 - CI 顺序见 `.github/workflows/ci.yml`。`main` 分支保护由仓库设置维护：必须要求 CI 的 `quality` job 通过后才能合并；本仓库代码不修改分支保护。
@@ -24,7 +24,7 @@
 
 | 阶段             | 典型周期                          | 我方参与人                   | 客户侧参与人                              |
 | ---------------- | --------------------------------- | ---------------------------- | ----------------------------------------- |
-| 初次沟通         | 30 分钟，1 次                     | 技术负责人 + 业务负责人      | 业务发起人，技术对接人可同来              |
+| 初次沟通         | 1 次                              | 技术负责人 + 业务负责人      | 业务发起人，技术对接人可同来              |
 | 需求与可行性评估 | 1–2 周                            | 前置交付工程师 + 方案 / 架构 | 业务专家 + IT / 数据对接人 + 业务 sponsor |
 | 方案与报价       | 3–5 个工作日                      | 方案 + 商务                  | 业务 sponsor，采购 / 法务按需             |
 | 合同与启动       | 1–2 周，取决于采购流程            | 商务 + 项目负责人            | 采购 / 法务 + 业务 sponsor + 项目对接人   |
@@ -89,7 +89,7 @@
 - [ ] ICP / 公安备案缺失时整项隐藏，不显示“待补”或空链接。
 - [ ] `PUBLIC_SHOW_PLACEHOLDERS=false`；预览占位标记不会进入生产。
 - [ ] 隐私政策有生效日期、最后更新、版本号与目录锚点。
-- [ ] 隐私政策先于表单收集上线。
+- [ ] 隐私政策先于联系渠道上线。
 - [ ] 服务条款明确“内容不构成报价或承诺”。
 - [ ] 法务审核建议完成；未审核不阻塞，但 owner 需确认内容。
 
@@ -97,28 +97,26 @@
 
 当前仓库只用占位地址与测试桩，生产凭证必须由 owner 注入。
 
-- [ ] `hello@seqtura.ai` 可收信、有人负责回复；联系页“提交后联系”的说明与实际一致。
+- [ ] `hello@seqtura.ai` 可收信、有人负责回复；联系页的渠道说明与实际一致。
 - [ ] `privacy@seqtura.ai` 可收信；隐私权利请求有处理人。
-- [ ] 飞书机器人 webhook 与签名密钥已配置（`FEISHU_WEBHOOK_URL`、`FEISHU_WEBHOOK_SECRET`）。
-- [ ] 微信二维码已上传或配置（`PUBLIC_WECHAT_QR`），移动端可打开。
-- [ ] 境内邮件服务凭证已配置：`EMAIL_PROVIDER=smtp` + `SMTP_*`、`CONTACT_TO_EMAIL`、`CONTACT_FROM_EMAIL`。
-- [ ] 发信域名 SPF / DKIM / DMARC 已配置并通过验证。
-- [ ] 生产提交一次真实测试线索：飞书与邮件分别检查，至少一路成功；失败时页面显示邮件兜底。
-- [ ] 密钥只放在服务端环境变量；没有任何 secret 进入 `PUBLIC_*`。
-- [ ] 若表单端点与静态站不同域：`PUBLIC_CONTACT_ENDPOINT` 指向境内端点，CSP `connect-src` 与 CORS 白名单同步放行。
+- [ ] 企业微信「联系我」二维码已上传或配置（`PUBLIC_WECOM_QR`），文件在站内 `public/` 下，移动端可扫码添加。
+- [ ] 飞书联系入口已配置（`PUBLIC_FEISHU_URL`），桌面与移动端均可打开。
+- [ ] 企业微信、飞书与邮箱三个渠道各做一次真实触达测试：二维码可扫、链接可开、邮件可回。
+- [ ] 企业微信与飞书的日常负责人已指定；三个渠道都有人回复。
+- [ ] 邮箱域名 SPF / DKIM / DMARC 已配置并通过验证。
+- [ ] 如未来接入需要凭证的服务，密钥只放在服务端环境变量；没有任何 secret 进入 `PUBLIC_*`。
+- [ ] 二维码不是外链图床：CSP `img-src 'self' data:` 只允许站内图片。
 
-## 6. 表单合规
+## 6. 联系渠道与合规
 
-- [ ] 表单字段、校验、投递语义与环境变量契约未改动；真实凭证替换不需要改端点。
-- [ ] 表单端点与邮件通道在中华人民共和国境内；静态站可境外。
+- [ ] 站点不再提供表单端点、提交 payload、限流或同意勾选；联系路径只有企业微信、飞书与邮箱。
+- [ ] 企业微信、飞书与邮件服务在中华人民共和国境内；静态站可境外。
 - [ ] 静态托管商访问日志的存储地域已确认；必要时由法务确认隐私政策对应条款。
-- [ ] 表单数据只进飞书与邮箱；不建数据库、CRM 或队列。
+- [ ] 联系信息只存在于企业微信、飞书与邮箱；不建数据库、CRM 或队列。
 - [ ] 不接访问统计、Cookie、Cookie 横幅、A/B 测试。
-- [ ] 同意勾选默认不勾选，链接到隐私政策并在新标签打开；提交 payload 带 `consent`、`consentAt`、`privacyVersion`。
-- [ ] 预览环境显式设置 `FORM_MODE=test`（或 `off`）；未设置或拼错时服务端按 `off` 返回 503。生产 `FORM_MODE=live` 仅在凭证就绪后设置。
-- [ ] 生产限流由宿主 WAF 或共享 KV 执行；仓库内的内存限流只作为本地回退。
-- [ ] `FORM_MODE=off` 时返回 503 并显示邮件兜底；`live` 两路失败返回 502。
-- [ ] 自动化已用本地飞书 / SMTP 桩验证 `live` 模式至少一路成功与两路失败；测试不投递真实消息。
+- [ ] 隐私政策描述主动联系时收到的信息、用途、保存期限与第三方处理者；与实际渠道一致。
+- [ ] 隐私政策保留查阅、更正、删除、撤回权利与 15 个工作日响应时限。
+- [ ] 企业微信（腾讯）与飞书（字节跳动）已按实际写入隐私政策的第三方处理者清单。
 
 ## 7. 占位哨兵
 
@@ -132,24 +130,23 @@
 ### 8.1 部署形态
 
 - 静态产物：`dist/client`，可部署到任意静态托管。
-- 动态端点：`server.mjs`（Node ≥ 22，读取 `dist/server/entry.mjs` 的 middleware handler）；`POST /api/contact` 是唯一动态路由。
+- 服务端：`server.mjs`（Node ≥ 22，读取 `dist/server/entry.mjs` 的 middleware handler）；站点没有动态路由，只负责静态页面与安全头。
 - 本地、测试与自建 Node 部署统一用 `node server.mjs`（`HOST` / `PORT`，默认端口 4321）；它也负责把 `dist/client` 的静态页面、目录索引与 404 交给 Astro handler。
 - 安全头与缓存规则在 `server.mjs` 中应用到每个响应；`public/_headers` 保留给 Cloudflare Pages / Netlify 等静态托管。`pnpm preview`、Playwright 与链接检查都走 `server.mjs`，所以本地响应可以证明安全头已生效。
 - 静态托管不跑 Node 时，`_headers` 必须随发布根目录一起上传；自建 Nginx / Caddy 也可在代理层注入同一组头。
 
 ### 8.2 必须核对的响应头
 
-| 范围                                                  | Header                                     | 期望值                                                                                                                                                                           |
-| ----------------------------------------------------- | ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 全站                                                  | `Strict-Transport-Security`                | `max-age=31536000; includeSubDomains; preload`                                                                                                                                   |
-| 全站                                                  | `X-Content-Type-Options`                   | `nosniff`                                                                                                                                                                        |
-| 全站                                                  | `Referrer-Policy`                          | `strict-origin-when-cross-origin`                                                                                                                                                |
-| 全站                                                  | `Permissions-Policy`                       | `camera=(), microphone=(), geolocation=()`                                                                                                                                       |
-| 全站                                                  | `Content-Security-Policy`                  | `default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'` |
-| HTML                                                  | `Cache-Control`                            | `public, max-age=0, must-revalidate`                                                                                                                                             |
-| `/_astro/*`                                           | `Cache-Control`                            | `public, max-age=31536000, immutable`                                                                                                                                            |
-| `/sitemap-index.xml`、`/sitemap-0.xml`、`/robots.txt` | `Cache-Control`                            | `public, max-age=600`                                                                                                                                                            |
-| `/api/contact`                                        | `X-Content-Type-Options` / `Cache-Control` | `nosniff` / `no-store`（端点自身已设置）                                                                                                                                         |
+| 范围                                                  | Header                      | 期望值                                                                                                                                                                           |
+| ----------------------------------------------------- | --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 全站                                                  | `Strict-Transport-Security` | `max-age=31536000; includeSubDomains; preload`                                                                                                                                   |
+| 全站                                                  | `X-Content-Type-Options`    | `nosniff`                                                                                                                                                                        |
+| 全站                                                  | `Referrer-Policy`           | `strict-origin-when-cross-origin`                                                                                                                                                |
+| 全站                                                  | `Permissions-Policy`        | `camera=(), microphone=(), geolocation=()`                                                                                                                                       |
+| 全站                                                  | `Content-Security-Policy`   | `default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'` |
+| HTML                                                  | `Cache-Control`             | `public, max-age=0, must-revalidate`                                                                                                                                             |
+| `/_astro/*`                                           | `Cache-Control`             | `public, max-age=31536000, immutable`                                                                                                                                            |
+| `/sitemap-index.xml`、`/sitemap-0.xml`、`/robots.txt` | `Cache-Control`             | `public, max-age=600`                                                                                                                                                            |
 
 - Cloudflare Pages / Netlify：直接读取发布根目录的 `_headers`（源文件为 `public/_headers`，构建后复制到 `dist/client/_headers`）。
 - 自建 Nginx / Caddy / 其他反向代理：在代理层注入同一组头；不要只依赖 `_headers` 文件。
@@ -170,9 +167,8 @@ curl -sSI "https://seqtura.ai$asset" | grep -i cache-control
 curl -sSI https://seqtura.ai/sitemap-index.xml | grep -i cache-control
 curl -sSI https://seqtura.ai/robots.txt | grep -i cache-control
 
-# 联系端点自身头（无效请求应为 400，且带 nosniff / no-store）
-curl -sS -D - -o /dev/null -X POST https://seqtura.ai/api/contact \
-  -H 'content-type: application/json' -H 'origin: https://seqtura.ai' --data '{}'
+# 联系页可访问
+curl -sSI https://seqtura.ai/contact | head -1
 ```
 
 ### 8.4 托管与 SEO 检查
@@ -193,24 +189,24 @@ curl -sS -D - -o /dev/null -X POST https://seqtura.ai/api/contact \
 自动化已覆盖：
 
 - [ ] `pnpm test` 全绿，包括 320 / 390 / 768 / 1024 / 1440 无页面级横向溢出。
-- [ ] 200% 缩放近似测试通过（720px CSS 视口，无横向溢出，主内容与表单可用）。
+- [ ] 200% 缩放近似测试通过（720px CSS 视口，无横向溢出，主内容与联系渠道可用）。
 - [ ] axe 扫描 7 个页面无 `serious` / `critical`；扫描在 `prefers-reduced-motion: reduce` 下运行，避免入场动画的半透明中间态被误判为低对比度。
-- [ ] 跳过链接、可见焦点、键盘导航、键盘完成表单、移动菜单、代码面板左右键、流程图示意的可访问名称。
+- [ ] 跳过链接、可见焦点、键盘导航、键盘访问联系渠道、移动菜单、代码面板左右键、流程图示意的可访问名称。
 - [ ] 装饰元素 `aria-hidden`，导航有 `aria-label`，图表有可访问名称 / 描述。
 - [ ] Lighthouse Accessibility / Best Practices / SEO 均为 100；Performance 只记录，不设门槛。
 
 上线前人工过一遍：
 
-- [ ] 浏览器 200% 缩放：导航、表单、法务目录、架构图仍可用。
-- [ ] 仅键盘：Tab 到跳过链接 → 主内容；打开/关闭移动菜单；切换代码面板；完成表单提交与错误摘要。
-- [ ] 读屏（VoiceOver / NVDA）：页头导航名称、当前页、主内容、图表名称与描述、表单标签与错误、成功态、页脚法务条。
+- [ ] 浏览器 200% 缩放：导航、联系渠道、法务目录、架构图仍可用。
+- [ ] 仅键盘：Tab 到跳过链接 → 主内容；打开/关闭移动菜单；切换代码面板；访问企业微信 / 飞书 / 邮箱链接。
+- [ ] 读屏（VoiceOver / NVDA）：页头导航名称、当前页、主内容、图表名称与描述、联系渠道卡片与二维码替代文本、页脚法务条。
 - [ ] `prefers-reduced-motion`：入场、模糊与位移动画关闭。
 - [ ] OG 预览：标题、描述、1200×630 图片正常。
 - [ ] 五档断点目视验收：无页面级横向滚动；代码面板与阶段胶囊只在自身内部滚动。
 
 ## 10. 法务审核
 
-- [ ] 隐私政策：收集字段、用途、存储地点、保存期限、权利与响应时限、Cookie / 统计声明、境内闭环与境外静态站说明。
+- [ ] 隐私政策：主动联系时收集的信息、用途、存储地点、保存期限、权利与响应时限、Cookie / 统计声明、境内闭环与境外静态站说明。
 - [ ] 服务条款：内容不构成报价或承诺、知识产权、使用规则、免责、适用法律。
 - [ ] 两页均有生效日期、最后更新、版本号；隐私政策目录锚点可用。
 - [ ] 运营主体、地址、域名、服务商、所在地、备案号已替换或按缺失规则隐藏。
@@ -225,7 +221,7 @@ curl -sS -D - -o /dev/null -X POST https://seqtura.ai/api/contact \
 | 架构 12 项事实                 |        |      |             |
 | 法务占位与备案                 |        |      |             |
 | 真实通道与凭证                 |        |      |             |
-| 表单合规与真实投递             |        |      |             |
+| 联系渠道与真实可达             |        |      |             |
 | 哨兵扫描                       |        |      |             |
 | 安全头 / 缓存 / HTTPS          |        |      |             |
 | SEO / sitemap / OG             |        |      |             |

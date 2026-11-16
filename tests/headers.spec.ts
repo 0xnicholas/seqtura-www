@@ -75,19 +75,14 @@ test('live sitemap and robots use a short cache', async ({ request }) => {
   }
 });
 
-test('the live contact endpoint answers with no-store and the security headers', async ({
+test('the live contact page answers with the security headers and revalidates', async ({
   request,
 }) => {
-  const origin = `http://127.0.0.1:${Number(process.env.PORT ?? 4321)}`;
-  const response = await request.post('/api/contact', {
-    data: { broken: true },
-    headers: { origin, 'content-type': 'application/json' },
-  });
+  const response = await request.get('/contact');
 
-  expect(response.status()).toBe(400);
+  expect(response.status()).toBe(200);
   expectSecurityHeaders(response);
-  expect(response.headers()['x-content-type-options']).toBe('nosniff');
-  expect(response.headers()['cache-control']).toContain('no-store');
+  expect(response.headers()['cache-control']).toBe('public, max-age=0, must-revalidate');
 });
 
 test('public/_headers still documents the static-host contract', () => {

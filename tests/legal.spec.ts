@@ -49,8 +49,9 @@ test('privacy policy carries the twelve canonical sections and disclosures', asy
   );
 
   for (const disclosure of [
-    '姓名、公司名称、邮箱、需求描述',
-    '同意勾选状态、提交时间与所同意的隐私政策版本',
+    '姓名、公司名称、联系方式、需求描述',
+    '企业微信（腾讯）',
+    '飞书（字节跳动）',
     'IP 地址、访问时间、请求页面',
     '不使用 Cookie、像素标签、第三方统计或广告脚本',
     '自最后一次联系之日起 12 个月内删除',
@@ -86,9 +87,9 @@ test('terms of service carries the nine canonical sections and disclosures', asy
 });
 
 test('both legal pages show the version metadata and no preview placeholder', async ({ page }) => {
-  for (const [route, heading] of [
-    ['/legal/privacy', '隐私政策'],
-    ['/legal/terms', '服务条款'],
+  for (const [route, heading, updated, updatedIso] of [
+    ['/legal/privacy', '隐私政策', '2026年11月16日', '2026-11-16'],
+    ['/legal/terms', '服务条款', '2026年11月15日', '2026-11-15'],
   ] as const) {
     await page.goto(route);
     const meta = page.locator('[data-legal-meta]');
@@ -96,12 +97,12 @@ test('both legal pages show the version metadata and no preview placeholder', as
     await expect(meta.getByText('生效日期')).toBeVisible();
     await expect(meta.getByText('最后更新')).toBeVisible();
     await expect(meta.getByText('版本')).toBeVisible();
-    await expect(meta.locator('dd')).toHaveText(['2026年11月15日', '2026年11月15日', '1.0']);
+    await expect(meta.locator('dd')).toHaveText(['2026年11月15日', updated, '1.0']);
     expect(
       await meta
         .locator('time')
         .evaluateAll((elements) => elements.map((element) => element.getAttribute('datetime'))),
-    ).toEqual(['2026-11-15', '2026-11-15']);
+    ).toEqual(['2026-11-15', updatedIso]);
     await expect(page.getByRole('heading', { level: 1 })).toHaveText(heading);
     await expect(page.locator('[data-placeholder-note]')).toHaveCount(0);
   }
@@ -329,6 +330,8 @@ test.describe('configured filing and operator values', () => {
         PUBLIC_HOSTING_LOCATION: '北京',
         PUBLIC_OPERATOR_LOCATION: '北京市',
         PUBLIC_PRIVACY_VERSION: '1.1',
+        PUBLIC_WECOM_QR: '/og-default.png',
+        PUBLIC_FEISHU_URL: 'https://feishu.example/contact',
       },
     });
 
@@ -405,5 +408,27 @@ test.describe('configured filing and operator values', () => {
     for (const sentinel of ['【', '待补', '占位', 'example']) {
       expect(bodyText, sentinel).not.toContain(sentinel);
     }
+  });
+
+  test('renders the configured contact channels', async ({ page }) => {
+    await page.goto(`${baseURL}/contact`);
+
+    const wecom = page.locator('[data-channel="wecom"]');
+    const qr = wecom.getByRole('img', { name: '企业微信二维码' });
+    await expect(qr).toBeVisible();
+    await expect(qr).toHaveAttribute('src', '/og-default.png');
+    await expect(wecom).toContainText('扫码添加企业微信，备注「预约」。');
+    await expect(wecom).not.toContainText('暂未公开');
+
+    const feishu = page.locator('[data-channel="feishu"]');
+    const link = feishu.getByRole('link', { name: '打开飞书' });
+    await expect(link).toHaveAttribute('href', 'https://feishu.example/contact');
+    await expect(link).toHaveAttribute('target', '_blank');
+    await expect(link).toHaveAttribute('rel', 'noopener');
+    await expect(feishu).toContainText('在飞书中打开联系入口，直接留言。');
+    await expect(feishu).not.toContainText('暂未公开');
+
+    await expect(page.locator('[data-placeholder-badge]')).toHaveCount(0);
+    await expect(page.locator('body')).not.toContainText('暂未公开');
   });
 });

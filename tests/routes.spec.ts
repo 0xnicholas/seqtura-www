@@ -13,7 +13,7 @@ const anchors = {
   '/methodology': ['stages', 'discover', 'validate', 'deploy'],
   '/architecture': ['overview', 'lifecycle', 'layers', 'controls', 'scenarios'],
   '/process': ['stages', 'pricing', 'support'],
-  '/contact': ['book', 'channels', 'about'],
+  '/contact': ['channels', 'about'],
 };
 
 for (const route of routes) {
@@ -60,6 +60,6 @@ test('unknown routes return 404 with a noindex page', async ({ page }) => {
   await expect(main.getByRole('link', { name: '返回首页' })).toHaveAttribute('href', '/');
   await expect(main.getByRole('link', { name: '预约沟通' })).toHaveAttribute(
     'href',
-    '/contact#book',
+    '/contact#channels',
   );
 });
