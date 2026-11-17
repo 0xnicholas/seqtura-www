@@ -48,7 +48,7 @@
 | 回退字体度量（新增 `Instrument Sans Fallback` `@font-face`）                                            | 无                                                         | `size-adjust: 100.8%; ascent-override: 97.0%; descent-override: 25.0%`（macOS / Helvetica Neue 标定，cap-height 对齐法，snippet 见 `prototype/type-specimen` 标样页 07 区块）；Windows / Arial 值于实现阶段首台 Windows 机器标定 | #30、#34 |
 | 字重层级（`.type-h1` / `.type-h2` / `.type-h3` / `.type-lead` / `.mono-label` / `.kicker` / `.btn` 等） | 标题 400（`.type-h3` 500）、正文 400                       | 方案 c：正文 400；交互与中强调 500；中文标题 500（`:lang(zh)`，可变字体下零文件代价）；拉丁标题恒定 400                                                                                                                          | #30      |
 | 中西文混排（`body` 级声明，非自定义属性）                                                               | 无                                                         | `text-autospace: normal` + `text-spacing-trim: normal`，Chrome 系渐进增强（macOS 苹方 + Chrome 157 实测标点挤压生效）；Firefox / Safari 静默降级可接受                                                                           | #27、#30 |
-| 数字排版                                                                                                | 无                                                         | 数据/统计数字场景 `font-variant-numeric: tabular-nums`；正文内联数字不开                                                                                                                                                         | #30      |
+| 数字排版                                                                                                | 无                                                         | 多数字并列对齐场景（表格/榜单）开 `font-variant-numeric: tabular-nums`；单个数字与正文内联数字不开（hero-facts、proof-value 判例，#37 加注）                                                                                     | #30      |
 
 记录在案：
 
@@ -118,13 +118,71 @@
 
 **决策依据**：[对标拆解](https://github.com/0xnicholas/seqtura-www/issues/26)、[字体调研](https://github.com/0xnicholas/seqtura-www/issues/27)、[色彩微调候选](https://github.com/0xnicholas/seqtura-www/issues/28)、[标志性图形语言](https://github.com/0xnicholas/seqtura-www/issues/29)、[排版标样页](https://github.com/0xnicholas/seqtura-www/issues/30)、[第二图层质感](https://github.com/0xnicholas/seqtura-www/issues/31)、[动效预算与语言](https://github.com/0xnicholas/seqtura-www/issues/32)；六字段模板来自[规格的结构与验收标准](https://github.com/0xnicholas/seqtura-www/issues/33)。
 
-### 区块 2 · ProofStrip
+### 区块 2 · ProofStrip（P1）
 
-（留白，由 #37 填充）
+**目标**：品牌红随 token 换值落到 5 处 7px tick；Instrument Sans 加载后 28px 数字与西文标签真实渲染切换；内联文案 8 处手写空格随全量清理归零；补上首页唯一缺席的区块级入场。结构、栅格、文案、tick 几何不动。
 
-### 区块 3 · MethodologyPreview
+**Before / After**：
 
-（留白，由 #37 填充）
+| 维度        | Before                                                                                                                                                                                                                                            | After                                                                                                                                                                                                                                                                                                | 优先级 |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| 色彩        | 5 处 7px tick（`.proof-intro::before` + 4×`.proof-cell::before`）取 `var(--color-red)` = `#f53003`；区块内零硬编码红（纯 token 引用，不占 #28 的 29 处份额）                                                                                      | token 换值后自动落 `#FF2D20`（§3.1）；无其它色彩变化                                                                                                                                                                                                                                                 | P1     |
+| 排版        | `proof-value` 28px/400，Instrument Sans 居栈首但未加载、实际渲染系统字体；`proof-label`/`.unit` mono 400；内联文案手写中西空格 8 处（facts 四行：`8 个交付阶段`/`FDE 交付方法 · 4 组`/`5 层能力栈`/`3 条控制面`/`1 个主转化`/`预约 30 分钟沟通`） | Latin 数字与西文渲染为 Instrument Sans（§3.2），CJK 维持系统栈；字重不动（proof-value 400 非标题；proof-label 400 与 `.mono-label` 层级一致）；8 处手写空格随全量清理归零，autospace 接管混排缝隙；`身份 / 评测 / 审计` 等「 / 」分隔保留；tnum 不开（单个数字无对齐收益，同 hero-facts 判例，§3.2） | P1     |
+| 图形语言    | 制图语法骨架（hairline + tick×5 + mono 标签）；无区块头部                                                                                                                                                                                         | 不变。无 SectionHeading，不适用 mini 等距栈统一规则（规则见区块 3）；本区块品牌表达 = tick 换值                                                                                                                                                                                                      | —      |
+| 质感        | 无光晕、无质感层                                                                                                                                                                                                                                  | 不变                                                                                                                                                                                                                                                                                                 | —      |
+| 动效 · 入场 | 无入场（`data-proof-intro`/`data-proof-fact` 全库无 JS/CSS 挂载，为死属性；首页唯一无入场的内容区块）                                                                                                                                             | `.proof-grid` 加 `.reveal`，随 §3.3 全局规则：IO 触发（threshold ≈0.15）、once-only、600ms `var(--duration-enter)`、`var(--ease-site)`、无逐格 stagger；死属性实现阶段清理                                                                                                                           | P2     |
+| 动效 · 反馈 | 无可交互元素                                                                                                                                                                                                                                      | 不变                                                                                                                                                                                                                                                                                                 | —      |
+
+**Token 影响**：引用 §3.1（红系换值；本区块硬编码份额 0 处）、§3.2（字体加载；手写空格清理本区块份额 8 处）、§3.3（reveal 全局机制）。无新增 token。
+
+**性能预算影响**：≈零。reveal 只动 transform/opacity，IO 运行时成本≈零；字体预算已在 §3.2 计。
+
+**边界**：`<1024px` 栅格两列、`<768px` 字号收缩等响应式规则不变；tick 全断点保留。
+
+**验收点**：
+
+- [ ] 5 处 tick 计算样式渲染为 `#FF2D20`；`ProofStrip.astro` 内无硬编码红
+- [ ] `proof-value` 数字与 `Built for production` 渲染为 Instrument Sans（非系统回退）；proof-value 400、proof-label 400 不变
+- [ ] 内联文案 8 处手写中西空格清零，autospace 下无双重加宽；「 / 」分隔保留
+- [ ] `.proof-grid` 带 `.reveal`：进入视口触发一次 600ms section-in，回滚不重演，无逐格 stagger；`prefers-reduced-motion` 下静态
+- [ ] `proof-value` 无 `font-variant-numeric` 声明（tnum 不开）
+- [ ] Lighthouse CI 与 Playwright（含 a11y）全绿
+
+**决策依据**：[#28](https://github.com/0xnicholas/seqtura-www/issues/28)（红系换值）、[#29](https://github.com/0xnicholas/seqtura-www/issues/29)（mini 版只进区块头部，本区块无头部不适用）、[#30](https://github.com/0xnicholas/seqtura-www/issues/30)（方案 c、autospace 与手写空格清理；tnum 判例同区块 1 hero-facts）、[#32](https://github.com/0xnicholas/seqtura-www/issues/32)（reveal IO 化、once-only、无组内 stagger）。
+
+### 区块 3 · MethodologyPreview（P0）
+
+**目标**：首页第一个 SectionHeading 的 mini 等距栈在此定标（本区块唯一 P0 品牌动作，统一规则随此节确立）；红色光晕保留换值；h2 中文升 500；39 处手写空格清理；3 处 reveal 与 code-tab 反馈并入全局动效 token 体系。结构、栅格、文案、CodePanel 交互不动。
+
+**Before / After**：
+
+| 维度        | Before                                                                                                                                                                                                                                                                                                                                                                         | After                                                                                                                                                                                                                                                                                                                                                                                                                              | 优先级 |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| 色彩        | `code-wrap::before` 光晕 `rgb(245 48 3 / 13%→0%)` 2 个 stop 硬编码（本区块占 #28 清单份额 2 处；全站 5 处光晕之一）；`.check-mark` / code-tab 文件图标 / code-foot 圆点取 `var(--color-red)`（装饰性，`aria-hidden`）；`.method-range` / `.method-group-link` 取 `var(--color-red-dark)`，已符合文本红规则；CodePanel 中性硬编码 `.code-line:hover` `#fafaf8`、`.ln` `#c8c8c4` | 光晕 2 个 stop 纯值替换为 `rgb(255 45 32 / …)`，透明度与范围（`inset: 4% 0 -8% 8%`）不变；token 引用处随 §3.1 自动换值；中性硬编码不动、记录在案（中性色阶锁定 #28）                                                                                                                                                                                                                                                               | P1     |
+| 排版        | h2 `.type-h2` 中文 400；`.type-h3` 现状已 500；kicker 500；文案手写中西空格 39 处（homepage methodology 段 6 / deliveryGroups 21 / methodologyCode 12——methodologyCode 唯一消费者即本区块 CodePanel）                                                                                                                                                                          | h2 中文 500（`:lang(zh)`，方案 c；拉丁恒定 400）；type-h3 / kicker 不变；39 处随全量清理归零，autospace 接管；code 内 CJK 注释同规清理，token 前导缩进空格保留；无多数字并列场景，tnum 不开（§3.2）                                                                                                                                                                                                                                | P1     |
+| 图形语言    | 无图形资产：SectionHeading = kicker + 标题 + lead 纯文字；组卡纯文字                                                                                                                                                                                                                                                                                                           | SectionHeading 头部加 **mini 等距栈**：三层 slab、中层红板（token 换值后 `#FF2D20`）、高 120px、居中于 kicker 上方、纯 SVG 内联、与 hero 主图同一几何（定标形态 = `prototype/graphic-language` 分支第二轮 A 变体）。**统一规则：mini 等距栈是所有 SectionHeading 区块头部的标准配置**，区块 4/5/6 节引用本行，内页由 §5 沿用；mini 栈为头部标记、不计入「每页至多一处图示化」预算——首页图示化仍仅 hero，组卡不加原型中的阶梯对图示 | P0     |
+| 质感        | code-wrap 13% 红色光晕                                                                                                                                                                                                                                                                                                                                                         | 不变（光晕单材质保留；色值随「色彩」行换值）；不新增网格/纸纹                                                                                                                                                                                                                                                                                                                                                                      | —      |
+| 动效 · 入场 | 3 处 `.reveal`（section-heading / method-split / method-groups）load 即播（折叠线以下白播）                                                                                                                                                                                                                                                                                    | 随 §3.3 全局改 IO 触发、once-only、无组内 stagger；时长 `var(--duration-enter)` 600ms                                                                                                                                                                                                                                                                                                                                              | P2     |
+| 动效 · 反馈 | `.code-tab` transition `50ms ease-out` 硬编码；`.btn`（method-link）50ms（§3.3 已统收）；`.method-group` hover `background-color 150ms var(--ease-site)` 已合规；组卡箭头 `translate(2px,-2px)` 在白名单内                                                                                                                                                                     | `.code-tab` 并入 `var(--duration-micro)` 150ms + `var(--ease-site)`；其余不变：卡片 hover 仅 background-color，位移 hover 全站仅箭头 2px                                                                                                                                                                                                                                                                                           | P2     |
+
+**Token 影响**：引用 §3.1（红系换值；硬编码份额 2 处 = 光晕 stops）、§3.2（字体、方案 c；手写空格清理本区块份额 39 处）、§3.3（`--duration-micro`、reveal 机制）。无新增 token；mini 栈几何不 token 化（单一形态，SVG 内联）。
+
+**性能预算影响**：≈零。mini 栈为内联 SVG（<2KB、无新请求）；光晕换值零成本；IO 运行时≈零；字体已在 §3.2 预算内。Lighthouse CI 与 Playwright 护栏不变。
+
+**边界**：`<1024px` method-split 单列、组卡 2→1 列不变；mini 栈全断点 120px 固定；code-tab 横向滚动现状保留。
+
+**验收点**：
+
+- [ ] SectionHeading 头部渲染 mini 等距栈：三层 slab、中层红板 `#FF2D20`、居中、高 120px、SVG 内联无外部资源，与 hero 主图几何同源
+- [ ] 组卡内无阶梯对或其它图示化元素（密度纪律：首页图示化仅 hero 一处）
+- [ ] `MethodologyPreview.astro` 中 `rgb(245 48 3` grep 零残留（换为 `rgb(255 45 32 / …)`）；`.code-line:hover` `#fafaf8` 与 `.ln` `#c8c8c4` 保持原值
+- [ ] 本区块 h2 在 `:lang(zh)` 下 `font-weight: 500`；introTitle 与组卡标题（`.type-h3`）500 不变
+- [ ] 39 处手写中西空格清零（homepage methodology 段 6 / deliveryGroups 21 / methodologyCode 12）；code token 前导缩进不动
+- [ ] `.code-tab` transition 为 `150ms var(--ease-site)`；`50ms ease-out` 零残留
+- [ ] 3 处 reveal 元素 IO 触发、once-only；`.method-group` hover 仅 background-color 150ms；组卡箭头 `translate(2px,-2px)` 保留
+- [ ] Lighthouse CI 与 Playwright（含 a11y）全绿
+
+**决策依据**：[#26](https://github.com/0xnicholas/seqtura-www/issues/26)（单材质约束）、[#28](https://github.com/0xnicholas/seqtura-www/issues/28)、[#29](https://github.com/0xnicholas/seqtura-www/issues/29)（方向 A；mini 版只进区块头部）、[#30](https://github.com/0xnicholas/seqtura-www/issues/30)、[#31](https://github.com/0xnicholas/seqtura-www/issues/31)（光晕单材质保留）、[#32](https://github.com/0xnicholas/seqtura-www/issues/32)；mini 栈定标形态：[prototype/graphic-language](https://github.com/0xnicholas/seqtura-www/blob/prototype/graphic-language/prototype/graphic-language/README.md)（第二轮 A 变体）。
 
 ### 区块 4 · ArchitectureBento
 
