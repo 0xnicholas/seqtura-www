@@ -1,0 +1,404 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>色彩微调候选 · 红色系与中性色阶（issue #28 · 一次性原型）</title>
+<style>
+  /* === 中性色阶：与 src/styles/global.css 完全一致，不在候选范围内 === */
+  :root {
+    --canvas: #ffffff;
+    --paper: #fcfcfb;
+    --ink: #171717;
+    --ink-2: #404040;
+    --muted: #737373;
+    --faint: #a3a3a3;
+    --line: #e5e5e5;
+    --line-strong: #d4d4d4;
+    --font-sans: 'Instrument Sans', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'PingFang SC',
+      'Hiragino Sans GB', 'Noto Sans SC', 'Microsoft YaHei', system-ui, sans-serif;
+    --font-mono: 'SF Mono', 'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace;
+    --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { max-width: 1440px; margin: 0 auto; padding: 0 32px; }
+
+  /* ---------- 页头 ---------- */
+  .page-head { padding: 56px 0 40px; border-bottom: 1px solid var(--line-strong); background: var(--canvas); }
+  .proto-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--muted); border: 1px solid var(--line-strong); border-radius: 4px; padding: 4px 8px;
+  }
+  .proto-badge::before { content: ''; width: 7px; height: 7px; background: var(--ink); }
+  .page-head h1 { font-size: 34px; font-weight: 500; letter-spacing: -0.02em; line-height: 1.25; margin-top: 18px; }
+  .page-head .q { margin-top: 12px; max-width: 860px; color: var(--ink-2); font-size: 16px; }
+  .page-head .how { margin-top: 16px; max-width: 860px; color: var(--muted); font-size: 14px; }
+  .page-head .how b { color: var(--ink-2); font-weight: 500; }
+  .de-legend {
+    margin-top: 18px; display: flex; flex-wrap: wrap; gap: 8px 20px;
+    font-family: var(--font-mono); font-size: 11.5px; letter-spacing: 0.02em; color: var(--muted);
+  }
+  .de-legend span { display: inline-flex; align-items: center; gap: 7px; }
+  .de-legend i { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+  .anchor-nav { margin-top: 22px; display: flex; flex-wrap: wrap; gap: 8px; }
+  .anchor-nav a {
+    font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.03em;
+    color: var(--ink-2); text-decoration: none; border: 1px solid var(--line-strong);
+    border-radius: 6px; padding: 6px 12px; background: var(--canvas);
+  }
+  .anchor-nav a:hover { border-color: var(--ink); color: var(--ink); }
+
+  /* ---------- 总览色板表 ---------- */
+  .overview { padding: 48px 0 8px; }
+  .sec-title { font-size: 22px; font-weight: 500; letter-spacing: -0.01em; }
+  .sec-note { margin-top: 6px; color: var(--muted); font-size: 13.5px; }
+  .pal-table { margin-top: 24px; display: grid; gap: 12px; }
+  .pal-row {
+    display: grid; grid-template-columns: 220px repeat(5, 1fr) 300px; gap: 12px; align-items: stretch;
+    background: var(--canvas); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px;
+  }
+  .pal-row.is-cand { border-color: var(--line-strong); }
+  .pal-name { display: flex; flex-direction: column; justify-content: center; gap: 2px; }
+  .pal-name b { font-size: 15px; font-weight: 500; }
+  .pal-name .hex-pri { font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
+  .pal-name .role { font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 0.05em; color: var(--faint); text-transform: uppercase; }
+  .sw { display: flex; flex-direction: column; gap: 6px; }
+  .sw i { display: block; height: 44px; border-radius: 6px; border: 1px solid rgb(0 0 0 / 6%); }
+  .sw span { font-family: var(--font-mono); font-size: 10.5px; color: var(--muted); }
+  .sw em { font-family: var(--font-mono); font-size: 10px; font-style: normal; color: var(--faint); }
+  .pal-meta { display: flex; flex-direction: column; justify-content: center; gap: 3px; font-family: var(--font-mono); font-size: 11.5px; color: var(--ink-2); }
+  .pal-meta .bad { color: #b3261e; }
+  .pal-meta .ok { color: #1a7f37; }
+  .pal-meta .dim { color: var(--muted); }
+
+  /* ---------- 对比区块 ---------- */
+  .block { margin-top: 56px; }
+  .block-head {
+    background: var(--canvas); border: 1px solid var(--line); border-radius: 10px 10px 0 0;
+    border-bottom: 0; padding: 20px 24px;
+  }
+  .block-head h2 { font-size: 20px; font-weight: 500; letter-spacing: -0.01em; display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+  .block-head h2 .hex-pri { font-family: var(--font-mono); font-size: 13px; color: var(--muted); font-weight: 400; }
+  .metrics { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 6px 18px; font-family: var(--font-mono); font-size: 12px; color: var(--ink-2); }
+  .metrics b { font-weight: 600; }
+  .metrics .ok { color: #1a7f37; }
+  .metrics .bad { color: #b3261e; }
+  .diff-note { margin-top: 10px; font-size: 13.5px; color: var(--ink-2); max-width: 980px; }
+  .diff-note b { font-weight: 500; }
+  .chips { margin-top: 12px; display: flex; flex-wrap: wrap; gap: 14px; }
+  .chip { display: inline-flex; align-items: center; gap: 7px; font-family: var(--font-mono); font-size: 11px; color: var(--muted); }
+  .chip i { width: 16px; height: 16px; border-radius: 4px; border: 1px solid rgb(0 0 0 / 8%); }
+
+  .compare {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 0;
+    border: 1px solid var(--line); border-radius: 0 0 10px 10px; overflow: hidden;
+  }
+  .compare > .col + .col { border-left: 1px solid var(--line-strong); }
+  .col-tag {
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--muted); padding: 10px 24px; border-bottom: 1px dashed var(--line-strong); background: var(--paper);
+    display: flex; justify-content: space-between; gap: 8px;
+  }
+
+  /* ---------- 站点 mock（palette 变量注入） ---------- */
+  .mock { background: var(--canvas); }
+  .mock .hero { position: relative; padding: 44px 40px 36px; border-bottom: 1px solid var(--line); overflow: hidden; }
+  .mock .hero::before {
+    content: ''; position: absolute; top: -10%; right: -12%; width: 60%; height: 90%;
+    background: radial-gradient(closest-side, color-mix(in srgb, var(--red) 11%, transparent), transparent 72%);
+    pointer-events: none;
+  }
+  .mock .tick-tr { position: absolute; top: 20px; right: 20px; width: 7px; height: 7px; background: var(--red); }
+  .mock .kicker {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: var(--font-mono); font-size: 12px; font-weight: 500; letter-spacing: 0.08em; color: var(--red-dark);
+  }
+  .mock .kicker::before { content: ''; width: 7px; height: 7px; background: var(--red); flex: none; }
+  .mock h1 { margin-top: 16px; font-size: 40px; font-weight: 400; line-height: 1.12; letter-spacing: -0.025em; }
+  .mock .lead { margin-top: 16px; font-size: 17px; line-height: 1.65; color: var(--muted); max-width: 420px; }
+  .mock .cta-row { margin-top: 24px; display: flex; gap: 12px; flex-wrap: wrap; }
+  .mock .btn {
+    display: inline-flex; align-items: center; gap: 8px; height: 44px; padding: 0 20px;
+    border-radius: 8px; font-size: 16px; font-weight: 500; letter-spacing: -0.01em;
+    border: 1px solid transparent; text-decoration: none;
+  }
+  .mock .btn-primary { background: var(--red-dark); color: #fff; }
+  .mock .btn-ghost { background: var(--canvas); border-color: var(--line); color: var(--ink); }
+  .mock .state-chips { margin-top: 16px; display: flex; gap: 14px; flex-wrap: wrap; }
+  .mock .state-chips .chip { font-size: 10px; }
+  .mock .state-chips .chip i { width: 12px; height: 12px; border-radius: 3px; }
+  .mock .facts {
+    margin-top: 24px; padding-top: 14px; border-top: 1px solid var(--line);
+    font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted);
+  }
+
+  .mock .proof { display: grid; grid-template-columns: repeat(3, 1fr); border-bottom: 1px solid var(--line); background: var(--canvas); }
+  .mock .proof-cell { position: relative; padding: 18px 20px; border-right: 1px solid var(--line); }
+  .mock .proof-cell:last-child { border-right: 0; }
+  .mock .proof-cell::before { content: ''; position: absolute; top: -4px; left: -4px; width: 7px; height: 7px; background: var(--red); }
+  .mock .proof-value { font-size: 26px; line-height: 1.1; letter-spacing: -0.02em; }
+  .mock .proof-value .unit { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.04em; color: var(--muted); }
+  .mock .proof-sub { margin-top: 4px; font-size: 12px; color: var(--muted); }
+  .mock .proof-sub b { color: var(--ink-2); font-weight: 400; }
+
+  .mock .cards-sec { padding: 36px 40px 40px; border-bottom: 1px solid var(--line); background: var(--canvas); }
+  .mock .cards-sec h3 { margin-top: 14px; font-size: 24px; font-weight: 500; line-height: 1.3; letter-spacing: -0.02em; max-width: 480px; }
+  .mock .card-row { margin-top: 20px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .mock .card { background: var(--paper); border: 1px solid var(--line); border-radius: 8px; padding: 16px; display: flex; flex-direction: column; gap: 8px; }
+  .mock .card .range { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--red-dark); }
+  .mock .card h4 { font-size: 15.5px; font-weight: 500; letter-spacing: -0.01em; }
+  .mock .card p { font-size: 12.5px; line-height: 1.6; color: var(--muted); }
+  .mock .card ul { list-style: none; margin-top: 2px; display: grid; gap: 4px; }
+  .mock .card li { font-size: 12px; color: var(--ink-2); display: flex; gap: 6px; align-items: baseline; }
+  .mock .card li::before { content: '✓'; color: var(--red); font-size: 11px; }
+  .mock .card .link { margin-top: auto; padding-top: 8px; font-size: 12.5px; font-weight: 500; color: var(--red-dark); }
+
+  .mock .wash { padding: 28px 40px; background: var(--red-wash); border-bottom: 1px solid var(--line); }
+  .mock .wash p { margin-top: 10px; font-size: 13.5px; color: var(--ink-2); max-width: 460px; }
+  .mock .wash .hl { background: var(--red-faded); border-radius: 3px; padding: 0 4px; color: var(--ink); }
+  .mock .wash .sel-demo { margin-top: 8px; font-family: var(--font-mono); font-size: 10.5px; color: var(--muted); }
+  .mock .wash .sel-demo i { display: inline-block; width: 10px; height: 10px; background: var(--red-faded); border: 1px solid rgb(0 0 0 / 6%); border-radius: 2px; margin-right: 6px; vertical-align: -1px; }
+
+  .mock .wordmark { padding: 20px 24px 8px; background: var(--canvas); overflow: hidden; }
+  .mock .wordmark span {
+    display: block; font-size: 148px; font-weight: 500; line-height: 0.85; letter-spacing: -0.055em;
+    color: var(--red); white-space: nowrap; user-select: none; transform: translateY(6%);
+  }
+
+  /* ---------- 页脚说明 ---------- */
+  .boundary { margin: 56px 0 72px; padding: 24px; background: var(--canvas); border: 1px solid var(--line); border-radius: 10px; }
+  .boundary h2 { font-size: 18px; font-weight: 500; }
+  .boundary ul { margin-top: 10px; padding-left: 18px; color: var(--ink-2); font-size: 13.5px; display: grid; gap: 6px; }
+  .boundary code { font-family: var(--font-mono); font-size: 12px; background: var(--paper); border: 1px solid var(--line); border-radius: 4px; padding: 1px 5px; }
+
+  body.capture .anchor-nav { display: none; }
+
+  @media (max-width: 1100px) {
+    .pal-row { grid-template-columns: 160px repeat(5, 1fr); }
+    .pal-meta { grid-column: 1 / -1; flex-direction: row; gap: 18px; }
+  }
+  @media (max-width: 900px) {
+    .compare { grid-template-columns: 1fr; }
+    .compare > .col + .col { border-left: 0; border-top: 2px solid var(--line-strong); }
+    .mock h1 { font-size: 32px; }
+    .mock .wordmark span { font-size: 21vw; }
+  }
+</style>
+</head>
+<body>
+
+<header class="page-head">
+  <div class="wrap">
+    <span class="proto-badge">Prototype · 一次性原型 · 不是生产代码 · issue #28</span>
+    <h1>品牌红微调候选：红色系与中性色阶</h1>
+    <p class="q">要回答的问题：品牌红在红色系内微调（动色相/明度，不换色系），选哪一组？每组给出主红、深色变体（dark / hover）、faded / wash 背景色，并与 laravel 品牌红 <b>#FF2D20</b> 并排对比。</p>
+    <p class="how"><b>怎么读：</b>每组的左侧是候选，右侧是同一结构的 laravel 对照。中性色阶（canvas / paper / ink / muted / line）五组完全一致，只有红色在变。第一个「校准组」是现状 <b>#f53003</b> vs laravel——它们只差 ΔE00 4.12，这就是要微调的原因。</p>
+    <div class="de-legend">
+      <span><i style="background:#e5e5e5"></i>ΔE00（CIEDE2000 色差）</span>
+      <span>&lt;2 几乎不可辨</span>
+      <span>2–5 并置可辨</span>
+      <span>5–10 明显差异</span>
+      <span>&gt;10 不同的颜色印象</span>
+    </div>
+    <nav class="anchor-nav">
+      <a href="#calib">校准组 · 现状 vs laravel</a>
+      <a href="#cand-a">A · 沉稳朱红</a>
+      <a href="#cand-b">B · 绯红</a>
+      <a href="#cand-c">C · 砖红陶土</a>
+      <a href="#boundary">边界与备注</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="overview" id="overview">
+    <h2 class="sec-title">色板总览</h2>
+    <p class="sec-note">white-on-主红 = 白字直接压在主红上的对比度（WCAG AA 普通文本需 ≥4.5）。laravel 行的 dark / hover 为按本站同一梯度规则派生的参考值（laravel.com 未公开完整梯度）。</p>
+    <div class="pal-table" id="pal-table"></div>
+  </section>
+
+  <div id="blocks"></div>
+
+  <section class="boundary" id="boundary">
+    <h2>边界与备注</h2>
+    <ul>
+      <li>三组候选的主红都过 WCAG AA（白字 ≥4.5）；现状 <code>#f53003</code> 为 3.96 未过——选定任一候选后，规格阶段可考虑「按钮直接用主红、hover 用 dark」的简化映射。</li>
+      <li>性能预算影响：<b>零</b>。纯色值 token 替换，不新增字体、图片或脚本。</li>
+      <li>faded / wash 按各自主红色相等亮度（OKLCH L=0.935 / 0.982）生成，三组间观感差异极小；选中性色文字其上对比度均 ≥13:1。</li>
+      <li>kicker / text-link 等小字红沿用 red-dark 槽位：A <code>#ac1c01</code> 7.19:1、B <code>#a30d2b</code> 7.93:1、C <code>#873216</code> 8.41:1，均过 AA。</li>
+      <li>本页只做颜色判断：版式、字号、间距沿用现状（较窄栏宽下 hero 为生产环境的 ≤1023px 断点形态），不评估其它设计变化。</li>
+      <li>验收方式：肉眼选定一组，或给方向性反馈（更冷/更暖、再深/再浅、饱和再降等）后再迭代一轮。</li>
+    </ul>
+  </section>
+
+</main>
+
+<script>
+const PALETTES = {
+  laravel: { label: 'laravel 品牌红', red: '#FF2D20', dark: '#cd2318', hover: '#aa1b12', faded: '#ffe2dd', wash: '#fff7f5' },
+  current: { label: '现状', red: '#f53003', dark: '#c42602', hover: '#a11d00', faded: '#ffe2dd', wash: '#fff7f5' },
+  a: { label: '候选 A', red: '#dc2600', dark: '#ac1c01', hover: '#8a1400', faded: '#ffe2dc', wash: '#fff7f5' },
+  b: { label: '候选 B', red: '#d3143a', dark: '#a30d2b', hover: '#820620', faded: '#ffe1e0', wash: '#fff7f6' },
+  c: { label: '候选 C', red: '#b54016', dark: '#873216', hover: '#662813', faded: '#fee3da', wash: '#fff7f4' },
+};
+
+const META = {
+  laravel: { deL: '—', deC: '4.12', aa: '3.72 ✗', role: 'reference' },
+  current: { deL: '4.12', deC: '—', aa: '3.96 ✗', role: 'baseline' },
+  a: { deL: '8.35', deC: '5.90', aa: '4.86 ✓', role: 'candidate' },
+  b: { deL: '14.52', deC: '16.13', aa: '5.34 ✓', role: 'candidate' },
+  c: { deL: '14.64', deC: '12.18', aa: '5.66 ✓', role: 'candidate' },
+};
+
+const BLOCKS = [
+  {
+    id: 'calib', left: 'current', right: 'laravel',
+    title: '校准组：现状 vs laravel',
+    hex: '#f53003 vs #FF2D20',
+    note: '两者并置几乎靠猜：ΔE00 仅 <b>4.12</b>（现状偏橙半档、暗半档）。这一组用来看清「为什么要微调」——后面每组候选都把同一位置的距离拉开到 8 以上。',
+  },
+  {
+    id: 'cand-a', left: 'a', right: 'laravel',
+    title: '候选 A · 沉稳朱红', hex: '#dc2600',
+    note: '<b>同色相、降明度：</b>HSL 色相 11°→10° 不变，亮度 49%→43%。朱红性格原样保留，只收半档亮度；红色点缀更沉，白字对比 3.96→<b>4.86 首过 AA</b>。三者中离现状最近（ΔE 5.90）、品牌延续性最好，但离 laravel 的距离也最小（8.35，「明显差异」档下沿）。',
+  },
+  {
+    id: 'cand-b', left: 'b', right: 'laravel',
+    title: '候选 B · 绯红', hex: '#d3143a',
+    note: '<b>色相向冷偏移：</b>HSL 11°→348°，橙感消失，转向宝石红/绯红。与 laravel 强烈区分（ΔE 14.52），但离现状也最远（16.13）——红色的「性格」变了。三者中识别度变化最大：最冒险，也最独特。',
+  },
+  {
+    id: 'cand-c', left: 'c', right: 'laravel',
+    title: '候选 C · 砖红陶土', hex: '#b54016',
+    note: '<b>降饱和 + 降明度：</b>HSL 11°→16° 微偏暖，饱和度 98%→78%。陶土/砖红，最克制、最「企业」；与 laravel 强烈区分（ΔE 14.64）。代价：小面积点缀（tick、kicker 方块）的亮度与张力下降，气场偏哑。',
+  },
+];
+
+function swatch(hex, name, role) {
+  return `<div class="sw"><i style="background:${hex}"></i><span>${hex}</span><em>${name}${role ? ' · ' + role : ''}</em></div>`;
+}
+
+function palRow(key) {
+  const p = PALETTES[key], m = META[key];
+  const aaCls = m.aa.includes('✓') ? 'ok' : 'bad';
+  return `<div class="pal-row ${m.role === 'candidate' ? 'is-cand' : ''}">
+    <div class="pal-name"><span class="role">${m.role}</span><b>${p.label}</b><span class="hex-pri">${p.red}</span></div>
+    ${swatch(p.red, '主红')}
+    ${swatch(p.dark, 'dark', '按钮底色')}
+    ${swatch(p.hover, 'hover', '悬停')}
+    ${swatch(p.faded, 'faded', '选中/高亮')}
+    ${swatch(p.wash, 'wash', '区块底')}
+    <div class="pal-meta">
+      <span>ΔE00 vs laravel <b>${m.deL}</b></span>
+      <span>ΔE00 vs 现状 <b>${m.deC}</b></span>
+      <span class="${aaCls}">white-on-主红 ${m.aa}</span>
+    </div>
+  </div>`;
+}
+
+document.getElementById('pal-table').innerHTML =
+  ['laravel', 'current', 'a', 'b', 'c'].map(palRow).join('');
+
+function mockHtml(key, tag) {
+  const p = PALETTES[key];
+  return `<div class="col">
+    <div class="col-tag"><span>${tag}</span><span>${p.red}</span></div>
+    <div class="mock" style="--red:${p.red};--red-dark:${p.dark};--red-hover:${p.hover};--red-faded:${p.faded};--red-wash:${p.wash}">
+      <div class="hero">
+        <span class="tick-tr"></span>
+        <p class="kicker">企业 AI Agent 定制交付</p>
+        <h1>企业 AI Agent 的<br>工程化交付</h1>
+        <p class="lead">把业务场景做成可验收、可私有化、可维护的 AI Agent。</p>
+        <div class="cta-row">
+          <a class="btn btn-primary" href="#" onclick="return false">预约沟通 →</a>
+          <a class="btn btn-ghost" href="#" onclick="return false">看工作方法论</a>
+        </div>
+        <div class="state-chips">
+          <span class="chip"><i style="background:${p.red}"></i>主红 ${p.red}</span>
+          <span class="chip"><i style="background:${p.dark}"></i>dark · 按钮 ${p.dark}</span>
+          <span class="chip"><i style="background:${p.hover}"></i>hover ${p.hover}</span>
+        </div>
+        <p class="facts">8 个交付阶段 · 5 层能力栈 · 3 条控制面</p>
+      </div>
+      <div class="proof">
+        <div class="proof-cell"><p class="proof-value">8 <span class="unit">STAGES</span></p><p class="proof-sub"><b>8 个交付阶段</b> · FDE 交付方法</p></div>
+        <div class="proof-cell"><p class="proof-value">5 <span class="unit">LAYERS</span></p><p class="proof-sub"><b>5 层能力栈</b> · 接入到运行时</p></div>
+        <div class="proof-cell"><p class="proof-value">3 <span class="unit">PLANES</span></p><p class="proof-sub"><b>3 条控制面</b> · 身份 / 评测 / 审计</p></div>
+      </div>
+      <div class="cards-sec">
+        <p class="kicker">工作方法论</p>
+        <h3>从业务结果出发，而不是从技术方案出发。</h3>
+        <div class="card-row">
+          <div class="card">
+            <span class="range">阶段 01–02</span>
+            <h4>发现与诊断</h4>
+            <p>先把业务、组织、系统、数据与约束盘点清楚，再判断值不值得做。</p>
+            <ul><li>客户业务画像</li><li>问题定义与 ROI 假设</li></ul>
+            <span class="link">看完整方法论 ↗</span>
+          </div>
+          <div class="card">
+            <span class="range">阶段 03–04</span>
+            <h4>定义与设计</h4>
+            <p>先把验收标准与评测集定下来，再动手构建。</p>
+            <ul><li>Agent 规格卡与验收标准</li><li>评测集 v0 与方案架构</li></ul>
+            <span class="link">看完整方法论 ↗</span>
+          </div>
+          <div class="card">
+            <span class="range">阶段 05–06</span>
+            <h4>构建与验证</h4>
+            <p>在沙箱或预发环境跑真实任务，按规格构建可运行原型。</p>
+            <ul><li>可运行原型</li><li>评测报告与失败案例</li></ul>
+            <span class="link">看完整方法论 ↗</span>
+          </div>
+        </div>
+      </div>
+      <div class="wash">
+        <p class="kicker">交付与合作</p>
+        <p>先把边界说清楚，再谈交付。四条承诺与三个合作节点，<span class="hl">具体范围以合同为准</span>——高亮底色即 faded，本区块底色即 wash。</p>
+        <p class="sel-demo"><i></i>::selection 选中底色 = faded ${p.faded}</p>
+      </div>
+      <div class="wordmark"><span>Seqtura</span></div>
+    </div>
+  </div>`;
+}
+
+document.getElementById('blocks').innerHTML = BLOCKS.map(b => {
+  const lp = PALETTES[b.left];
+  const chips = ['red', 'dark', 'hover', 'faded', 'wash'].map(k =>
+    `<span class="chip"><i style="background:${lp[k]}"></i>${k} ${lp[k]}</span>`).join('');
+  const mLeft = META[b.left];
+  const metrics = b.left === 'current'
+    ? `<span>ΔE00 vs laravel <b>${mLeft.deL}</b></span><span class="bad">white-on-主红 ${mLeft.aa}</span>`
+    : `<span>ΔE00 vs laravel <b>${mLeft.deL}</b></span><span>ΔE00 vs 现状 <b>${mLeft.deC}</b></span><span class="ok">white-on-主红 ${mLeft.aa}</span>`;
+  const leftTag = b.left === 'current' ? '现状（对照基线）' : lp.label;
+  return `<section class="block" id="${b.id}">
+    <div class="block-head">
+      <h2>${b.title} <span class="hex-pri">${b.hex}</span></h2>
+      <div class="metrics">${metrics}</div>
+      <p class="diff-note">${b.note}</p>
+      <div class="chips">${chips}</div>
+    </div>
+    <div class="compare">
+      ${mockHtml(b.left, leftTag)}
+      ${mockHtml('laravel', 'laravel #FF2D20 对照')}
+    </div>
+  </section>`;
+}).join('');
+
+if (new URLSearchParams(location.search).get('capture')) document.body.classList.add('capture');
+</script>
+
+</body>
+</html>
