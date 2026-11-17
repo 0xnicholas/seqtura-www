@@ -184,13 +184,72 @@
 
 **决策依据**：[#26](https://github.com/0xnicholas/seqtura-www/issues/26)（单材质约束）、[#28](https://github.com/0xnicholas/seqtura-www/issues/28)、[#29](https://github.com/0xnicholas/seqtura-www/issues/29)（方向 A；mini 版只进区块头部）、[#30](https://github.com/0xnicholas/seqtura-www/issues/30)、[#31](https://github.com/0xnicholas/seqtura-www/issues/31)（光晕单材质保留）、[#32](https://github.com/0xnicholas/seqtura-www/issues/32)；mini 栈定标形态：[prototype/graphic-language](https://github.com/0xnicholas/seqtura-www/blob/prototype/graphic-language/prototype/graphic-language/README.md)（第二轮 A 变体）。
 
-### 区块 4 · ArchitectureBento
+### 区块 4 · ArchitectureBento（P0）
 
-（留白，由 #38 填充）
+**目标**：SectionHeading 头部进 mini 等距栈（本区块唯一 P0 品牌动作，统一规则引用区块 3 定标行）；红系换值落到区块内 4 处硬编码（#28）；h2 与 trace 卡中文标题升 500（#30 方案 c）；28 处手写空格随全量清理；3 处 hover transition 并入动效 token。plan panel、trace 卡、控制面卡的结构、栅格与文案不动。
 
-### 区块 5 · DeliverySection
+**Before / After**：
 
-（留白，由 #38 填充）
+| 维度        | Before                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | After                                                                                                                                                                                                                                                                                                  | 优先级 |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------ |
+| 色彩        | 硬编码红 4 处（本区块占 #28 清单份额 4 处）：`.arch-section` 光晕 `rgb(245 48 3 / 10%)`、`.trace-card` 光晕 `rgb(245 48 3 / 16%)`（全站 5 处光晕之二，各 2 个 stop）、`.trace-line.is-hitl` 行底 `rgb(245 48 3 / 7%)`、plan 控制面虚线 `rgb(245 48 3 / 38%)`（ReferenceArchitecturePlan.astro）；`.trace-head` / `.trace-line .ev` / `.plane-label` 文字与状态点、tick 方块取 `var(--color-red)`，`.control-code` / `.plane-label` 取 `var(--color-red-dark)`，已符合文本红规则 | 4 处纯值替换为 `rgb(255 45 32 / …)`，透明度不变；token 引用处随 §3.1 自动换值。记录在案：trace 卡红色 mono 文字（`--color-red` 压 `--color-dark` `#171717`）换值后对比度 ≈4.9:1 过 AA（换值前 ≈4.6:1），无需处理                                                                                       | P1     |
+| 排版        | h2 `.type-h2` 中文 400；`.trace-title` 30px/400（组件级中文标题未按方案 c）；`.control-title` / `.arch-name b` 现状已 500；kicker 500；Instrument Sans 居栈首但未加载、实际渲染系统字体；引用数据手写中西空格 28 处（homeSections.architecture 4：title 2 / lead 2；architectureLayers 18，capabilityLayers 同源；controlPlanes 6；traceSteps、structuralNote 为 0）                                                                                                            | h2 与 `.trace-title` 中文 500（`:lang(zh)`，方案 c；拉丁恒定 400）；control-title / arch-name b / kicker 不变；Instrument Sans 真正加载（§3.2），CJK 维持系统栈；28 处随全量清理归零，autospace 接管混排缝隙；trace-log 为 mono 栈、数字本等宽，tnum 不开（同 hero-facts 判例，§3.2）                  | P1     |
+| 图形语言    | 无头部图形资产：SectionHeading = kicker + 标题 + lead 纯文字；plan panel（5 层行 × 3 虚线控制面 + 边界注记）为表格化信息骨架                                                                                                                                                                                                                                                                                                                                                    | SectionHeading 头部加 **mini 等距栈**（统一规则与定标形态见区块 3：三层 slab、中层红板 `#FF2D20`、高 120px、居中于 kicker 上方、纯 SVG 内联、与 hero 主图同一几何；静止无动效）。plan panel 不按图示化计、结构不变；trace 卡与控制面卡不加阶梯对或其它图示化元素（密度纪律：首页图示化仍仅 hero 一处） | P0     |
+| 质感        | `.arch-section` 10% 与 `.trace-card` 16% 两处红色光晕（全站 5 处光晕之二）                                                                                                                                                                                                                                                                                                                                                                                                      | 不变（光晕单材质保留，#31；色值随「色彩」行换值）；不新增网格/纸纹                                                                                                                                                                                                                                     | —      |
+| 动效 · 入场 | 1 处 `.reveal`（bento 容器）load 即播（折叠线以下白播）                                                                                                                                                                                                                                                                                                                                                                                                                         | 随 §3.3 全局改 IO 触发、once-only、无组内 stagger；时长 `var(--duration-enter)` 600ms                                                                                                                                                                                                                  | P2     |
+| 动效 · 反馈 | 3 处 transition 硬编码 `150ms`（`.trace-card` box-shadow、`.control-card` border-color、`.arch-panel` border-color）；缓动已 `var(--ease-site)`；hover 均在白名单内（无位移）                                                                                                                                                                                                                                                                                                   | 时长并入 `var(--duration-micro)`（150ms），缓动不变；其余不动                                                                                                                                                                                                                                          | P2     |
+
+**Token 影响**：引用 §3.1（红系换值；硬编码更新本区块份额 = 4 处）、§3.2（字体加载、方案 c；手写空格清理本区块份额 28 处）、§3.3（`--duration-micro`、`--duration-enter`、reveal 机制）。无新增 token；mini 栈几何不 token 化（单一形态，SVG 内联，同区块 3）。
+
+**性能预算影响**：≈零。mini 栈为内联 SVG（<2KB、无新请求）；光晕与虚线换值零成本；IO 运行时≈零；字体已在 §3.2 预算内。Lighthouse CI 与 Playwright 护栏不变。
+
+**边界**：`<1024px` arch / trace 卡通栏、控制面卡 2 列，`<768px` 单列与 trace 字号收缩等响应式规则不变；mini 栈全断点 120px 固定（同区块 3）。
+
+**验收点**：
+
+- [ ] SectionHeading 头部渲染 mini 等距栈：三层 slab、中层红板 `#FF2D20`、居中、高 120px、SVG 内联无外部资源、无动效，与 hero 主图几何同源（形态同区块 3）
+- [ ] plan panel 结构不变（5 层行 + 3 虚线控制面 + 边界注记）；trace 卡与控制面卡内无阶梯对或其它图示化元素（密度纪律：首页图示化仅 hero 一处）
+- [ ] `ArchitectureBento.astro` / `ReferenceArchitecturePlan.astro` 中 `rgb(245 48 3` grep 零残留（4 处换为 `rgb(255 45 32 / 10% / 16% / 7% / 38%)`，透明度不变）
+- [ ] 本区块 h2 与 `.trace-title` 在 `:lang(zh)` 下 `font-weight: 500`；`.control-title`、`.arch-name b` 500 不变，拉丁标题恒定 400
+- [ ] 28 处手写中西空格清零（homeSections.architecture 4 / architectureLayers 18 / controlPlanes 6），autospace 下无双重加宽
+- [ ] 3 处 transition（`.trace-card` box-shadow、`.control-card` border-color、`.arch-panel` border-color）为 `150ms var(--ease-site)`，时长取 `var(--duration-micro)`，无裸值 `150ms`
+- [ ] 两处光晕（10% / 16%）保留、未新增质感层；`.reveal` IO 触发、once-only、600ms `var(--duration-enter)`
+- [ ] Lighthouse CI 与 Playwright（含 a11y）全绿
+
+**决策依据**：[#28](https://github.com/0xnicholas/seqtura-www/issues/28)（红系换值；硬编码份额 4 处）、[#29](https://github.com/0xnicholas/seqtura-www/issues/29)（方向 A；mini 版只进区块头部）、[#30](https://github.com/0xnicholas/seqtura-www/issues/30)（方案 c、autospace 与手写空格清理）、[#31](https://github.com/0xnicholas/seqtura-www/issues/31)（光晕单材质保留）、[#32](https://github.com/0xnicholas/seqtura-www/issues/32)（动效 token 与 reveal 机制）、[#37](https://github.com/0xnicholas/seqtura-www/issues/37)（mini 等距栈统一规则，本节引用区块 3 定标行；plan panel「不按图示化计」的判定经 #38 会话仲裁确认）。
+
+### 区块 5 · DeliverySection（P0）
+
+**目标**：SectionHeading 头部进 mini 等距栈（本区块唯一 P0 品牌动作，统一规则引用区块 3 定标行）；红全走 token、区块内零硬编码，换值自动生效（#28）；h2 中文升 500，commit / step 标题已 500 不动；7 处手写空格随全量清理；reveal 并入全局机制。tick、hairline 网格、结构、栅格与文案不动。
+
+**Before / After**：
+
+| 维度        | Before                                                                                                                                                                                                                                    | After                                                                                                                                                                                                                                                                                          | 优先级 |
+| ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| 色彩        | 区块内零硬编码红（不占 #28 的 29 处份额）：7px tick（`.commit-card:nth-child(odd)::before`）取 `var(--color-red)`；`.commit-code` / `.step-no` 取 `var(--color-red-dark)`，已符合文本红规则                                               | token 换值后自动落 `#FF2D20` / `#CD2318`（§3.1）；无其它色彩变化                                                                                                                                                                                                                               | P1     |
+| 排版        | h2 `.type-h2` 中文 400；`.commit-title` 24px/500、`.step-title` 18px/500 现状已 500；kicker 500；Instrument Sans 居栈首但未加载、实际渲染系统字体；引用数据手写中西空格 7 处（commitments 7；homeSections.delivery、processPreview 为 0） | h2 中文 500（`:lang(zh)`，方案 c；拉丁恒定 400）；commit-title / step-title / kicker 不变；Instrument Sans 真正加载（§3.2），CJK 维持系统栈；7 处随全量清理归零，autospace 接管混排缝隙；无多数字并列场景，tnum 不开（§3.2）                                                                   | P1     |
+| 图形语言    | 无头部图形资产：SectionHeading 纯文字；7px tick（奇数卡）+ hairline 网格为制图语法骨架                                                                                                                                                    | SectionHeading 头部加 **mini 等距栈**（统一规则与定标形态见区块 3：三层 slab、中层红板 `#FF2D20`、高 120px、居中于 kicker 上方、纯 SVG 内联、与 hero 主图同一几何；静止无动效）。tick 与 hairline 网格为保留骨架不变；承诺卡与步骤列表不加任何图示化元素（密度纪律：首页图示化仍仅 hero 一处） | P0     |
+| 质感        | 无光晕、无质感层                                                                                                                                                                                                                          | 不变                                                                                                                                                                                                                                                                                           | —      |
+| 动效 · 入场 | 2 处 `.reveal`（commit-grid / process-preview）load 即播（折叠线以下白播）                                                                                                                                                                | 随 §3.3 全局改 IO 触发、once-only、无组内 stagger；时长 `var(--duration-enter)` 600ms                                                                                                                                                                                                          | P2     |
+| 动效 · 反馈 | 无可交互元素（卡片为 `<article>` 非链接；process-head 的 `text-link` 为全局类，随 §3.3 统收）                                                                                                                                             | 不变                                                                                                                                                                                                                                                                                           | —      |
+
+**Token 影响**：引用 §3.1（红系换值；本区块硬编码份额 0 处）、§3.2（字体加载、方案 c；手写空格清理本区块份额 7 处）、§3.3（reveal 机制）。无新增 token。
+
+**性能预算影响**：≈零。mini 栈为内联 SVG（<2KB、无新请求）；reveal IO 运行时≈零；字体已在 §3.2 预算内。Lighthouse CI 与 Playwright 护栏不变。
+
+**边界**：`<1024px` commit-grid 2 列、process-list 单列，`<768px` 单列与字号收缩等响应式规则不变；mini 栈全断点 120px 固定（同区块 3）。
+
+**验收点**：
+
+- [ ] SectionHeading 头部渲染 mini 等距栈：三层 slab、中层红板 `#FF2D20`、居中、高 120px、SVG 内联无外部资源、无动效，与 hero 主图几何同源（形态同区块 3）
+- [ ] `DeliverySection.astro` 及引用数据（`commitments` / `processPreview` / `homeSections.delivery`）grep `245 48 3` / `#F53003` / `#C42602` 零命中（维持项）
+- [ ] 本区块 h2 在 `:lang(zh)` 下 `font-weight: 500`；`.commit-title` / `.step-title` 500 不变，拉丁标题恒定 400
+- [ ] `commitments` 7 处手写中西空格清零，autospace 下无双重加宽
+- [ ] 7px tick（`.commit-card:nth-child(odd)::before`）保留；commit-grid / process-list hairline 结构不变；卡与列表内无图示化元素
+- [ ] 2 处 `.reveal` IO 触发、once-only、600ms `var(--duration-enter)`；无区块级动效新增
+- [ ] Lighthouse CI 与 Playwright（含 a11y）全绿
+
+**决策依据**：[#28](https://github.com/0xnicholas/seqtura-www/issues/28)（红系换值）、[#29](https://github.com/0xnicholas/seqtura-www/issues/29)（方向 A；mini 版只进区块头部）、[#30](https://github.com/0xnicholas/seqtura-www/issues/30)（方案 c、autospace 与手写空格清理）、[#32](https://github.com/0xnicholas/seqtura-www/issues/32)（reveal 机制）、[#37](https://github.com/0xnicholas/seqtura-www/issues/37)（mini 等距栈统一规则，本节引用区块 3 定标行）。
 
 ### 区块 6 · FitSituations
 
