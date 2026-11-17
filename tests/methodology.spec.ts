@@ -15,7 +15,7 @@ test('methodology hero states the FDE method and routes both actions', async ({ 
   ).toBeVisible();
   await expect(main.getByRole('link', { name: '聊聊你的场景' }).first()).toHaveAttribute(
     'href',
-    '/contact#book',
+    '/contact#channels',
   );
   await expect(main.getByRole('link', { name: '看合作流程' }).first()).toHaveAttribute(
     'href',
@@ -271,7 +271,7 @@ test('methodology explains its division of labor and closes with the booking CTA
   await expect(cta.getByRole('heading', { level: 2 })).toHaveText('从第一个具体场景开始。');
   await expect(cta.getByRole('link', { name: '聊聊你的场景' })).toHaveAttribute(
     'href',
-    '/contact#book',
+    '/contact#channels',
   );
   await expect(cta.getByRole('link', { name: '看合作流程' })).toHaveAttribute('href', '/process');
 });

@@ -19,6 +19,6 @@ export default defineConfig({
     url: baseURL,
     reuseExistingServer: !process.env.CI && !process.env.PORT,
     timeout: 120_000,
-    env: { FORM_MODE: 'test', HOST: '127.0.0.1', PORT: String(port) },
+    env: { HOST: '127.0.0.1', PORT: String(port) },
   },
 });

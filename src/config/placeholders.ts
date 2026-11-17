@@ -14,7 +14,7 @@ export const placeholders = {
   contactEmail: envValue('PUBLIC_CONTACT_EMAIL', 'hello@seqtura.ai'),
   privacyEmail: envValue('PUBLIC_PRIVACY_EMAIL', 'privacy@seqtura.ai'),
   feishuUrl: envValue('PUBLIC_FEISHU_URL', ''),
-  wechatQr: envValue('PUBLIC_WECHAT_QR', ''),
+  wecomQr: envValue('PUBLIC_WECOM_QR', ''),
   icpNumber: { value: env.PUBLIC_ICP_NUMBER?.trim() ?? '', isPlaceholder: false },
   psbNumber: { value: env.PUBLIC_PSB_NUMBER?.trim() ?? '', isPlaceholder: false },
   operatorName: envValue('PUBLIC_OPERATOR_NAME', ''),

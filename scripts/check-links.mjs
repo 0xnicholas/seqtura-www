@@ -116,7 +116,6 @@ if (!process.env.LINK_CHECK_BASE_URL) {
       ...process.env,
       HOST: '127.0.0.1',
       PORT: port,
-      FORM_MODE: 'test',
     },
     stdio: 'ignore',
   });

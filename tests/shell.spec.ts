@@ -16,7 +16,7 @@ test('header carries the four-section navigation and a persistent booking action
   ]);
   await expect(header.getByRole('link', { name: '预约沟通' })).toHaveAttribute(
     'href',
-    '/contact#book',
+    '/contact#channels',
   );
 
   const headerBox = await header.boundingBox();
@@ -55,6 +55,11 @@ test('footer provides site, delivery and contact columns plus legal links', asyn
     'href',
     '/contact#about',
   );
+  await expect(footer.getByRole('link', { name: '预约沟通' })).toHaveAttribute(
+    'href',
+    '/contact#channels',
+  );
+  await expect(footer.getByRole('link', { name: '飞书 / 微信' })).toHaveCount(0);
   await expect(footer.getByRole('link', { name: '参考架构' })).toHaveAttribute(
     'href',
     '/architecture#overview',
@@ -210,9 +215,9 @@ test('200% zoom approximation stays usable without page-level overflow', async (
   }
 
   await page.goto('/contact');
-  await expect(page.getByLabel('姓名', { exact: true })).toBeVisible();
-  const submit = page.getByRole('button', { name: '提交预约' });
-  await expect(submit).toBeVisible();
-  const box = await submit.boundingBox();
+  await expect(page.locator('#channels').getByRole('heading', { level: 2 })).toHaveText('直接联系');
+  const cta = page.getByRole('main').getByRole('link', { name: '预约沟通' });
+  await expect(cta).toBeVisible();
+  const box = await cta.boundingBox();
   expect(box?.height ?? 0).toBeGreaterThanOrEqual(44);
 });

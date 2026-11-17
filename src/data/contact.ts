@@ -1,54 +1,22 @@
 export const contactHero = {
   kicker: '联系我们',
   title: '先聊一个具体场景。',
-  lead: '30 分钟，围绕一个具体业务场景，给出值不值得做、下一步是什么的判断。',
-  note: '提交后，我们会通过你留下的邮箱或微信联系你。',
-  formCta: '填写预约表单',
+  lead: '围绕一个具体业务场景，给出值不值得做、下一步是什么的判断。',
+  note: '扫码添加企业微信、打开飞书，或直接写邮件。',
+  primaryCta: '预约沟通',
   secondaryCta: '看工作方法论',
 } as const;
 
-export interface BookingStep {
-  readonly no: string;
-  readonly title: string;
-  readonly text: string;
-}
-
-export const bookingCopy = {
-  kicker: '预约表单',
-  title: '预约 30 分钟沟通',
-  lead: '带一个真实的业务流程来。我们会先读你的描述，再约 30 分钟一起判断。',
-  steps: [
-    {
-      no: '01',
-      title: '你留下场景',
-      text: '用几句话说明业务、现状与卡点，不需要先准备方案。',
-    },
-    {
-      no: '02',
-      title: '我们先读一遍',
-      text: '判断是否适合用 Agent 解决，以及还需要补充哪些信息。',
-    },
-    {
-      no: '03',
-      title: '30 分钟沟通',
-      text: '给出值不值得做、先做哪一步，以及下一步的具体建议。',
-    },
-  ] satisfies readonly BookingStep[],
-  note: '30 分钟 · 不收费 · 不推销',
-  submitLabel: '提交预约',
-  submittingLabel: '提交中…',
-} as const;
-
 export const contactChannels = {
-  kicker: '其他通道',
-  title: '其他通道',
-  lead: '不想填表，也可以直接写邮件，或通过已开通的飞书 / 微信联系。',
+  kicker: '联系渠道',
+  title: '直接联系',
+  lead: '扫码添加企业微信、打开飞书，或直接写邮件；备注「预约」即可。',
   channels: [
     {
-      id: 'wechat',
+      id: 'wecom',
       no: '01',
-      title: '微信',
-      configuredNote: '扫码添加微信，备注「预约」。',
+      title: '企业微信',
+      configuredNote: '扫码添加企业微信，备注「预约」。',
       fallbackNote: '暂未公开，请先通过邮箱联系：',
     },
     {

@@ -73,7 +73,7 @@ test('architecture hero frames the reference architecture and routes both action
 
   await expect(main.getByRole('link', { name: '和架构师聊聊' }).first()).toHaveAttribute(
     'href',
-    '/contact#book',
+    '/contact#channels',
   );
   await expect(main.getByRole('link', { name: '看工作方法论' }).first()).toHaveAttribute(
     'href',
@@ -388,7 +388,7 @@ test('closing connects the architecture to method, process and booking', async (
   );
   await expect(section.getByRole('link', { name: '和架构师聊聊' })).toHaveAttribute(
     'href',
-    '/contact#book',
+    '/contact#channels',
   );
   await expect(section.getByRole('link', { name: '看工作方法论' })).toHaveAttribute(
     'href',
