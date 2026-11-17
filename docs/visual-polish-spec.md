@@ -58,12 +58,13 @@
 
 ### 3.3 动效
 
-| Token                      | 现值                                                    | 目标值                                                     | 出处 |
-| -------------------------- | ------------------------------------------------------- | ---------------------------------------------------------- | ---- |
-| `--duration-micro`（新增） | 无（`.btn` transition 硬编码 `50ms ease-out`）          | `150ms`：一切 hover / 功能反馈                             | #32  |
-| `--duration-enter`（新增） | 无（`.reveal` 600ms、内页 hero `hero-in` 600ms 内联）   | `600ms`：区块与内页入场                                    | #32  |
-| `--duration-hero`（新增）  | 无（首页 hero `blur-up` 900ms 与 hero-art 1000ms 混用） | `1000ms`：首页 hero 入场统一                               | #32  |
-| `--ease-site`              | `cubic-bezier(0.22, 0.61, 0.36, 1)`                     | 不变；全站唯一缓动，消灭 `.btn` 等处硬编码 `ease-out` 例外 | #32  |
+| Token                        | 现值                                                    | 目标值                                                                  | 出处     |
+| ---------------------------- | ------------------------------------------------------- | ----------------------------------------------------------------------- | -------- |
+| `--duration-micro`（新增）   | 无（`.btn` transition 硬编码 `50ms ease-out`）          | `150ms`：一切 hover / 功能反馈                                          | #32      |
+| `--duration-enter`（新增）   | 无（`.reveal` 600ms、内页 hero `hero-in` 600ms 内联）   | `600ms`：区块与内页入场                                                 | #32      |
+| `--duration-hero`（新增）    | 无（首页 hero `blur-up` 900ms 与 hero-art 1000ms 混用） | `1000ms`：首页 hero 入场统一                                            | #32      |
+| `--duration-ambient`（新增） | 无                                                      | `24s`：首页 hero 等距栈描边循环（全站唯一环境动效，周期 ≥20s 档内取整） | #32、#36 |
+| `--ease-site`                | `cubic-bezier(0.22, 0.61, 0.36, 1)`                     | 不变；全站唯一缓动，消灭 `.btn` 等处硬编码 `ease-out` 例外              | #32      |
 
 动效的类型级约束（#32）：仅「入场编排 + 功能反馈」两类；装饰性动画在 `prefers-reduced-motion` 下全静态化，表单 spinner 以 `motion-safe` 反向豁免保留旋转。逐元素白名单、入场编排规则与各区块表现见第 4 节相关区块。
 
@@ -83,9 +84,39 @@
 
 优先级标注：逐条变更行标 P0/P1/P2（P0 = 品牌区分度核心，P1 = 专业度与质感提升，P2 = 锦上添花），区块取其内最高行级；定档依据 = 维度优先级（品牌独特性 ≈ 视觉资产 > 排版 > 动效）兼顾实现成本（#33）。
 
-### 区块 1 · Hero
+### 区块 1 · Hero（P0）
 
-（留白，由 #36 填充）
+**目标**：图形语言与动效的主战场。等距栈主图作为全站等距几何母版维持现状（#29）；红系换值落到区块内每一处硬编码（#28）；入场阶梯沉稳化，并承载全站唯一环境动效——等距栈描边缓动（#32）；中文大标题升 500（#30）。结构、栅格与文案不动。
+
+**Before / After**：
+
+| 维度        | Before                                                                                                                                                                                         | After                                                                                                                                                                                                                                                                        | 优先级 |
+| ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| 色彩        | 区块内硬编码品牌红 30 处：`.hero-art::before` 光晕 `rgb(245 48 3 / 12%→0%)`（2 个 stop）；等距栈 SVG `#F53003` ×24、`#C42602` ×4（光晕 stops、slab 渐变与投影、控制面虚线、L3 红板、注记路径） | 全部纯值替换：`#F53003`→`#FF2D20`、`#C42602`→`#CD2318`、`rgb(245 48 3 / …)`→`rgb(255 45 32 / …)`，透明度不变；`#FF8A65` 桃色 ×6 与 `#171717` 等中性色不动；SVG 不类化、不引 token（presentation attribute 不支持 `var()`）                                                   | P0     |
+| 排版        | h1 `.type-h1` 400；Instrument Sans 声明未加载、实际渲染系统字体；hero 文案手写中西空格 12 处（kicker 2 / titleLead 2 / lead 1 / primaryCta 2 / facts 3 / caption 2）                           | h1 中文 500（`:lang(zh)`，方案 c；拉丁恒定 400）；Instrument Sans 可变字体真正加载（§3.2）；autospace + 标点挤压 body 级生效（§3.2）；12 处手写空格随全量清理归零；字号/行高/字距不变。kicker 现状已 500 不变；hero-facts 为 mono 栈、数字本等宽，tnum 无视觉效果不开        | P1     |
+| 图形语言    | 等距栈主图（五层 slab + 三条控制面 + 任务/工具/HITL 注记）                                                                                                                                     | 不变。主图为全站等距几何母版；向区块头部 mini 版与区块图示的延展规则见区块 2–7 各自节；密度纪律：首页图示化即此一处                                                                                                                                                          | —      |
+| 质感        | hero-art 12% 红色光晕（全站 5 处光晕之一）                                                                                                                                                     | 不变（光晕单材质系统保留，不新增网格/纸纹；色值随「色彩」行换值）                                                                                                                                                                                                            | —      |
+| 动效 · 入场 | blur-up 900ms，copy 五子元素 delay 60/140/220/300/380ms；hero-art 1000ms delay 180ms                                                                                                           | blur-up 保留（opacity + blur(4px) + translateY(12px)，品牌签名）；delay 改 0/200/400/600/800ms 等差阶梯（DOM 序 kicker→h1→lead→CTA→facts），hero-art 1000ms 收尾；时长统一 `var(--duration-hero)` 1000ms；缓动 `var(--ease-site)`；两个 `.title-line` 不拆阶、随 h1 整体入场 | P1     |
+| 动效 · 环境 | 无                                                                                                                                                                                             | 新增全站唯一环境动效：C1/C2/C3 控制面竖虚线 + HITL 虚线引导路径 `stroke-dashoffset` 线性循环（linear infinite），周期 `var(--duration-ambient)` = 24s；slab 轮廓与其余元素静止；`prefers-reduced-motion` 下静止                                                              | P0     |
+| 动效 · 反馈 | `.btn` transition 50ms ease-out 硬编码                                                                                                                                                         | 并入 §3.3：`--duration-micro` 150ms + `--ease-site`；hover 白名单不变（按钮 color/background/border-color；主 CTA 箭头 translate(2px,-2px) 为全站唯一位移 hover）                                                                                                            | P1     |
+
+**Token 影响**：引用 §3.1（红系三行换值；硬编码更新本区块份额 = 上表 30 处）、§3.2（字体加载、字重方案 c、autospace/标点挤压、手写空格清理要求）、§3.3（`--duration-hero`、`--duration-micro`、`--ease-site`）。新增一行进 §3.3：`--duration-ambient: 24s`（首页 hero 等距栈描边循环专用，出处 #32、#36）。入场 delay 阶梯（0/200/400/600/800/1000ms）为单区块一次性取值，不 token 化，写在本节验收点。
+
+**性能预算影响**：≈零。字体 30KB / preload 1 个已在 §3.2 预算内（首屏 ≤100KB）；blur(4px) 为入场一次性开销；dashoffset 循环只动 stroke 属性，无 layout 抖动、无新请求；光晕系统零变化（#31）。Lighthouse CI 与 Playwright 护栏不变。
+
+**边界**：`<1024px` 时 hero-art `display:none`，描边缓动与 art 入场仅 ≥1024px 存在；copy 阶梯全断点生效。全部动画维持只动 transform/opacity/filter（dashoffset 为 SVG 呈现属性，不触发布局）。
+
+**验收点**：
+
+- [ ] `.hero-copy > *` 五个子元素 `animation-delay` 依次为 0 / 200 / 400 / 600 / 800ms，`.hero-art` 为 1000ms；时长全部 `var(--duration-hero)`（1000ms），缓动 `var(--ease-site)`；blur-up keyframes 保持 opacity + blur(4px) + translateY(12px)
+- [ ] C1/C2/C3 竖虚线与 HITL 虚线路径 `stroke-dashoffset` 动画 linear infinite、周期 `var(--duration-ambient)` = 24s；`prefers-reduced-motion: reduce` 下静止
+- [ ] `IsometricCapabilityStack.astro` 中 `#F53003`、`#C42602` grep 零残留（对应换为 `#FF2D20`、`#CD2318`），`#FF8A65` ×6 保留；`HomeHero.astro` 光晕为 `rgb(255 45 32 / 12%)`
+- [ ] hero h1 在 `:lang(zh)` 下 `font-weight: 500`；网络面板加载 1 个 Instrument Sans woff2（≈30KB），hero 标题渲染 Instrument Sans 而非系统回退
+- [ ] hero 文案 12 处手写中西空格清零（kicker 2 / titleLead 2 / lead 1 / primaryCta 2 / facts 3 / caption 2），autospace 下无双重加宽
+- [ ] 12% 光晕保留、未新增网格/纸纹层；hero 主图未替换、几何未改
+- [ ] Lighthouse CI 与 Playwright（含 a11y）全绿
+
+**决策依据**：[对标拆解](https://github.com/0xnicholas/seqtura-www/issues/26)、[字体调研](https://github.com/0xnicholas/seqtura-www/issues/27)、[色彩微调候选](https://github.com/0xnicholas/seqtura-www/issues/28)、[标志性图形语言](https://github.com/0xnicholas/seqtura-www/issues/29)、[排版标样页](https://github.com/0xnicholas/seqtura-www/issues/30)、[第二图层质感](https://github.com/0xnicholas/seqtura-www/issues/31)、[动效预算与语言](https://github.com/0xnicholas/seqtura-www/issues/32)；六字段模板来自[规格的结构与验收标准](https://github.com/0xnicholas/seqtura-www/issues/33)。
 
 ### 区块 2 · ProofStrip
 
