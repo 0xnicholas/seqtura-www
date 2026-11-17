@@ -1,0 +1,72 @@
+---
+// PROTOTYPE texture-layers (#31): dev-only floating panel that toggles the
+// candidate second-layer textures on the homepage (drafting grid / existing
+// red glows on-off / paper grain). State is applied client-side by
+// /scripts/prototype-texture-layers.js as body classes; URL param ?tex=
+// makes a state shareable (absent = all on, "none" = bare, otherwise a
+// comma-separated list of the on-keys). ?capture=1 hides the panel for
+// screenshots. Throwaway — drop with the prototype.
+import './texture-layers.css';
+
+// key → [chip label, kind]; glow keys are subtractive (off-state adds the
+// body class), everything else is additive.
+const rows = [
+  { label: 'HERO', chips: [['grid-hero', '网格'], ['glow-hero', '光晕']] },
+  { label: '方法论', chips: [['grid-methodology', '网格'], ['glow-methodology', '光晕']] },
+  { label: '架构', chips: [['glow-arch', '光晕']] },
+  { label: '收尾 CTA', chips: [['grid-cta', '网格'], ['glow-cta', '光晕']] },
+  { label: '全局', chips: [['grain', '纸纹']] },
+] as const;
+---
+
+{
+  import.meta.env.DEV && (
+    <div class="tex-panel" data-tex-panel>
+      <div class="tex-grain-overlay" aria-hidden="true" />
+      <nav class="tex-bar" aria-label="质感层原型开关">
+        <div class="tex-head">
+          <span class="tex-tag">PROTO</span>
+          <span class="tex-title">质感层 #31</span>
+          <button type="button" data-tex-all>
+            全开
+          </button>
+          <button type="button" data-tex-none>
+            全关
+          </button>
+          <button type="button" data-tex-perf-toggle aria-expanded="false">
+            性能
+          </button>
+        </div>
+        <div class="tex-matrix">
+          {rows.map((row) => (
+            <div class="tex-row">
+              <span class="tex-row-label">{row.label}</span>
+              {row.chips.map(([key, label]) => (
+                <button type="button" class="tex-chip" data-tex-key={key} aria-pressed="true">
+                  {label}
+                </button>
+              ))}
+            </div>
+          ))}
+        </div>
+        <dl class="tex-perf" data-tex-perf hidden>
+          <dt>网格（每区块，仅 ≥1024px）</dt>
+          <dd>
+            纯 CSS：两条 linear-gradient 网格线 + 一条遮罩渐变。0 请求、0 JS、paint-only；FCP/LCP/TBT/CLS
+            无感。
+          </dd>
+          <dt>光晕（每区块，现状已带 5 处）</dt>
+          <dd>单条 radial-gradient。0 请求、paint-only；去留对性能预算均无实质影响。</dd>
+          <dt>纸纹（全局覆层）</dt>
+          <dd>
+            inline SVG feTurbulence data-URI ≈0.6KB，随 CSS 下载、无额外请求；fixed 全视口 = 1
+            个合成层（约 5MB GPU 纹理 @1440×900）。pointer-events:none；Lighthouse 分数无直接影响，低端机滚动重绘建议真机抽查。
+          </dd>
+          <dt>面板本身</dt>
+          <dd>面板与本脚本仅 dev 渲染，不进生产构建；原型 CSS 全部以 body.tex-* 类名为门，生产默认不生效。</dd>
+        </dl>
+      </nav>
+      <script is:inline src="/scripts/prototype-texture-layers.js" defer />
+    </div>
+  )
+}

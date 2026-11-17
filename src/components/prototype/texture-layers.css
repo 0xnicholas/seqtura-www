@@ -1,0 +1,255 @@
+/* PROTOTYPE texture-layers (#31): candidate second-layer textures for the
+   homepage (drafting grid / existing red glows on-off / paper grain), toggled
+   by body classes from the dev-only panel. Throwaway — drop with the
+   prototype. All rules are gated behind body.tex-* classes, so the shipped
+   prod bundle (which never gets those classes) stays inert. */
+
+/* --- layer 1: drafting grid underlay (desktop only, md+ guard) ---------- */
+
+@media (min-width: 1024px) {
+  /* hero: graph-paper grid, radial veil keeps it strongest around the art */
+  body.tex-grid-hero .hero {
+    background-image:
+      radial-gradient(72% 82% at 60% 44%, transparent 42%, var(--color-canvas) 88%),
+      linear-gradient(to right, rgb(23 23 23 / 4.5%) 1px, transparent 1px),
+      linear-gradient(to bottom, rgb(23 23 23 / 4.5%) 1px, transparent 1px);
+    background-size:
+      100% 100%,
+      80px 80px,
+      80px 80px;
+    background-position:
+      0 0,
+      center top,
+      center top;
+  }
+
+  /* methodology: grid fades in mid-section band, clear at top/bottom seams */
+  body.tex-grid-methodology .method-section {
+    background-image:
+      linear-gradient(to bottom, var(--color-canvas) 0%, transparent 14%, transparent 86%, var(--color-canvas) 100%),
+      linear-gradient(to right, rgb(23 23 23 / 4.5%) 1px, transparent 1px),
+      linear-gradient(to bottom, rgb(23 23 23 / 4.5%) 1px, transparent 1px);
+    background-size:
+      100% 100%,
+      80px 80px,
+      80px 80px;
+    background-position:
+      0 0,
+      center top,
+      center top;
+  }
+
+  /* cta: veil is solid in the text zone, grid emerges toward the edges;
+     glow kept as the bottom layer of the stack. */
+  body.tex-grid-cta .cta-section {
+    background-image:
+      radial-gradient(58% 72% at 50% 55%, var(--color-canvas) 18%, transparent 68%),
+      linear-gradient(to right, rgb(23 23 23 / 4.5%) 1px, transparent 1px),
+      linear-gradient(to bottom, rgb(23 23 23 / 4.5%) 1px, transparent 1px),
+      radial-gradient(54% 70% at 50% 78%, rgb(245 48 3 / 14%), transparent 72%);
+    background-size:
+      100% 100%,
+      80px 80px,
+      80px 80px,
+      100% 100%;
+    background-position:
+      0 0,
+      center top,
+      center top,
+      0 0;
+    background-color: var(--color-canvas);
+  }
+
+  body.tex-off-glow-cta.tex-grid-cta .cta-section {
+    background-image:
+      radial-gradient(58% 72% at 50% 55%, var(--color-canvas) 18%, transparent 68%),
+      linear-gradient(to right, rgb(23 23 23 / 4.5%) 1px, transparent 1px),
+      linear-gradient(to bottom, rgb(23 23 23 / 4.5%) 1px, transparent 1px);
+    background-size:
+      100% 100%,
+      80px 80px,
+      80px 80px;
+    background-position:
+      0 0,
+      center top,
+      center top;
+    background-color: var(--color-canvas);
+  }
+}
+
+/* --- layer 2: existing red glows, removable per section ------------------ */
+
+body.tex-off-glow-hero .hero-art::before {
+  content: none;
+}
+
+body.tex-off-glow-methodology .code-wrap::before {
+  content: none;
+}
+
+body.tex-off-glow-arch .arch-section {
+  background: var(--color-paper);
+}
+
+body.tex-off-glow-arch .trace-card {
+  background: var(--color-dark);
+}
+
+body.tex-off-glow-cta .cta-section {
+  background: var(--color-canvas);
+}
+
+/* --- layer 3: paper grain, global fixed overlay --------------------------- */
+
+.tex-grain-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1500;
+  display: none;
+  pointer-events: none;
+  opacity: 0.045;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+body.tex-grain .tex-grain-overlay {
+  display: block;
+}
+
+/* --- dev-only toggle panel ------------------------------------------------- */
+
+.tex-panel {
+  font-family: var(--font-mono);
+}
+
+.tex-bar {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  z-index: 9999;
+  width: max-content;
+  max-width: calc(100vw - 32px);
+  transform: translateX(-50%);
+  border-radius: 14px;
+  background: #171717;
+  color: #ffffff;
+  box-shadow: 0 10px 28px rgb(0 0 0 / 28%);
+  font-size: 11px;
+  line-height: 1.4;
+  letter-spacing: 0.03em;
+}
+
+.tex-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-bottom: 1px solid rgb(255 255 255 / 12%);
+}
+
+.tex-tag {
+  padding: 3px 6px;
+  border-radius: 3px;
+  background: var(--color-red);
+  color: #ffffff;
+  font-size: 9px;
+  letter-spacing: 0.08em;
+}
+
+.tex-title {
+  margin-right: auto;
+  white-space: nowrap;
+  color: rgb(255 255 255 / 72%);
+}
+
+.tex-head button {
+  padding: 3px 8px;
+  border: 1px solid rgb(255 255 255 / 20%);
+  border-radius: 4px;
+  background: transparent;
+  color: #ffffff;
+  font: inherit;
+  cursor: pointer;
+}
+
+.tex-head button:hover {
+  border-color: rgb(255 255 255 / 55%);
+}
+
+.tex-matrix {
+  display: grid;
+  gap: 4px 12px;
+  padding: 10px 12px 12px;
+}
+
+.tex-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tex-row-label {
+  width: 64px;
+  flex: none;
+  color: rgb(255 255 255 / 55%);
+  font-size: 10px;
+  text-align: right;
+}
+
+.tex-chip {
+  padding: 4px 10px;
+  border: 1px solid rgb(255 255 255 / 22%);
+  border-radius: 999px;
+  background: transparent;
+  color: rgb(255 255 255 / 55%);
+  font: inherit;
+  cursor: pointer;
+  transition:
+    background-color 120ms ease-out,
+    color 120ms ease-out,
+    border-color 120ms ease-out;
+}
+
+.tex-chip[aria-pressed='true'] {
+  border-color: var(--color-red);
+  background: var(--color-red);
+  color: #ffffff;
+}
+
+.tex-chip:hover {
+  border-color: rgb(255 255 255 / 65%);
+  color: #ffffff;
+}
+
+.tex-chip[aria-pressed='true']:hover {
+  border-color: var(--color-red);
+}
+
+.tex-chip:focus-visible,
+.tex-head button:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
+}
+
+.tex-perf {
+  max-width: 560px;
+  padding: 10px 12px 12px;
+  border-top: 1px solid rgb(255 255 255 / 12%);
+  color: rgb(255 255 255 / 72%);
+}
+
+.tex-perf dt {
+  margin-top: 8px;
+  color: #ffffff;
+}
+
+.tex-perf dt:first-child {
+  margin-top: 0;
+}
+
+.tex-perf dd {
+  margin: 2px 0 0;
+}
+
+body.tex-capture .tex-bar {
+  display: none;
+}

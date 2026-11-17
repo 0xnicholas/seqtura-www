@@ -3,6 +3,7 @@ import SeoHead from '../components/SeoHead.astro';
 import SkipLink from '../components/SkipLink.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
+import TextureLayersSwitcher from '../components/prototype/TextureLayersSwitcher.astro';
 import '../styles/global.css';
 
 interface Props {
@@ -34,5 +35,7 @@ const { title, description, canonicalPath, noindex, ogImage } = Astro.props;
       <slot />
     </main>
     <Footer />
+    {/* PROTOTYPE texture-layers (#31): dev-only texture toggle panel. */}
+    <TextureLayersSwitcher />
   </body>
 </html>
