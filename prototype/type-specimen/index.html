@@ -1,0 +1,898 @@
+<!doctype html>
+<html lang="zh-CN" data-font="web" data-autospace="on" data-trim="off" data-cjk="c">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>排版标样 · 字重层级与 CJK 细节（prototype #30）</title>
+<!--
+  一次性原型，不是生产代码。issue #30。
+  要回答的问题：字体调研（#27）选定的方案——Instrument Sans 可变 latin 自托管 +
+  CJK 系统栈 + 字重层级 400/500（中文标题升 500）+ text-autospace / text-spacing-trim——
+  在真实文案下的渲染效果是否可接受？字重对比与混排细节待 owner 肉眼验收。
+-->
+<style>
+  /* ---- tokens：与 src/styles/global.css 对齐；红色采用 #28 锁定值（laravel 系） ---- */
+  :root {
+    --color-canvas: #ffffff;
+    --color-paper: #fcfcfb;
+    --color-ink: #171717;
+    --color-ink-2: #404040;
+    --color-muted: #737373;
+    --color-faint: #a3a3a3;
+    --color-line: #e5e5e5;
+    --color-line-strong: #d4d4d4;
+    /* #28 锁定：照搬 laravel 红色系；faded/wash 不变 */
+    --color-red: #ff2d20;
+    --color-red-dark: #cd2318;
+    --color-red-hover: #aa1b12;
+    --color-red-faded: #ffe2dd;
+    --color-red-wash: #fff7f5;
+
+    --stack-web: 'Instrument Sans', -apple-system, BlinkMacSystemFont, 'Helvetica Neue',
+      'PingFang SC', 'Hiragino Sans GB', 'Noto Sans SC', 'Microsoft YaHei', system-ui, sans-serif;
+    --stack-sys: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'PingFang SC',
+      'Hiragino Sans GB', 'Noto Sans SC', 'Microsoft YaHei', system-ui, sans-serif;
+    --stack-mono: 'SF Mono', 'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace;
+    --stack-active: var(--stack-web);
+
+    --container-site: 1280px;
+    --gutter: 80px;
+    --section-y: 96px;
+
+    --type-h1-size: 72px;
+    --type-h1-line: 1.04;
+    --type-h1-track: -0.025em;
+    --type-h2-size: 60px;
+    --type-h2-line: 1.08;
+    --type-h2-track: -0.025em;
+    --type-h3-size: 32px;
+    --type-h3-line: 1.25;
+    --type-lead-size: 20px;
+    --type-lead-line: 1.6;
+    --type-body-size: 16px;
+    --type-body-line: 1.7;
+    --type-code-size: 14px;
+    --type-code-line: 1.85;
+  }
+
+  html[data-font='sys'] { --stack-active: var(--stack-sys); }
+
+  @media (max-width: 1279px) { :root { --gutter: 48px; } }
+  @media (max-width: 1023px) { :root { --gutter: 40px; } }
+  @media (max-width: 767px) {
+    :root {
+      --gutter: 24px;
+      --type-h1-size: 40px; --type-h1-line: 1.12;
+      --type-h2-size: 31px; --type-h2-line: 1.16;
+      --type-h3-size: 24px; --type-h3-line: 1.3;
+      --type-lead-size: 17px; --type-lead-line: 1.65;
+      --type-code-size: 12px;
+    }
+  }
+
+  /* ---- 字体声明：方案本体（latin 可变 30,092B，自托管，swap） ---- */
+  @font-face {
+    font-family: 'Instrument Sans';
+    src: url('./instrument-sans-latin-wght-normal.woff2') format('woff2');
+    font-weight: 400 700;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  html { -webkit-text-size-adjust: 100%; }
+
+  body {
+    margin: 0;
+    background: var(--color-canvas);
+    color: var(--color-ink);
+    font-family: var(--stack-active);
+    font-size: var(--type-body-size);
+    line-height: var(--type-body-line);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    font-synthesis: none;
+  }
+
+  /* 全局开关：autospace（默认 on = 新默认 normal） */
+  html[data-autospace='off'] body { text-autospace: no-autospace; text-autospace: none; }
+  /* 全局开关：标点挤压（默认 off = 浏览器初始） */
+  html[data-trim='on'] body { text-spacing-trim: normal; }
+  /* 全局开关：中文标题字重方案（a=400 / c=500，默认 c） */
+  html[data-cjk='c'] .cjk-h { font-weight: 500; }
+
+  /* 固定对照 lane（不受全局开关影响） */
+  .as-on { text-autospace: normal; }
+  .as-off { text-autospace: no-autospace; text-autospace: none; }
+  .ts-on { text-spacing-trim: normal; }
+  .ts-off { text-spacing-trim: space-all; }
+  .tnum { font-feature-settings: 'tnum' 1; }
+
+  .lane-web { font-family: var(--stack-web); }
+  .lane-sys { font-family: var(--stack-sys); }
+
+  /* ---- 排版类：复制自 global.css（字重按方案参数化） ---- */
+  .type-h1 {
+    font-size: var(--type-h1-size); font-weight: 400;
+    line-height: var(--type-h1-line); letter-spacing: var(--type-h1-track);
+    text-wrap: balance;
+  }
+  .type-h2 {
+    font-size: var(--type-h2-size); font-weight: 400;
+    line-height: var(--type-h2-line); letter-spacing: var(--type-h2-track);
+    text-wrap: balance;
+  }
+  .type-h3 {
+    font-size: var(--type-h3-size); font-weight: 500;
+    line-height: var(--type-h3-line); letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+  .type-lead {
+    font-size: var(--type-lead-size); font-weight: 400;
+    line-height: var(--type-lead-line); letter-spacing: -0.01em;
+  }
+  .type-code {
+    font-family: var(--stack-mono);
+    font-size: var(--type-code-size); font-weight: 400; line-height: var(--type-code-line);
+  }
+  .mono-label {
+    font-family: var(--stack-mono);
+    font-size: 11px; font-weight: 400; line-height: 1.5;
+    letter-spacing: 0.06em; text-transform: uppercase;
+  }
+  .kicker {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: var(--stack-mono);
+    font-size: 12px; font-weight: 500; line-height: 1.5;
+    letter-spacing: 0.08em; color: var(--color-red-dark);
+  }
+  .kicker::before {
+    content: ''; flex: none; width: 7px; height: 7px; background: var(--color-red);
+  }
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+    height: 48px; padding: 0 24px; border: 1px solid transparent; border-radius: 8px;
+    font-size: 18px; font-weight: 500; line-height: 1; letter-spacing: -0.01em;
+    white-space: nowrap; text-decoration: none;
+  }
+  .btn-primary { background: var(--color-red-dark); color: #fff; }
+  .btn-ghost { background: var(--color-canvas); border-color: var(--color-line); color: var(--color-ink); }
+
+  /* ---- 页面骨架 ---- */
+  .container-site {
+    width: 100%; max-width: calc(var(--container-site) + var(--gutter) * 2);
+    margin-inline: auto; padding-inline: var(--gutter); box-sizing: border-box;
+  }
+  .mast {
+    padding: 28px 0 20px; border-bottom: 1px solid var(--color-line);
+    background: var(--color-paper);
+  }
+  .mast h1 { margin: 10px 0 6px; font-size: 20px; font-weight: 500; letter-spacing: -0.01em; }
+  .mast p { margin: 0; max-width: 72ch; color: var(--color-ink-2); font-size: 14px; line-height: 1.7; }
+  .mast-nav { margin-top: 12px; display: flex; flex-wrap: wrap; gap: 6px 16px; }
+  .mast-nav a { font-family: var(--stack-mono); font-size: 11px; letter-spacing: 0.04em; color: var(--color-muted); text-decoration: none; }
+  .mast-nav a:hover { color: var(--color-red-dark); }
+  #badges { margin-top: 12px; display: flex; flex-wrap: wrap; gap: 6px; }
+
+  .band { position: relative; padding-block: var(--section-y); border-bottom: 1px solid var(--color-line); }
+  .band::before, .band::after {
+    content: ''; position: absolute; top: -4px; width: 7px; height: 7px; background: var(--color-red);
+  }
+  .band::before { left: max(var(--gutter), calc((100vw - var(--container-site)) / 2)); }
+  .band::after { right: max(var(--gutter), calc((100vw - var(--container-site)) / 2)); }
+
+  .band-head { margin-bottom: 40px; max-width: 76ch; }
+  .band-head .mono-label { color: var(--color-muted); }
+  .band-head h2 { margin: 10px 0 8px; font-size: 28px; font-weight: 500; letter-spacing: -0.02em; line-height: 1.25; }
+  .band-head p { margin: 0; color: var(--color-ink-2); font-size: 14px; line-height: 1.7; }
+
+  .chip {
+    display: inline-flex; align-items: center; height: 22px; padding: 0 7px;
+    border: 1px solid var(--color-line); border-radius: 4px; background: var(--color-paper);
+    font-family: var(--stack-mono); font-size: 9px; line-height: 1; letter-spacing: 0.02em;
+    color: var(--color-muted); white-space: nowrap;
+  }
+  .chip.ok { color: #137333; border-color: #b7dfc2; background: #f2fbf4; }
+  .chip.ng { color: var(--color-red-dark); border-color: var(--color-red-faded); background: var(--color-red-wash); }
+  .chip.hot { color: var(--color-red-dark); border-color: var(--color-red-dark); }
+
+  .note { font-size: 13px; line-height: 1.7; color: var(--color-muted); max-width: 76ch; }
+  .note strong { color: var(--color-ink-2); font-weight: 500; }
+
+  /* hero 复刻 */
+  .hero-copy { max-width: 720px; }
+  .hero-title { margin: 22px 0 0; }
+  .title-line { display: inline-block; }
+  .hero-lead { margin: 24px 0 0; color: var(--color-ink-2); }
+  .cta-row { margin-top: 32px; display: flex; flex-wrap: wrap; gap: 12px; }
+  .hero-facts {
+    margin: 40px 0 0; display: flex; flex-wrap: wrap; gap: 12px;
+    font-family: var(--stack-mono); font-size: 12px; letter-spacing: 0.06em;
+    text-transform: uppercase; color: var(--color-muted);
+  }
+  .hero-facts .sep { width: 1px; background: var(--color-line-strong); }
+  .hero-annot { margin-top: 28px; display: flex; flex-wrap: wrap; gap: 6px; }
+
+  /* 矩阵 */
+  .lvl { padding: 28px 0; border-top: 1px dashed var(--color-line); }
+  .lvl:first-of-type { border-top: 0; }
+  .lvl-meta { display: flex; align-items: baseline; gap: 10px; margin-bottom: 18px; }
+  .lvl-meta .name { font-family: var(--stack-mono); font-size: 12px; letter-spacing: 0.04em; color: var(--color-ink); }
+  .cells { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; }
+  @media (max-width: 1023px) { .cells { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .cell { margin: 0; min-width: 0; }
+  .cell > figcaption { margin-bottom: 10px; }
+  .lane { position: relative; padding-top: 22px; margin-top: 14px; border-top: 1px solid var(--color-line); }
+  .lane:first-of-type { margin-top: 0; }
+  .lane .tag { position: absolute; top: -11px; left: 0; }
+  .lane p { margin: 0; overflow-wrap: break-word; }
+
+  /* 通用对照 lane 栅格 */
+  .lanes2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px; }
+  .lanes3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
+  @media (max-width: 1023px) { .lanes2, .lanes3 { grid-template-columns: 1fr; } }
+  .panel { border: 1px solid var(--color-line); border-radius: 8px; background: var(--color-canvas); padding: 20px; min-width: 0; }
+  .panel > .panel-tag { margin: -20px -20px 16px; padding: 10px 20px; border-bottom: 1px solid var(--color-line); background: var(--color-paper); border-radius: 8px 8px 0 0; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .panel p { margin: 0 0 0.6em; }
+  .panel p:last-child { margin-bottom: 0; }
+  .narrow { max-width: 24em; }
+
+  /* 数字表格 */
+  table.num { border-collapse: collapse; width: 100%; }
+  table.num td, table.num th {
+    padding: 8px 12px; border-bottom: 1px solid var(--color-line);
+    font-size: 20px; line-height: 1.4; text-align: right; white-space: nowrap;
+  }
+  table.num th { font-family: var(--stack-mono); font-size: 10px; letter-spacing: 0.06em; color: var(--color-muted); text-align: right; font-weight: 400; }
+  table.num td:first-child, table.num th:first-child { text-align: left; font-family: var(--stack-mono); font-size: 11px; color: var(--color-muted); letter-spacing: 0.04em; }
+
+  /* 度量网格背景 */
+  .gridbg {
+    background-image: repeating-linear-gradient(to bottom,
+      rgb(255 45 32 / 0.14) 0 1px, transparent 1px 32px);
+  }
+
+  pre.snippet {
+    margin: 0; padding: 16px; border: 1px solid var(--color-line); border-radius: 8px;
+    background: var(--color-paper); overflow-x: auto;
+    font-family: var(--stack-mono); font-size: 12px; line-height: 1.7; color: var(--color-ink-2);
+  }
+
+  table.meta { border-collapse: collapse; }
+  table.meta td, table.meta th {
+    padding: 6px 14px 6px 0; border-bottom: 1px dashed var(--color-line);
+    font-size: 13px; text-align: left; vertical-align: top;
+  }
+  table.meta th { font-family: var(--stack-mono); font-size: 10px; letter-spacing: 0.06em; color: var(--color-muted); font-weight: 400; }
+
+  ul.bounds { margin: 0; padding-left: 1.2em; font-size: 14px; line-height: 1.9; color: var(--color-ink-2); }
+
+  /* 底部浮条 */
+  .bar {
+    position: fixed; z-index: 50; left: 50%; bottom: 18px; transform: translateX(-50%);
+    display: flex; align-items: center; gap: 14px; flex-wrap: wrap; justify-content: center;
+    max-width: min(96vw, 1100px); padding: 10px 16px; border-radius: 12px;
+    background: #171717; color: #fafafa;
+    box-shadow: 0 8px 30px rgb(0 0 0 / 25%);
+    font-family: var(--stack-mono); font-size: 11px; letter-spacing: 0.03em;
+  }
+  .bar .proto { color: #ff6b60; letter-spacing: 0.1em; }
+  .seg { display: inline-flex; align-items: center; gap: 6px; }
+  .seg-label { color: #a3a3a3; }
+  .seg button {
+    appearance: none; border: 1px solid #404040; background: transparent; color: #d4d4d4;
+    font: inherit; padding: 4px 9px; border-radius: 6px; cursor: pointer;
+  }
+  .seg button[aria-pressed='true'] { background: #fafafa; color: #171717; border-color: #fafafa; }
+  .seg button:hover { border-color: #a3a3a3; }
+  .bar .hint { color: #737373; }
+  html[data-capture='1'] .bar, html[data-capture='1'] .mast-nav { display: none; }
+
+  .spacer { height: 96px; }
+</style>
+</head>
+<body>
+<header class="mast">
+  <div class="container-site">
+    <span class="chip hot">PROTOTYPE · 一次性 · #30</span>
+    <h1>排版标样：字重层级与 CJK 细节</h1>
+    <p>
+      用「字体调研」（#27）选定方案渲染真实文案：Instrument Sans 可变（latin，30.1KB，自托管 + swap）+ CJK 系统栈；
+      字重层级正文 400 / 交互与中强调 500 / 中文标题升 500；混排接受 text-autospace 新默认，标点挤压作渐进增强。
+      红色按 #28 锁定值（#FF2D20 系）。整页自上而下即标样本体；底部浮条切全局状态，URL 参数可分享。
+    </p>
+    <nav class="mast-nav" aria-label="标样区块">
+      <a href="#hero">hero 复刻</a>
+      <a href="#matrix">层级×字种矩阵</a>
+      <a href="#weights">字重梯度 / 中文标题 a·c</a>
+      <a href="#autospace">混排间距 autospace</a>
+      <a href="#trim">标点挤压 trim</a>
+      <a href="#numbers">数字场景 tnum</a>
+      <a href="#metrics">度量标定与预算</a>
+      <a href="#bounds">边界与未验证</a>
+    </nav>
+    <div id="badges" aria-label="环境探测"></div>
+  </div>
+</header>
+
+<main>
+  <!-- ============ 1. Hero 复刻 ============ -->
+  <section class="band" id="hero">
+    <div class="container-site">
+      <div class="band-head">
+        <span class="mono-label">01 · HERO REPLICA</span>
+        <h2>Hero 复刻（生产最小场景集）</h2>
+        <p>kicker + 两行 H1 + lead + 双按钮 + mono 事实条，全部用 src/data 真实文案。跟随全局开关。
+          注意主 CTA「预约 30 分钟沟通」：文案含手写空格，autospace 开启时会与自动间距叠加（见 04）。</p>
+      </div>
+      <div class="hero-copy">
+        <p class="kicker">企业 AI Agent 定制交付</p>
+        <p class="type-h1 hero-title cjk-h">
+          <span class="title-line">企业 AI Agent 的</span><br>
+          <span class="title-line">工程化交付</span>
+        </p>
+        <p class="hero-lead type-lead">把业务场景做成可验收、可私有化、可维护的 AI Agent。</p>
+        <div class="cta-row">
+          <a class="btn btn-primary" href="#hero">预约 30 分钟沟通</a>
+          <a class="btn btn-ghost" href="#hero">看工作方法论</a>
+        </div>
+        <p class="hero-facts">
+          <span>8 个交付阶段</span><span class="sep" aria-hidden="true"></span>
+          <span>5 层能力栈</span><span class="sep" aria-hidden="true"></span>
+          <span>3 条控制面</span>
+        </p>
+        <div class="hero-annot">
+          <span class="chip">kicker: mono 12px/500 · CJK 落系统字体</span>
+          <span class="chip">H1 72px/−0.025em · 中文按方案 <span data-scheme-label>500</span></span>
+          <span class="chip">lead 20px/400</span>
+          <span class="chip">btn 18px/500</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 2. 层级 × 字种矩阵 ============ -->
+  <section class="band" id="matrix">
+    <div class="container-site">
+      <div class="band-head">
+        <span class="mono-label">02 · MATRIX</span>
+        <h2>字重层级 × 字种矩阵</h2>
+        <p>每格上下两条 lane：上 = 当前方案（Instrument Sans + CJK 系统栈），下 = 纯系统栈（webfont 未加载的回退形态）。
+          中文标题字重随全局「中文标题」开关（a=400 / c=500）；拉丁标题恒定 400。</p>
+      </div>
+
+      <div class="lvl">
+        <div class="lvl-meta"><span class="name">H1 · 72px · ls −0.025em</span><span class="chip">拉丁 400</span><span class="chip">中文 <span data-scheme-label>500</span></span></div>
+        <div class="cells">
+          <figure class="cell"><figcaption class="chip">纯中文</figcaption>
+            <div class="lane"><span class="tag chip">webfont</span><p class="type-h1 cjk-h lane-web">工程化交付</p></div>
+            <div class="lane"><span class="tag chip">系统栈</span><p class="type-h1 cjk-h lane-sys">工程化交付</p></div>
+          </figure>
+          <figure class="cell"><figcaption class="chip">纯拉丁</figcaption>
+            <div class="lane"><span class="tag chip">webfont</span><p class="type-h1 lane-web">Outcome</p></div>
+            <div class="lane"><span class="tag chip">系统栈</span><p class="type-h1 lane-sys">Outcome</p></div>
+          </figure>
+          <figure class="cell"><figcaption class="chip">混排</figcaption>
+            <div class="lane"><span class="tag chip">webfont</span><p class="type-h1 cjk-h lane-web">企业 AI Agent 交付</p></div>
+            <div class="lane"><span class="tag chip">系统栈</span><p class="type-h1 cjk-h lane-sys">企业 AI Agent 交付</p></div>
+          </figure>
+          <figure class="cell"><figcaption class="chip">数字</figcaption>
+            <div class="lane"><span class="tag chip">webfont</span><p class="type-h1 lane-web">2–4 周</p></div>
+            <div class="lane"><span class="tag chip">系统栈</span><p class="type-h1 lane-sys">2–4 周</p></div>
+          </figure>
+        </div>
+      </div>
+
+      <div class="lvl">
+        <div class="lvl-meta"><span class="name">H2 · 60px · ls −0.025em</span><span class="chip">拉丁 400</span><span class="chip">中文 <span data-scheme-label>500</span></span></div>
+        <div class="cells">
+          <figure class="cell"><figcaption class="chip">纯中文</figcaption>
+            <div class="lane"><span class="tag chip">webfont</span><p class="type-h2 cjk-h lane-web">从业务结果出发</p></div>
+            <div class="lane"><span class="tag chip">系统栈</span><p class="type-h2 cjk-h lane-sys">从业务结果出发</p></div>
+          </figure>
+          <figure class="cell"><figcaption class="chip">纯拉丁</figcaption>
+            <div class="lane"><span class="tag chip">webfont</span><p class="type-h2 lane-web">Reference Architecture</p></div>
+            <div class="lane"><span class="tag chip">系统栈</span><p class="type-h2 lane-sys">Reference Architecture</p></div>
+          </figure>
+          <figure class="cell"><figcaption class="chip">混排</figcaption>
+            <div class="lane"><span class="tag chip">webfont</span><p class="type-h2 cjk-h lane-web">5 层能力栈 Capability Stack</p></div>
+            <div class="lane"><span class="tag chip">系统栈</span><p class="type-h2 cjk-h lane-sys">5 层能力栈 Capability Stack</p></div>
+          </figure>
+          <figure class="cell"><figcaption class="chip">数字</figcaption>
+            <div class="lane"><span class="tag chip">webfont</span><p class="type-h2 lane-web">8 阶段 · 4 组</p></div>
+            <div class="lane"><span class="tag chip">系统栈</span><p class="type-h2 lane-sys">8 阶段 · 4 组</p></div>
+          </figure>
+        </div>
+      </div>
+
+      <div class="lvl">
+        <div class="lvl-meta"><span class="name">H3 · 32px · ls −0.02em</span><span class="chip">恒定 500（现状）</span></div>
+        <div class="cells">
+          <figure class="cell"><figcaption class="chip">纯中文</figcaption>
+            <div class="lane"><span class="tag chip">webfont</span><p class="type-h3 lane-web">每个阶段都有产出物</p></div>
+            <div class="lane"><span class="tag chip">系统栈</span><p class="type-h3 lane-sys">每个阶段都有产出物</p></div>
+          </figure>
+          <figure class="cell"><figcaption class="chip">纯拉丁</figcaption>
+            <div class="lane"><span class="tag chip">webfont</span><p class="type-h3 lane-web">Evaluation Set</p></div>
+            <div class="lane"><span class="tag chip">系统栈</span><p class="type-h3 lane-sys">Evaluation Set</p></div>
+          </figure>
+          <figure class="cell"><figcaption class="chip">混排</figcaption>
+            <div class="lane"><span class="tag chip">webfont</span><p class="type-h3 lane-web">评测集覆盖 3 类样本</p></div>
+            <div class="lane"><span class="tag chip">系统栈</span><p class="type-h3 lane-sys">评测集覆盖 3 类样本</p></div>
+          </figure>
+          <figure class="cell"><figcaption class="chip">数字</figcaption>
+            <div class="lane"><span class="tag chip">webfont</span><p class="type-h3 lane-web">99.9% 可追溯</p></div>
+            <div class="lane"><span class="tag chip">系统栈</span><p class="type-h3 lane-sys">99.9% 可追溯</p></div>
+          </figure>
+        </div>
+      </div>
+
+      <div class="lvl">
+        <div class="lvl-meta"><span class="name">Lead · 20px / 1.6 · 400</span></div>
+        <div class="cells">
+          <figure class="cell"><figcaption class="chip">纯中文</figcaption>
+            <div class="lane"><span class="tag chip">webfont</span><p class="type-lead lane-web">先把问题定义清楚，再定验收标准与评测集，然后才进入构建。</p></div>
+            <div class="lane"><span class="tag chip">系统栈</span><p class="type-lead lane-sys">先把问题定义清楚，再定验收标准与评测集，然后才进入构建。</p></div>
+          </figure>
+          <figure class="cell"><figcaption class="chip">纯拉丁</figcaption>
+            <div class="lane"><span class="tag chip">webfont</span><p class="type-lead lane-web">We deliver components and patterns; systems, data, and identity stay in your environment.</p></div>
+            <div class="lane"><span class="tag chip">系统栈</span><p class="type-lead lane-sys">We deliver components and patterns; systems, data, and identity stay in your environment.</p></div>
+          </figure>
+          <figure class="cell"><figcaption class="chip">混排</figcaption>
+            <div class="lane"><span class="tag chip">webfont</span><p class="type-lead lane-web">Agent 不是一次模型调用，而是一条有状态的执行链；每一环都要能被验证、被审计、被接手。</p></div>
+            <div class="lane"><span class="tag chip">系统栈</span><p class="type-lead lane-sys">Agent 不是一次模型调用，而是一条有状态的执行链；每一环都要能被验证、被审计、被接手。</p></div>
+          </figure>
+          <figure class="cell"><figcaption class="chip">数字</figcaption>
+            <div class="lane"><span class="tag chip">webfont</span><p class="type-lead lane-web">单项目 2–4 周出验证切片，首屏字体预算 ≤100KB， preload 仅 1 个文件。</p></div>
+            <div class="lane"><span class="tag chip">系统栈</span><p class="type-lead lane-sys">单项目 2–4 周出验证切片，首屏字体预算 ≤100KB，preload 仅 1 个文件。</p></div>
+          </figure>
+        </div>
+      </div>
+
+      <div class="lvl">
+        <div class="lvl-meta"><span class="name">Body · 16px / 1.7 · 400</span></div>
+        <div class="cells">
+          <figure class="cell"><figcaption class="chip">纯中文</figcaption>
+            <div class="lane"><span class="tag chip">webfont</span><p class="lane-web">值得做、不值得做，或先做哪一步，给出结论。验收标准在 Define 阶段前置，逐项可量化、可复核。</p></div>
+            <div class="lane"><span class="tag chip">系统栈</span><p class="lane-sys">值得做、不值得做，或先做哪一步，给出结论。验收标准在 Define 阶段前置，逐项可量化、可复核。</p></div>
+          </figure>
+          <figure class="cell"><figcaption class="chip">纯拉丁</figcaption>
+            <div class="lane"><span class="tag chip">webfont</span><p class="lane-web">Forward Deployed Engineering: engineers design, build, and validate together with your team, in your environment.</p></div>
+            <div class="lane"><span class="tag chip">系统栈</span><p class="lane-sys">Forward Deployed Engineering: engineers design, build, and validate together with your team, in your environment.</p></div>
+          </figure>
+          <figure class="cell"><figcaption class="chip">混排</figcaption>
+            <div class="lane"><span class="tag chip">webfont</span><p class="lane-web">Seqtura 用 FDE 模式交付 AI Agent：8 个交付阶段从 Discover 到 Optimize，Build 之前锁定评测集，Deploy 之后进入支持期。</p></div>
+            <div class="lane"><span class="tag chip">系统栈</span><p class="lane-sys">Seqtura 用 FDE 模式交付 AI Agent：8 个交付阶段从 Discover 到 Optimize，Build 之前锁定评测集，Deploy 之后进入支持期。</p></div>
+          </figure>
+          <figure class="cell"><figcaption class="chip">数字</figcaption>
+            <div class="lane"><span class="tag chip">webfont</span><p class="lane-web">参考架构分 5 层能力栈、3 条控制面；验证切片 2–4 周；2026 年起按项目交付，不做年度订阅。</p></div>
+            <div class="lane"><span class="tag chip">系统栈</span><p class="lane-sys">参考架构分 5 层能力栈、3 条控制面；验证切片 2–4 周；2026 年起按项目交付，不做年度订阅。</p></div>
+          </figure>
+        </div>
+      </div>
+
+      <div class="lvl">
+        <div class="lvl-meta"><span class="name">Mono label · 11px / Kicker · 12px</span><span class="chip">mono 栈无 CJK 字形 → 中文逐字回退系统字体（现状即如此）</span></div>
+        <div class="cells">
+          <figure class="cell"><figcaption class="chip">mono label</figcaption>
+            <div class="lane"><span class="tag chip">webfont</span><p class="mono-label lane-web">Capability Stack · 能力栈</p></div>
+            <div class="lane"><span class="tag chip">系统栈</span><p class="mono-label lane-sys">Capability Stack · 能力栈</p></div>
+          </figure>
+          <figure class="cell"><figcaption class="chip">kicker</figcaption>
+            <div class="lane"><span class="tag chip">webfont</span><p class="kicker lane-web">企业 AI Agent 定制交付</p></div>
+            <div class="lane"><span class="tag chip">系统栈</span><p class="kicker lane-sys">企业 AI Agent 定制交付</p></div>
+          </figure>
+          <figure class="cell"><figcaption class="chip">mono label · 纯拉丁</figcaption>
+            <div class="lane"><span class="tag chip">webfont</span><p class="mono-label lane-web">Forward Deployed Engineering</p></div>
+            <div class="lane"><span class="tag chip">系统栈</span><p class="mono-label lane-sys">Forward Deployed Engineering</p></div>
+          </figure>
+          <figure class="cell"><figcaption class="chip">mono · 数字</figcaption>
+            <div class="lane"><span class="tag chip">webfont</span><p class="mono-label lane-web">v2.4.1 · 2026-11-17 · UTC+8</p></div>
+            <div class="lane"><span class="tag chip">系统栈</span><p class="mono-label lane-sys">v2.4.1 · 2026-11-17 · UTC+8</p></div>
+          </figure>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 3. 字重梯度 + 中文标题方案对照 ============ -->
+  <section class="band" id="weights">
+    <div class="container-site">
+      <div class="band-head">
+        <span class="mono-label">03 · WEIGHTS</span>
+        <h2>字重梯度与中文标题方案 a / c 对照</h2>
+        <p>上：Instrument Sans 可变字重梯度（font-synthesis: none，所见即真实字重）。
+          下：中文标题 400（方案 a，现状）vs 500（方案 c，推荐）固定并排——本 ticket 的核心验收点。
+          Windows 雅黑无 500，会落 Bold（更重），需真机复核（见 08）。</p>
+      </div>
+
+      <div class="lvl">
+        <div class="lvl-meta"><span class="name">拉丁字重梯度 · Instrument Sans · 60px</span></div>
+        <div class="cells">
+          <figure class="cell"><figcaption class="chip">400</figcaption><p class="type-h2 lane-web" style="font-weight:400">Outcome</p></figure>
+          <figure class="cell"><figcaption class="chip">500</figcaption><p class="type-h2 lane-web" style="font-weight:500">Outcome</p></figure>
+          <figure class="cell"><figcaption class="chip">600</figcaption><p class="type-h2 lane-web" style="font-weight:600">Outcome</p></figure>
+          <figure class="cell"><figcaption class="chip">700</figcaption><p class="type-h2 lane-web" style="font-weight:700">Outcome</p></figure>
+        </div>
+      </div>
+
+      <div class="lvl">
+        <div class="lvl-meta"><span class="name">拉丁字重梯度 · 16px 正文</span></div>
+        <div class="cells">
+          <figure class="cell"><figcaption class="chip">400</figcaption><p class="lane-web" style="font-weight:400">Engineering delivery, 0123456789</p></figure>
+          <figure class="cell"><figcaption class="chip">500</figcaption><p class="lane-web" style="font-weight:500">Engineering delivery, 0123456789</p></figure>
+          <figure class="cell"><figcaption class="chip">600</figcaption><p class="lane-web" style="font-weight:600">Engineering delivery, 0123456789</p></figure>
+          <figure class="cell"><figcaption class="chip">700</figcaption><p class="lane-web" style="font-weight:700">Engineering delivery, 0123456789</p></figure>
+        </div>
+      </div>
+
+      <div class="lvl">
+        <div class="lvl-meta"><span class="name">中文标题 · 方案 a（400） vs 方案 c（500）</span><span class="chip">固定对照，不随全局开关</span></div>
+        <div class="cells">
+          <figure class="cell"><figcaption class="chip">H1 72 · a · 400</figcaption><p class="type-h1" style="font-weight:400">工程化交付</p></figure>
+          <figure class="cell"><figcaption class="chip">H1 72 · c · 500</figcaption><p class="type-h1" style="font-weight:500">工程化交付</p></figure>
+          <figure class="cell"><figcaption class="chip">H2 60 · a · 400</figcaption><p class="type-h2" style="font-weight:400">从业务结果出发</p></figure>
+          <figure class="cell"><figcaption class="chip">H2 60 · c · 500</figcaption><p class="type-h2" style="font-weight:500">从业务结果出发</p></figure>
+        </div>
+        <div class="cells" style="margin-top:20px">
+          <figure class="cell"><figcaption class="chip">H3 32 · 400 参考</figcaption><p class="type-h3" style="font-weight:400">每个阶段都有产出物</p></figure>
+          <figure class="cell"><figcaption class="chip">H3 32 · 500（现状）</figcaption><p class="type-h3">每个阶段都有产出物</p></figure>
+          <figure class="cell"><figcaption class="chip">混排 60 · a · 400</figcaption><p class="type-h2" style="font-weight:400">企业 AI Agent 交付</p></figure>
+          <figure class="cell"><figcaption class="chip">混排 60 · c · 500</figcaption><p class="type-h2" style="font-weight:500">企业 AI Agent 交付</p></figure>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 4. 混排间距 text-autospace ============ -->
+  <section class="band" id="autospace">
+    <div class="container-site">
+      <div class="band-head">
+        <span class="mono-label">04 · AUTOSPACE</span>
+        <h2>中西文混排间距：text-autospace</h2>
+        <p>三条固定 lane：A = 新默认（normal），B = 关闭，C = 新默认 + 手写「盘古之白」空格（现状文案写法，演示双重加宽）。
+          正文用同一混排段落；下方附真实 CTA 文案对照。<span id="autospace-support"></span></p>
+      </div>
+      <div class="lanes3">
+        <div class="panel">
+          <div class="panel-tag"><span class="chip hot">A</span><span class="chip">text-autospace: normal（新默认）</span></div>
+          <p class="as-on">Seqtura用FDE模式交付AI Agent：8个交付阶段从Discover到Optimize，首个验证切片2–4周上线。Define阶段前置验收标准，Build之前锁定评测集。</p>
+          <p class="as-on"><a class="btn btn-primary" href="#autospace">预约30分钟沟通</a></p>
+        </div>
+        <div class="panel">
+          <div class="panel-tag"><span class="chip hot">B</span><span class="chip">autospace 关闭（no-autospace）</span></div>
+          <p class="as-off">Seqtura用FDE模式交付AI Agent：8个交付阶段从Discover到Optimize，首个验证切片2–4周上线。Define阶段前置验收标准，Build之前锁定评测集。</p>
+          <p class="as-off"><a class="btn btn-primary" href="#autospace">预约30分钟沟通</a></p>
+        </div>
+        <div class="panel">
+          <div class="panel-tag"><span class="chip hot">C</span><span class="chip">normal + 手写空格（现状文案）</span></div>
+          <p class="as-on">Seqtura 用 FDE 模式交付 AI Agent：8 个交付阶段从 Discover 到 Optimize，首个验证切片 2–4 周上线。Define 阶段前置验收标准，Build 之前锁定评测集。</p>
+          <p class="as-on"><a class="btn btn-primary" href="#autospace">预约 30 分钟沟通</a></p>
+        </div>
+      </div>
+      <p class="note" style="margin-top:20px">
+        <strong>看哪里：</strong>A vs B 的「FDE / AI Agent / 8 / 2–4」两侧缝隙；C 的同一位置是否明显过宽。
+        src/data 现有 <strong>276 处</strong>手写空格（6 个文件），若接受 autospace 新默认，文案侧需要一轮清理，否则全是 C 的形态。
+      </p>
+    </div>
+  </section>
+
+  <!-- ============ 5. 标点挤压 text-spacing-trim ============ -->
+  <section class="band" id="trim">
+    <div class="container-site">
+      <div class="band-head">
+        <span class="mono-label">05 · SPACING TRIM</span>
+        <h2>标点挤压：text-spacing-trim</h2>
+        <p>窄栏迫使全宽标点落到行首/行尾/相邻。左 = normal（挤压），右 = space-all（不挤压）。
+          仅 Chrome/Edge 123+；且依赖字体 halt/chws 特性，苹方/雅黑是否内建未验证——本页即测试。<span id="trim-support"></span></p>
+      </div>
+      <div class="lanes2">
+        <div class="panel">
+          <div class="panel-tag"><span class="chip hot">ON</span><span class="chip">text-spacing-trim: normal</span></div>
+          <p class="ts-on narrow">「能力栈」分 5 层：接入与编排、模型、工具与系统集成、知识与记忆、运行时与部署；「控制面」有 3 条——身份与权限、评测与可观测、策略与审计。（详见《技术架构》页。）</p>
+        </div>
+        <div class="panel">
+          <div class="panel-tag"><span class="chip hot">OFF</span><span class="chip">text-spacing-trim: space-all</span></div>
+          <p class="ts-off narrow">「能力栈」分 5 层：接入与编排、模型、工具与系统集成、知识与记忆、运行时与部署；「控制面」有 3 条——身份与权限、评测与可观测、策略与审计。（详见《技术架构》页。）</p>
+        </div>
+      </div>
+      <p class="note" style="margin-top:20px">
+        <strong>看哪里：</strong>「」相邻处、行首「（」、行尾「。」的半宽化。左右无差异 = 浏览器不支持或字体缺 halt/chws（都是已知风险，不是 bug）。
+      </p>
+    </div>
+  </section>
+
+  <!-- ============ 6. 数字场景 ============ -->
+  <section class="band" id="numbers">
+    <div class="container-site">
+      <div class="band-head">
+        <span class="mono-label">06 · NUMERALS</span>
+        <h2>数字场景：tnum 与事实条</h2>
+        <p>数据/统计数字开 tnum（表格数字，等宽对齐）；正文内联数字不开。下表左右对照同一份数字。</p>
+      </div>
+      <div class="lanes2">
+        <div class="panel">
+          <div class="panel-tag"><span class="chip hot">默认</span><span class="chip">比例数字</span></div>
+          <table class="num lane-web">
+            <tr><th>指标</th><th>数值</th></tr>
+            <tr><td>字体文件</td><td>30,092 B</td></tr>
+            <tr><td>全量 CJK</td><td>4,354,412 B</td></tr>
+            <tr><td>预算上限</td><td>102,400 B</td></tr>
+            <tr><td>可用性</td><td>99.95%</td></tr>
+            <tr><td>日期</td><td>2026-11-17</td></tr>
+            <tr><td>连续数字</td><td>1,111,111</td></tr>
+          </table>
+        </div>
+        <div class="panel">
+          <div class="panel-tag"><span class="chip hot">tnum</span><span class="chip">表格数字（推荐用于数据卡）</span></div>
+          <table class="num lane-web tnum">
+            <tr><th>指标</th><th>数值</th></tr>
+            <tr><td>字体文件</td><td>30,092 B</td></tr>
+            <tr><td>全量 CJK</td><td>4,354,412 B</td></tr>
+            <tr><td>预算上限</td><td>102,400 B</td></tr>
+            <tr><td>可用性</td><td>99.95%</td></tr>
+            <tr><td>日期</td><td>2026-11-17</td></tr>
+            <tr><td>连续数字</td><td>1,111,111</td></tr>
+          </table>
+        </div>
+      </div>
+      <div class="lanes2" style="margin-top:24px">
+        <div class="panel">
+          <div class="panel-tag"><span class="chip">hero 事实条复刻 · mono 12px uppercase</span></div>
+          <p class="hero-facts" style="margin:0">
+            <span>8 个交付阶段</span><span class="sep" aria-hidden="true"></span>
+            <span>5 层能力栈</span><span class="sep" aria-hidden="true"></span>
+            <span>3 条控制面</span>
+          </p>
+        </div>
+        <div class="panel">
+          <div class="panel-tag"><span class="chip">正文内联数字（不开 tnum）</span></div>
+          <p>评测集在 Build 之前锁定，覆盖正常、边界与失败 3 类样本；验证切片 2–4 周交付，2026 年起支持期按次或按项目约定。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 7. 度量标定与预算 ============ -->
+  <section class="band" id="metrics">
+    <div class="container-site">
+      <div class="band-head">
+        <span class="mono-label">07 · METRICS &amp; BUDGET</span>
+        <h2>回退字体度量标定 + 字体预算读数</h2>
+        <p>JS 在本机实时测量 Instrument Sans 与本地回退字体的字形度量（100px 采样），算出 size-adjust / ascent-override /
+          descent-override，注入一条校准后的 <span class="type-code">Instrument Sans Fallback</span> @font-face 并给出可复制进规格的 snippet。
+          下方三条 lane 叠 32px 网格线：目标（webfont）/ 未校准回退 / 校准后回退。</p>
+      </div>
+
+      <div class="lvl">
+        <div class="lvl-meta"><span class="name">实测字形度量（本机，100px 采样）</span></div>
+        <table class="meta" id="metric-table">
+          <tr><th>字体</th><th>cap-height</th><th>x-height</th><th>ascent</th><th>descent</th><th>size-adjust（回退×）</th></tr>
+          <tr><td>Instrument Sans（目标）</td><td id="m-is-cap">…</td><td id="m-is-x">…</td><td id="m-is-a">…</td><td id="m-is-d">…</td><td>—</td></tr>
+          <tr><td id="m-fb-name">回退（探测中…）</td><td id="m-fb-cap">…</td><td id="m-fb-x">…</td><td id="m-fb-a">…</td><td id="m-fb-d">…</td><td id="m-fb-s">…</td></tr>
+        </table>
+      </div>
+
+      <div class="lvl">
+        <div class="lvl-meta"><span class="name">规格 snippet（本机标定值；Windows/Arial 需真机另测）</span></div>
+        <pre class="snippet" id="snippet">测量中…</pre>
+      </div>
+
+      <div class="lvl">
+        <div class="lvl-meta"><span class="name">校准对照 · lead 20px/1.6（网格 = 32px 行盒）</span></div>
+        <div class="lanes3">
+          <div class="panel">
+            <div class="panel-tag"><span class="chip">目标 · Instrument Sans</span></div>
+            <p class="type-lead lane-web gridbg">Outcome-driven engineering 结果导向。8 个阶段，3 条控制面。</p>
+          </div>
+          <div class="panel">
+            <div class="panel-tag"><span class="chip">回退 · 未校准</span></div>
+            <p class="type-lead gridbg" id="fallback-raw">Outcome-driven engineering 结果导向。8 个阶段，3 条控制面。</p>
+          </div>
+          <div class="panel">
+            <div class="panel-tag"><span class="chip">回退 · 校准后</span></div>
+            <p class="type-lead gridbg" id="fallback-cal">Outcome-driven engineering 结果导向。8 个阶段，3 条控制面。</p>
+          </div>
+        </div>
+        <p class="note" style="margin-top:16px">
+          <strong>看哪里：</strong>三栏行盒是否压在同一条网格线上、拉丁字形灰度差异。校准目标 = swap 瞬间 CLS≈0。
+        </p>
+      </div>
+
+      <div class="lvl">
+        <div class="lvl-meta"><span class="name">字体预算读数（本页实时）</span></div>
+        <div id="budget" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+        <p class="note" style="margin-top:12px">预算（#27）：首屏字体总量 ≤100KB、preload ≤1 个文件。本页即「加载后」形态：1 个 woff2，30,092B。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 8. 边界与未验证 ============ -->
+  <section class="band" id="bounds">
+    <div class="container-site">
+      <div class="band-head">
+        <span class="mono-label">08 · BOUNDARIES</span>
+        <h2>边界与未验证项</h2>
+      </div>
+      <ul class="bounds">
+        <li><strong>Windows 雅黑未真机验证</strong>：雅黑只有 Regular/Bold，中文标题 500 会落 Bold（更重）；若观感不可接受，退路 = 中文标题保持 400、层级让位给尺度（#27 方案 c 的既定退路）。</li>
+        <li><strong>text-autospace 版本门槛</strong>：Chrome/Edge 140+、Safari 18.4+、Firefox 145+ 才生效；旧浏览器静默无自动间距（优雅降级）。本页 badge 显示当前浏览器支持实况。</li>
+        <li><strong>text-spacing-trim</strong>：仅 Chrome/Edge 123+；且依赖字体 halt/chws 特性，苹方/雅黑是否内建以本页实测为准。</li>
+        <li><strong>手写空格存量</strong>：src/data 现有 276 处手写「盘古之白」；接受 autospace 新默认则文案需一轮清理（规格阶段立项）。</li>
+        <li><strong>latin-ext 未加载</strong>：本页只挂 latin 子集（30,092B）；若未来出现拉丁扩展字符（如德法语），latin-ext 另加 10.6KB。</li>
+        <li><strong>size-adjust 标定值分平台</strong>：本页在本机（macOS）实时标定 Helvetica Neue；Windows 需对 Arial/Segoe UI 另跑一次，规格应给两组值。</li>
+        <li><strong>颜色</strong>：本页红色用 #28 锁定的 laravel 系（#FF2D20 / #cd2318 / #aa1b12），与生产现状（#f53003 系）不同，属预期。</li>
+        <li><strong>mono 栈不变</strong>：kicker / mono-label 维持系统等宽栈（CJK 逐字回退系统字体），mono webfont 是预算内预留的未来项，本页不验证。</li>
+      </ul>
+      <div class="spacer"></div>
+    </div>
+  </section>
+</main>
+
+<!-- 底部浮条：全局开关 -->
+<div class="bar" id="bar">
+  <span class="proto">PROTO #30</span>
+  <span class="seg">
+    <span class="seg-label">字体</span>
+    <button type="button" data-k="font" data-v="web">webfont</button>
+    <button type="button" data-k="font" data-v="sys">系统栈</button>
+  </span>
+  <span class="seg">
+    <span class="seg-label">autospace</span>
+    <button type="button" data-k="autospace" data-v="on">on</button>
+    <button type="button" data-k="autospace" data-v="off">off</button>
+  </span>
+  <span class="seg">
+    <span class="seg-label">标点挤压</span>
+    <button type="button" data-k="trim" data-v="on">on</button>
+    <button type="button" data-k="trim" data-v="off">off</button>
+  </span>
+  <span class="seg">
+    <span class="seg-label">中文标题</span>
+    <button type="button" data-k="cjk" data-v="a">a·400</button>
+    <button type="button" data-k="cjk" data-v="c">c·500</button>
+  </span>
+  <span class="hint">←/→ 切字体</span>
+</div>
+
+<script>
+  const root = document.documentElement;
+  const params = new URLSearchParams(location.search);
+  const state = {
+    font: params.get('font') === 'sys' ? 'sys' : 'web',
+    autospace: params.get('autospace') === 'off' ? 'off' : 'on',
+    trim: params.get('trim') === 'on' ? 'on' : 'off',
+    cjk: params.get('cjk') === 'a' ? 'a' : 'c',
+    capture: params.get('capture') === '1' ? '1' : '',
+  };
+
+  function apply() {
+    for (const k of ['font', 'autospace', 'trim', 'cjk', 'capture']) {
+      if (state[k]) root.dataset[k] = state[k]; else delete root.dataset[k];
+    }
+    const q = new URLSearchParams();
+    if (state.font !== 'web') q.set('font', state.font);
+    if (state.autospace !== 'on') q.set('autospace', state.autospace);
+    if (state.trim !== 'off') q.set('trim', state.trim);
+    if (state.cjk !== 'c') q.set('cjk', state.cjk);
+    if (state.capture) q.set('capture', '1');
+    history.replaceState(null, '', location.pathname + (q.size ? '?' + q : '') + location.hash);
+    document.querySelectorAll('.seg button').forEach((b) => {
+      b.setAttribute('aria-pressed', String(state[b.dataset.k] === b.dataset.v));
+    });
+    document.querySelectorAll('[data-scheme-label]').forEach((el) => {
+      el.textContent = state.cjk === 'c' ? '500' : '400';
+    });
+  }
+
+  document.querySelectorAll('.seg button').forEach((b) => {
+    b.addEventListener('click', () => { state[b.dataset.k] = b.dataset.v; apply(); });
+  });
+  addEventListener('keydown', (e) => {
+    const t = e.target;
+    if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+      state.font = state.font === 'web' ? 'sys' : 'web';
+      apply();
+    }
+  });
+  apply();
+
+  // ---- 环境探测 badges ----
+  const badges = document.getElementById('badges');
+  function badge(text, cls) {
+    const s = document.createElement('span');
+    s.className = 'chip' + (cls ? ' ' + cls : '');
+    s.textContent = text;
+    badges.append(s);
+    return s;
+  }
+  const asOffKeyword = ['no-autospace', 'none'].find((v) => CSS.supports('text-autospace', v));
+  badge('Instrument Sans: ' + (document.fonts.check("400 16px 'Instrument Sans'") ? '已加载' : '未加载/回退中'),
+    document.fonts.check("400 16px 'Instrument Sans'") ? 'ok' : 'ng');
+  badge('text-autospace: ' + (CSS.supports('text-autospace', 'normal') ? '支持' : '不支持'),
+    CSS.supports('text-autospace', 'normal') ? 'ok' : 'ng');
+  badge('autospace 关闭关键字: ' + (asOffKeyword || '无'), asOffKeyword ? 'ok' : 'ng');
+  badge('text-spacing-trim: ' + (CSS.supports('text-spacing-trim', 'normal') ? '支持' : '不支持'),
+    CSS.supports('text-spacing-trim', 'normal') ? 'ok' : 'ng');
+  badge('UA: ' + (navigator.userAgent.match(/Chrome\/[\d.]+|Safari\/[\d.]+|Firefox\/[\d.]+/) || ['?'])[0]);
+
+  const asSup = document.getElementById('autospace-support');
+  asSup.textContent = CSS.supports('text-autospace', 'normal')
+    ? '' : ' ⚠ 当前浏览器不支持 text-autospace，A/B/C 三栏将无差异。';
+  if (asSup.textContent) asSup.className = 'chip ng';
+  const tsSup = document.getElementById('trim-support');
+  tsSup.textContent = CSS.supports('text-spacing-trim', 'normal')
+    ? '' : ' ⚠ 当前浏览器不支持 text-spacing-trim（需 Chrome/Edge 123+），两栏将无差异。';
+  if (tsSup.textContent) tsSup.className = 'chip ng';
+
+  // ---- 字形度量标定 ----
+  function measure(family) {
+    const ctx = document.createElement('canvas').getContext('2d');
+    ctx.font = '100px ' + family;
+    const probe = ctx.measureText('HxygpQ');
+    const fallbackProbe = ctx.measureText('HxygpQgj');
+    return {
+      cap: ctx.measureText('H').actualBoundingBoxAscent,
+      x: ctx.measureText('x').actualBoundingBoxAscent,
+      ascent: probe.fontBoundingBoxAscent ?? fallbackProbe.actualBoundingBoxAscent,
+      descent: probe.fontBoundingBoxDescent ?? fallbackProbe.actualBoundingBoxDescent,
+    };
+  }
+  const fmt = (n) => (Math.round(n * 10) / 10).toFixed(1);
+
+  document.fonts.ready.then(() => {
+    const is = measure("'Instrument Sans'");
+    const fbName = ['Helvetica Neue', 'Arial', 'Segoe UI'].find((f) => document.fonts.check('16px "' + f + '"')) || 'sans-serif';
+    const fb = measure("'" + fbName + "'");
+    const sizeAdjust = (is.cap / fb.cap) * 100;
+
+    document.getElementById('m-is-cap').textContent = fmt(is.cap);
+    document.getElementById('m-is-x').textContent = fmt(is.x);
+    document.getElementById('m-is-a').textContent = fmt(is.ascent);
+    document.getElementById('m-is-d').textContent = fmt(is.descent);
+    document.getElementById('m-fb-name').textContent = '回退 · ' + fbName;
+    document.getElementById('m-fb-cap').textContent = fmt(fb.cap);
+    document.getElementById('m-fb-x').textContent = fmt(fb.x);
+    document.getElementById('m-fb-a').textContent = fmt(fb.ascent);
+    document.getElementById('m-fb-d').textContent = fmt(fb.descent);
+    document.getElementById('m-fb-s').textContent = fmt(sizeAdjust) + '%';
+
+    const a = fmt(is.ascent), d = fmt(is.descent), s = fmt(sizeAdjust);
+    const snippet =
+`@font-face {
+  font-family: 'Instrument Sans Fallback';
+  src: local('${fbName}');
+  size-adjust: ${s}%;
+  ascent-override: ${a}%;
+  descent-override: ${d}%;
+  line-gap-override: normal;
+}
+/* 用法：'Instrument Sans', 'Instrument Sans Fallback', PingFang SC, … */`;
+    document.getElementById('snippet').textContent = snippet;
+
+    const dyn = document.createElement('style');
+    dyn.textContent = `@font-face { font-family: 'IS Fallback'; src: local('${fbName}'); size-adjust: ${s}%; ascent-override: ${a}%; descent-override: ${d}%; line-gap-override: normal; }`;
+    document.head.append(dyn);
+    document.getElementById('fallback-raw').style.fontFamily = `'${fbName}', 'PingFang SC', sans-serif`;
+    document.getElementById('fallback-cal').style.fontFamily = `'IS Fallback', '${fbName}', 'PingFang SC', sans-serif`;
+
+    // ---- 预算读数 ----
+    const budget = document.getElementById('budget');
+    const fonts = performance.getEntriesByType('resource').filter((r) => /\.woff2($|\?)/.test(r.name));
+    const bytes = fonts.reduce((sum, r) => sum + (r.transferSize || r.encodedBodySize || 0), 0);
+    const bytesKnown = bytes > 0;
+    const shown = bytesKnown ? bytes.toLocaleString() + ' B（实测）' : '30,092 B（声明值，file:// 无传输计量）';
+    const pass = fonts.length <= 1 && (bytesKnown ? bytes <= 102400 : true);
+    const mk = (text, cls) => {
+      const s = document.createElement('span');
+      s.className = 'chip' + (cls ? ' ' + cls : '');
+      s.textContent = text;
+      budget.append(s);
+    };
+    mk('字体请求数: ' + fonts.length + ' / ≤1', fonts.length <= 1 ? 'ok' : 'ng');
+    mk('字体字节: ' + shown + ' / ≤100KB', pass ? 'ok' : 'ng');
+    mk('预算: ' + (pass ? 'PASS' : 'FAIL'), pass ? 'ok' : 'ng');
+  });
+</script>
+</body>
+</html>
