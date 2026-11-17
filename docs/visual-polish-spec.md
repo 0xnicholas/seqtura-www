@@ -251,13 +251,75 @@
 
 **决策依据**：[#28](https://github.com/0xnicholas/seqtura-www/issues/28)（红系换值）、[#29](https://github.com/0xnicholas/seqtura-www/issues/29)（方向 A；mini 版只进区块头部）、[#30](https://github.com/0xnicholas/seqtura-www/issues/30)（方案 c、autospace 与手写空格清理）、[#32](https://github.com/0xnicholas/seqtura-www/issues/32)（reveal 机制）、[#37](https://github.com/0xnicholas/seqtura-www/issues/37)（mini 等距栈统一规则，本节引用区块 3 定标行）。
 
-### 区块 6 · FitSituations
+### 区块 6 · FitSituations（P0）
 
-（留白，由 #39 填充）
+**目标**：SectionHeading 头部进 mini 等距栈（本区块唯一 P0 品牌动作，统一规则引用区块 3 定标行）；红全走 token、区块内零硬编码，换值自动生效（#28）；h2 中文升 500，`.fit-title` 已 500 不动；9 处手写空格随全量清理；2 处 transition 声明并入动效 token。三卡结构、栅格、文案与整卡链接 `/process` 的行为不动。
 
-### 区块 7 · CtaSection
+**Before / After**：
 
-（留白，由 #39 填充）
+| 维度        | Before                                                                                                                                                                                                                                                                                              | After                                                                                                                                                                                                                                                                       | 优先级 |
+| ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| 色彩        | 区块内零硬编码红（不占 #28 的 29 处份额）：3 处 7px tick（`.fit-card::before`，每卡右上角）取 `var(--color-red)`；`.fit-code`（10px mono）与 `.fit-link`（13px/500）取 `var(--color-red-dark)`，已符合文本红规则；卡面边框与底取中性 token（`line` / `line-strong` / `canvas` / `paper`，锁定不变） | token 换值后自动落 `#FF2D20` / `#CD2318`（§3.1）；无其它色彩变化                                                                                                                                                                                                            | P1     |
+| 排版        | h2 `.type-h2` 中文 400；`.fit-title` 24px/500 现状已 500；kicker 500；`.fit-code` mono 400；Instrument Sans 居栈首但未加载、实际渲染系统字体；引用数据手写中西空格 9 处（`fitSituations` 全量：code「情境 01/02/03」×3、sponsor 卡 title 1、summary 两卡 5；`homeSections.fit` 为 0）               | h2 中文 500（`:lang(zh)`，方案 c；拉丁恒定 400）；fit-title / kicker / fit-code 不变；Instrument Sans 真正加载（§3.2），CJK 维持系统栈；9 处随全量清理归零，autospace 接管混排缝隙；无多数字并列场景，tnum 不开（§3.2）                                                     | P1     |
+| 图形语言    | 无头部图形资产：SectionHeading = kicker + 标题 + lead 纯文字；卡角 7px tick ×3 为制图语法骨架                                                                                                                                                                                                       | SectionHeading 头部加 **mini 等距栈**（统一规则与定标形态见区块 3：三层 slab、中层红板 `#FF2D20`、高 120px、居中于 kicker 上方、纯 SVG 内联、与 hero 主图同一几何；静止无动效）。卡内 tick 保留；三张情境卡不加阶梯对或其它图示化元素（密度纪律：首页图示化仍仅 hero 一处） | P0     |
+| 质感        | 无光晕、无质感层                                                                                                                                                                                                                                                                                    | 不变                                                                                                                                                                                                                                                                        | —      |
+| 动效 · 入场 | 区块自身 1 处 `.reveal`（fit-grid）load 即播（折叠线以下白播）；SectionHeading 头部自带 1 处随组件同规（区块 3 已列）                                                                                                                                                                               | 随 §3.3 全局改 IO 触发、once-only、无组内 stagger（三卡同帧入场）；时长 `var(--duration-enter)` 600ms                                                                                                                                                                       | P2     |
+| 动效 · 反馈 | 2 处 transition 声明硬编码 `150ms`（`.fit-card` 的 border-color + background-color；`.fit-link svg` 的 transform）；缓动已 `var(--ease-site)`；hover 均在白名单内（卡片无 lift/scale，箭头 `translate(2px,-2px)` 为白名单唯一位移模式）                                                             | 时长并入 `var(--duration-micro)`（150ms），缓动不变；其余不动。记录在案：`data-fit-situation` 为 Playwright 测试锚点（home.spec.ts），非死属性，保留不动                                                                                                                    | P2     |
+
+**Token 影响**：引用 §3.1（红系换值；本区块硬编码份额 0 处）、§3.2（字体加载、方案 c；手写空格清理本区块份额 9 处 = `fitSituations` 全量，`fitSituations` 与 `homeSections.fit` 的唯一消费者即本区块）、§3.3（`--duration-micro`、`--duration-enter`、reveal 机制）。无新增 token；mini 栈几何不 token 化（单一形态，SVG 内联，同区块 3）。
+
+**性能预算影响**：≈零。mini 栈为内联 SVG（<2KB、无新请求）；reveal IO 运行时≈零；字体已在 §3.2 预算内。Lighthouse CI 与 Playwright 护栏不变。
+
+**边界**：`<1024px` fit-grid 单列、卡片 `min-height` 归零，`<768px` padding 26/24 与 fit-title 22px 收缩等响应式规则不变；mini 栈全断点 120px 固定（同区块 3）。
+
+**验收点**：
+
+- [ ] SectionHeading 头部渲染 mini 等距栈：三层 slab、中层红板 `#FF2D20`、居中、高 120px、SVG 内联无外部资源、无动效，与 hero 主图几何同源（形态同区块 3）
+- [ ] `FitSituations.astro` 及引用数据（`fitSituations` / `homeSections.fit`）grep `245 48 3` / `#F53003` / `#C42602` 零命中（维持项）
+- [ ] 3 处 `.fit-card::before` tick 计算样式 `#FF2D20`；`.fit-code` / `.fit-link` 计算样式 `#CD2318`
+- [ ] 本区块 h2 在 `:lang(zh)` 下 `font-weight: 500`；`.fit-title` 500 与 kicker 500 不变，拉丁标题恒定 400
+- [ ] 9 处手写中西空格清零（code ×3 / title ×1 / summary ×5），`homeSections.fit` 维持 0；autospace 下无双重加宽
+- [ ] 卡内无阶梯对或其它图示化元素，7px tick ×3 保留（密度纪律：首页图示化仅 hero 一处）
+- [ ] `.fit-grid` reveal IO 触发、once-only、600ms `var(--duration-enter)`，三卡同帧无 stagger；`prefers-reduced-motion` 下静态
+- [ ] `.fit-card` 与 `.fit-link svg` transition 为 `150ms var(--ease-site)`、时长取 `var(--duration-micro)`，无裸值 `150ms`；hover 仅 border-color / background-color + 箭头 `translate(2px,-2px)`
+- [ ] `data-fit-situation` 属性保留（测试锚点）
+- [ ] Lighthouse CI 与 Playwright（含 a11y）全绿
+
+**决策依据**：[#28](https://github.com/0xnicholas/seqtura-www/issues/28)（红系换值）、[#29](https://github.com/0xnicholas/seqtura-www/issues/29)（方向 A；mini 版只进区块头部）、[#30](https://github.com/0xnicholas/seqtura-www/issues/30)（方案 c、autospace 与手写空格清理）、[#32](https://github.com/0xnicholas/seqtura-www/issues/32)（动效 token 与 reveal 机制）、[#37](https://github.com/0xnicholas/seqtura-www/issues/37)（mini 等距栈统一规则，本节引用区块 3 定标行）。
+
+### 区块 7 · CtaSection（P1）
+
+**目标**：14% 红色光晕（全站 5 处光晕之末）纯值换色（#28）；h2 中文升 500（#30 方案 c）；4 处手写空格随全量清理；reveal 并入全局机制。本区块头部为自建居中结构（kicker + h2 + lead）而非 SectionHeading 组件，不适用 mini 等距栈统一规则（判例同区块 2）。结构、文案、双按钮行为与 note 不动。
+
+**Before / After**：
+
+| 维度        | Before                                                                                                                                                                                                                                                                                                      | After                                                                                                                                                                                                                                                                                  | 优先级 |
+| ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| 色彩        | 硬编码红 1 处（本区块占 #28 清单份额 1 处）：`.cta-section` 背景光晕 `radial-gradient(54% 70% at 50% 78%, rgb(245 48 3 / 14%), transparent 72%)`（单 colored stop + `transparent` 关键字；全站 5 处光晕之末）；kicker（red-dark 文字 + red tick）与 `.btn-primary`（red-dark 底 / red-hover hover）走 token | 光晕纯值替换为 `rgb(255 45 32 / 14%)`，透明度与范围不变；token 引用处随 §3.1 自动换值；白字压 red-dark 底对比度维持 §3.1 记录（5.46:1 ✓，按钮不搬亮红）。记录在案：内页 `MethodologyCta` / `ArchitectureCta` 为同构渐变（同几何、同 14%），份额计入 #28 清单，沿用映射由 §5（#42）落笔 | P1     |
+| 排版        | h2 `.type-h2` 中文 400；kicker 500；`.type-lead` 400；`.cta-note` mono 11px/400；Instrument Sans 居栈首但未加载、实际渲染系统字体；引用数据手写中西空格 4 处（lead 1：「30 分钟」；primaryCta 2：「预约 30 分钟沟通」；note 1）                                                                             | h2 中文 500（`:lang(zh)`，方案 c；拉丁恒定 400）；kicker / lead / cta-note 不变；Instrument Sans 真正加载（§3.2），CJK 维持系统栈；4 处随全量清理归零，autospace 接管混排缝隙；note 的「 · 」分隔保留（同区块 2「 / 」判例）；无多数字并列场景，tnum 不开（§3.2）                      | P1     |
+| 图形语言    | 无 SectionHeading、无头部图形资产：自建居中 kicker + h2 + lead；品牌表达 = 14% 光晕 + kicker tick                                                                                                                                                                                                           | 不变。不适用 mini 等距栈统一规则（#37 规则枚举区块 4/5/6 为 SectionHeading 消费者；本区块非组件消费者，判例同区块 2 ProofStrip）；不加任何图示化元素（密度纪律：首页图示化仍仅 hero 一处）                                                                                             | —      |
+| 质感        | `.cta-section` 14% 红色光晕（全站 5 处光晕之末）                                                                                                                                                                                                                                                            | 不变（光晕单材质保留，#31；色值随「色彩」行换值）；不新增网格/纸纹                                                                                                                                                                                                                     | —      |
+| 动效 · 入场 | 1 处 `.reveal`（cta-inner）load 即播（折叠线以下白播）                                                                                                                                                                                                                                                      | 随 §3.3 全局改 IO 触发、once-only、无组内 stagger；时长 `var(--duration-enter)` 600ms                                                                                                                                                                                                  | P2     |
+| 动效 · 反馈 | 无区块级 transition / hover 规则；两个按钮继承全局 `.btn`（`50ms ease-out` 硬编码，§3.3 已统收，区块 1 已列）；hover 仅 background-color / border-color / color，白名单内无位移                                                                                                                             | 不变                                                                                                                                                                                                                                                                                   | —      |
+
+**Token 影响**：引用 §3.1（红系换值；硬编码更新本区块份额 = 1 处光晕 colored stop）、§3.2（字体加载、方案 c；手写空格清理本区块份额 4 处，`homeSections.cta` 的唯一消费者即本区块）、§3.3（reveal 机制；`.btn` 全局统收见区块 1）。无新增 token。
+
+**性能预算影响**：≈零。光晕换值为纯色值替换；reveal IO 运行时≈零；字体已在 §3.2 预算内。Lighthouse CI 与 Playwright 护栏不变。
+
+**边界**：`<768px` padding-block 88/96、按钮纵排全宽、cta-note 10px 等响应式规则不变；`overflow: hidden` 裁切光晕保留；`data-primary-cta` 为测试锚点（home.spec.ts 计数全页主 CTA），保留不动。
+
+**验收点**：
+
+- [ ] `CtaSection.astro` 光晕声明为 `radial-gradient(54% 70% at 50% 78%, rgb(255 45 32 / 14%), transparent 72%)`（几何与透明度不变，源码级核对），`rgb(245 48 3` grep 零残留
+- [ ] 本区块 h2 在 `:lang(zh)` 下 `font-weight: 500`；kicker 500 / `.type-lead` 400 / `.cta-note` 400 不变，拉丁标题恒定 400
+- [ ] 4 处手写中西空格清零（lead 1 / primaryCta 2 / note 1）；「30 分钟 · 不收费 · 不推销」的「 · 」分隔保留，autospace 下无双重加宽
+- [ ] 头部维持自建居中结构（kicker + h2 + lead），不渲染 mini 等距栈；区块内无图示化元素
+- [ ] `.btn-primary` 底计算样式 `#CD2318`、hover `#AA1B12`；`.btn` transition 为 `150ms var(--ease-site)`、时长取 `var(--duration-micro)`（§3.3 全局统收）
+- [ ] `.cta-inner` reveal IO 触发、once-only、600ms `var(--duration-enter)`；`prefers-reduced-motion` 下静态（home.spec.ts 已锁定）
+- [ ] 14% 光晕保留、未新增质感层；双按钮 href（`/contact#book` / `mailto:`）与 note 文案不变（测试锁定）
+- [ ] Lighthouse CI 与 Playwright（含 a11y）全绿
+
+**决策依据**：[#28](https://github.com/0xnicholas/seqtura-www/issues/28)（红系换值；硬编码份额 1 处）、[#29](https://github.com/0xnicholas/seqtura-www/issues/29)（mini 版只进区块头部，本区块不适用）、[#30](https://github.com/0xnicholas/seqtura-www/issues/30)（方案 c、autospace 与手写空格清理）、[#31](https://github.com/0xnicholas/seqtura-www/issues/31)（光晕单材质保留，本区块为全站 5 处之末）、[#32](https://github.com/0xnicholas/seqtura-www/issues/32)（reveal 机制）；不适用 mini 栈的判例来自[区块 2 / #37](https://github.com/0xnicholas/seqtura-www/issues/37)。
 
 ### 区块 8 · 全站 chrome（Header / Footer）
 
