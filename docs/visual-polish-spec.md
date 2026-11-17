@@ -359,8 +359,137 @@
 
 ## 5. 其它页沿用规则
 
-（留白，由 #42 落笔；输入 = #41 整站区块审计的区块清单与映射。锁定原则：其它页不写 before/after，沿用首页定标区块规则 + 例外清单。——#33）
+锁定原则（#33）：其它页不写 before/after，沿用首页定标区块规则 + 例外清单。本节输入 = #41 整站区块审计（区块清单、份额数字与例外候选的采集口径见[审计清单](https://github.com/0xnicholas/seqtura-www/issues/41#issuecomment-6948014292)）；审计所列份额数字供实现定位用，验收以 §3.2 的 276 台账与 §6 总口径为准。
+
+### 5.1 全局规则清单
+
+以下各项实现落点后全站自动生效，或经单点实现一次覆盖，无需逐块动作：
+
+- **红系换值（§3.1）**：走 token 的红（tick、文本红、按钮、nav 下划线等）随 `--color-red` / `--color-red-dark` 换值全站自动落位；硬编码份额按 5.2 逐页列出，全部纯值替换、透明度不变。
+- **字体与排版（§3.2）**：Instrument Sans 可变字体加载全站生效；方案 c 以 `.type-*:lang(zh)` 机制实现，全站 `.type-h1` / `.type-h2` 中文标题（含 404 页）自动 500；autospace + 标点挤压为 body 级声明，覆盖全部页面含 legal mdx 正文。
+- **动效（§3.3）**：`--duration-micro` / `--duration-enter` / `--duration-hero` / `--duration-ambient` 与 `--ease-site` 全站统收；`.reveal` 全局改 IntersectionObserver 触发、once-only、无组内 stagger；`prefers-reduced-motion` 全站秒杀装饰、豁免表单 spinner。
+- **chrome 基线（区块 8）**：Header / Footer / SkipLink 为 BaseLayout 唯一实例，六页天然继承区块 8 全部决策，无需逐页映射（#40）。
+- **mini 等距栈单点实现（区块 3 定标行）**：mini 栈实现于 SectionHeading 组件内，全站 18 处实例（首页 4 + 内页 14）一次生效；内页 14 处不再逐块重复规则，5.2 各行以「SH」标记指代。
+
+### 5.2 沿用映射表
+
+#### architecture 页（9 区块，SH ×7）
+
+| 区块                  | 沿用                                                                                         | 本页显式动作                                                                                                                                                                                                                                      |
+| --------------------- | -------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ArchitectureHero      | 区块 1 排版行（h1 中文 500 自动；hero-tags 为 mono 栈、tnum 不开，同 hero-facts 判例）+ §3.3 | 8% 光晕 1 声明（2 stops）纯值替换；`hero-in` 600ms 内联 → `var(--duration-enter)`（时值一致，仅 token 化）                                                                                                                                        |
+| ArchitectureOverview  | SH（mini 栈组件化）+ 区块 4 同构（硬编码纯值替换、结构不变、reveal IO 化）                   | 硬编码红 7 色值 / 6 声明（overview 35% 边框 ×1 + ArchitectureMap 内 6）纯值替换；conclusion-grid / legend 2 处 reveal 随全局 IO 化；DeploymentTierBar 为表格化信息骨架（plan panel 判例），结构不变、维持无 reveal；ArchitectureMap 定性见 5.3-E5 |
+| ArchitectureLifecycle | SH + 区块 4                                                                                  | 35% 边框 1 处纯值替换；2 处 reveal IO 化；LifecycleDiagram 定性见 5.3-E5                                                                                                                                                                          |
+| ArchitectureLayers    | SH + 区块 4                                                                                  | table-frame reveal IO 化；零硬编码                                                                                                                                                                                                                |
+| ArchitectureControls  | SH + 区块 4                                                                                  | table-frame reveal IO 化；零硬编码                                                                                                                                                                                                                |
+| EnterpriseConcerns    | SH + 区块 4                                                                                  | concern-grid reveal IO 化；零硬编码                                                                                                                                                                                                               |
+| ArchitectureScenarios | SH + 区块 4                                                                                  | 35% 边框 1 处纯值替换；scenario-grid reveal IO 化                                                                                                                                                                                                 |
+| ArchitectureMetrics   | SH + 区块 2（tick 换值随 token 自动）                                                        | metric-grid reveal IO 化；metric-no 为 mono 编号，tnum 不开（hero-facts 判例）；零硬编码                                                                                                                                                          |
+| ArchitectureCta       | 区块 7 全行（自建头部不加 mini 栈判例直接适用；h2 中文 500 自动）                            | 14% 光晕 1 声明纯值替换；cta-inner reveal IO 化                                                                                                                                                                                                   |
+
+页注：空格份额 = 本页独有 ≈37 + 同源（architectureLayers / controlPlanes）已计首页区块 4 台账，清理一次两页生效；reveal 计 18 处（含 SH 自带）全部 IO 化；图示化口径见 5.3-E5。
+
+#### methodology 页（6 组件、7 个 section，SH ×5）
+
+| 区块                                       | 沿用                                                  | 本页显式动作                                                                                                                                                                             |
+| ------------------------------------------ | ----------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| MethodologyHero                            | 同 ArchitectureHero 行                                | 8% 光晕 1 声明纯值替换；`hero-in` 600ms 内联 → `var(--duration-enter)`；hero-facts mono 栈 tnum 不开                                                                                     |
+| MethodologyPrinciples                      | SH + 区块 4                                           | principle-grid reveal IO 化；裸 `150ms` ×1 → `var(--duration-micro)`                                                                                                                     |
+| MethodologyStages（总览 + 详情两 section） | SH ×2 + 区块 5（步骤卡同构 commitments / steps 处理） | 裸 `150ms` ×5（stages 3 + StageCard 2）→ `var(--duration-micro)`；3 处 reveal（group-grid / loopback-row / trim-rule）IO 化；sticky stage-nav 子导航结构不变；trim-gates mono chips 不变 |
+| MethodologyArtifacts                       | SH + 区块 4                                           | artifact-layout reveal IO 化；裸 `150ms` ×1 → `var(--duration-micro)`                                                                                                                    |
+| MethodologyDivision                        | SH + 区块 4                                           | division-grid reveal IO 化；零硬编码                                                                                                                                                     |
+| MethodologyCta                             | 区块 7 全行（同 ArchitectureCta 行）                  | 14% 光晕 1 声明纯值替换                                                                                                                                                                  |
+
+页注：空格份额 = 本页 ≈99 + 同源 deliveryGroups 已计首页区块 3 台账（清理一次两页生效）；reveal 计 12 处（含 SH 自带）全部 IO 化。
+
+#### process 页（3 区块，SH ×2）
+
+| 区块              | 沿用                                                                                                                  | 本页显式动作                                                                                                                                                  |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ProcessHero       | 同 ArchitectureHero 行 + 5.3-E2                                                                                       | 9% 光晕 1 声明纯值替换；补 hero-in 入场（600ms `var(--duration-enter)`、`var(--ease-site)`，P2，与另三页 hero 对齐）                                          |
+| stages section    | SH + 区块 4 判例（ProcessStageTable 真 `<table>` 为表格化信息骨架，结构不变）+ 5.3-E5（ProcessFlow 同判例不按图示化） | 裸 `150ms` ×3 → `var(--duration-micro)`；tnum 按 5.3-E6：周期列与 flow-duration 行开 `tabular-nums`，stage-no / flow-no 不开；ProcessFlow 与表格维持无 reveal |
+| PricingPrinciples | SH + 区块 4                                                                                                           | 裸 `150ms` ×1 → `var(--duration-micro)`；价格卡结构不变；support-kicker mono 不变                                                                             |
+
+页注：空格份额 32 全属本页；reveal 计 2 处（含 SH 自带）全部 IO 化。
+
+#### contact 页（4 区块，SH ×0；5.3-E7 判例页）
+
+| 区块            | 沿用                                             | 本页显式动作                                                                                                                    |
+| --------------- | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------- |
+| ContactHero     | 同 ArchitectureHero 行                           | 8% 光晕 1 声明纯值替换；`hero-in` 600ms 内联 → `var(--duration-enter)`                                                          |
+| ContactBooking  | 区块 7 判例（自建头部非 SH，不加 mini 栈）+ §3.3 | field `150ms` 1 声明（双属性）→ `var(--duration-micro)`；spinner `submit-spin` 维持 #32 既定 reduced-motion 豁免；维持无 reveal |
+| ContactChannels | 同 ContactBooking 行                             | 裸 `150ms` ×1 → `var(--duration-micro)`；维持无 reveal；微信 QR 占位逻辑不变                                                    |
+| ContactAbout    | 同 ContactBooking 行                             | 维持无 reveal；sticky intro 与 facts dl 不变                                                                                    |
+
+页注：空格份额 16 全属本页；全页零 reveal 维持不加（少而准，#32）；除 hero 光晕外零硬编码红。
+
+#### legal 页（privacy / terms，LegalPage 单区块 ×2 页）
+
+- 沿用：§3.2 全局项（autospace 覆盖 mdx 正文；prose h2/h3 现状已 500 不变）+ §3.3。
+- 显式动作：`.legal-title:lang(zh)` 400 → 500（5.3-E4，P1；非 `.type-*` 类，方案 c 机制覆盖不到，需单独声明规则）；TOC `150ms` ×1 → `var(--duration-micro)`；mdx 手写空格 60 处（privacy 41 / terms 19）随全量清理（5.3-E3）；零硬编码红、无光晕、零 reveal 维持。
+
+#### 404 页
+
+全局自动项即全部（h1 `.type-h1` 中文 500 随方案 c 自动），零区块级动作。
+
+### 5.3 例外与判例
+
+#41 审计提交的 8 项例外候选，裁决如下（E8 为事实复核，非取舍）：
+
+- **E1 · 光晕全站口径**：全站光晕计 11 处 = 首页 5（hero 12% / code-wrap 13% / arch-section 10% / trace-card 16% / cta 14%）+ 内页 6（hero 8%×3 + 9%×1、CTA 14%×2）。光晕单材质系统不变（#31），内页 6 处纯值换色、透明度与几何不变。各区块节「全站 5 处」表述为首页口径，全站口径以本节为准。
+- **E2 · ProcessHero 补入场（P2）**：补 hero-in 入场（600ms `var(--duration-enter)`、`var(--ease-site)`），与另三页内页 hero 对齐；属 #32 允许的「入场编排」类，非新增动效类型，性能影响零。
+- **E3 · 手写空格总口径 342**：清理总口径 = 276（#30 台账，`src/data`）+ 60（legal mdx：privacy 41 / terms 19）+ 6（chrome，#40 补记）。autospace 为 body 级声明，mdx 正文同样双重加宽，必须同批清理。§3.2 已确认节不回改，总口径由 §6 承载。
+- **E4 · legal-title 升 500（P1）**：`.legal-title`（40px/400，非 `.type-*` 类）中文升 500，随区块 4 trace-title 判例；方案 c 的 `.type-*` 机制覆盖不到，实现为单独 `:lang(zh)` 规则。
+- **E5 · 密度纪律三分定性**：ProcessFlow（8 节点 flow-track + SVG 回流线 + legend）判为表格化信息骨架（同 #38 plan panel 判例），不按图示化计，结构不变；ArchitectureMap（`role="img"`，div 架构全图）占 architecture 页唯一图示化额度；LifecycleDiagram（环形生命周期图）为明示内页例外——现状保留、记录在案、不构成新增先例。总则：密度纪律（#29）约束新增、不追溯既有内容，本规格对三者均只定性、不改结构；ArchitectureMap 非等距几何，不引阶梯对、不做 #29 方向 A 延展。
+- **E6 · tnum**：ProcessStageTable 周期列与 ProcessFlow flow-duration 行（多数字并列对齐）开 `tabular-nums`；mono 编号类（metric-no / stage-no / flow-no）维持不开（hero-facts 判例，§3.2）。
+- **E7 · contact 页三判例**：三区块自建头部（非 SectionHeading）不加 mini 栈（区块 2/7 判例）；全页零 reveal 维持不加（少而准，#32）；ContactForm spinner 维持 #32 既定 reduced-motion 豁免。
+- **E8 · #28 台账对账（事实复核，闭合）**：实测 `rgb(245 48 3` 全站 28 色值 / 15 文件（首页 9 + 内页 19，与 5.2 份额一致）；#28 台账「29 处 / 16 文件」的差 1 处 1 文件 = `src/styles/global.css` 的 `--color-red: #f53003` token 定义行（随 §3.1 换值）。SVG 十六进制（IsometricCapabilityStack 的 `#F53003` ×24 / `#C42602` ×4）单列于区块 1 的 30 处口径，不在该 rgb 台账内。两口径各自闭合，无需处理。
 
 ## 6. 全局验收清单
 
-（留白，由 #42 落笔。已知纳入项：字体预算 ≤100KB / preload ≤1（#27）；对比度记录——白字压主红 3.72:1 未过 AA 的取舍与按钮 5.46:1 ✓（#28）；276 处手写空格清理完成（#30）；Lighthouse CI 与 Playwright（含 a11y）全绿；整页一致性检查。）
+### 6.1 性能预算汇总
+
+| 预算项         | 锁定值                                                                    | 出处       | 验收方式                     |
+| -------------- | ------------------------------------------------------------------------- | ---------- | ---------------------------- |
+| 首屏字体       | ≤100KB、preload ≤1 个文件（实测 Instrument Sans 可变 woff2 30KB ×1）      | #27        | 网络面板核对字体请求数与体积 |
+| 动效属性白名单 | 只动 transform / opacity / filter；dashoffset 为 SVG 呈现属性，不触发布局 | #32        | 代码审查 + Lighthouse CI     |
+| 环境动效       | 全站唯一 = 首页 hero 等距栈描边循环 24s，reduced-motion 静止              | #32、#36   | 源码核对 + 系统设置抽查      |
+| 色彩替换       | 性能影响零（纯色值替换）                                                  | #28        | —                            |
+| 第二图层       | 光晕单材质，零新增请求（不新增网格 / 纸纹层）                             | #31        | —                            |
+| mini 等距栈    | 内联 SVG <2KB、零外部请求；18 处随 SectionHeading 单点实现一次生效        | #29、#37   | 源码核对                     |
+| Lighthouse CI  | 现有阈值不破                                                              | 护栏（§1） | CI 全绿                      |
+
+### 6.2 对比度记录
+
+| 元素               | 前景 / 背景                       | 比值    | 判定                                                        | 出处   |
+| ------------------ | --------------------------------- | ------- | ----------------------------------------------------------- | ------ |
+| 白字压主红         | `#FFFFFF` / `#FF2D20`             | 3.72:1  | 未过 AA，记录在案的取舍（laravel.com 相同）；按钮不搬亮红底 | #28    |
+| 按钮白字           | `#FFFFFF` / `#CD2318`（red-dark） | 5.46:1  | ✓ AA                                                        | #28    |
+| kicker / text-link | `#CD2318` / 白底                  | 5.46:1  | ✓ AA                                                        | #28    |
+| trace 卡红 mono    | `#FF2D20`（换值后） / `#171717`   | ≈4.9:1  | ✓ AA（换值前 ≈4.6:1）                                       | 区块 4 |
+| footer-tagline     | `#CD2318` / 白底                  | ≈5.46:1 | ✓ AA                                                        | 区块 8 |
+
+### 6.3 整页一致性检查
+
+**自动化断言（实现阶段全库 grep 与样式核对）**：
+
+- [ ] 旧红零残留：`rgb(245 48 3`（28 处 / 15 文件）、`#f53003`、`#c42602`、`#a11d00` 全库 grep 零命中（大小写均查）；`global.css` token 定义行换为 §3.1 目标值
+- [ ] 裸时长零残留：各区块节枚举处——`50ms ease-out` ×2（`.btn`、code-tab）与裸 `150ms`（chrome 9 / 区块 4 三处 / 区块 6 两处 / 内页 14）全部取 `var(--duration-micro)`；缓动统一 `var(--ease-site)`
+- [ ] 内联 hero-in 零残留：ArchitectureHero / MethodologyHero / ContactHero 3 处 token 化为 `var(--duration-enter)`；ProcessHero 补齐 1 处同规（5.3-E2）
+- [ ] 手写空格 342 处清零（276 `src/data` + 60 legal mdx + 6 chrome）；autospace 下无双重加宽；「 / 」「 · 」分隔符保留（区块 2/7 判例）
+- [ ] `text-autospace: normal` 与 `text-spacing-trim: normal` body 级声明存在；`.type-h1` / `.type-h2` 的 `:lang(zh)` 500 规则存在；`.legal-title:lang(zh)` 500 单独规则存在（5.3-E4）
+- [ ] reveal 全站一致：IO 触发、once-only、600ms `var(--duration-enter)`、`var(--ease-site)`、无组内 stagger；contact / legal / 404 维持零 reveal；ProcessFlow / ProcessStageTable / DeploymentTierBar 维持无 reveal
+- [ ] mini 等距栈 18 处（首页 4 + 内页 14）全部渲染定标形态（三层 slab / 中层 `#FF2D20` / 高 120px / 居中 / 纯 SVG 内联）；非 SH 头部（区块 2/7、contact 三区块、chrome）零 mini 栈
+- [ ] 密度复核：首页图示化仍仅 hero 主图一处；architecture 页 = ArchitectureMap + LifecycleDiagram（5.3-E5 例外记录）；其余页零图示化
+- [ ] 测试锚点保留：`data-fit-situation` / `data-primary-cta` / `data-menu-toggle` / `data-mobile-menu` / `data-footer-mark` / `data-filing`；区块 2 死属性 `data-proof-intro` / `data-proof-fact` 随实现清理
+
+**测试**：
+
+- [ ] Lighthouse CI 全绿；Playwright（含 a11y）全绿
+- [ ] `shell.spec.ts` 含手写空格的标签断言（「8 阶段交付」等）随清理同步更新（#40 记录在案）
+
+**人工目检**：
+
+- [ ] mini 栈 18 处形态一致性抽查；footer-mark 字距 −0.055em 观感（区块 8）
+- [ ] autospace 混排缝隙抽查（首页 + 内页各一）；Instrument Sans 渲染切换无跳变（size-adjust 标定值生效）
+- [ ] 延后项：Windows 真机雅黑中文标题 500 观感与 Arial size-adjust 标定（#34 记录在案，实现阶段首台 Windows 机器补跑，标定机制内建于 type-specimen 标样页 07 区块）
