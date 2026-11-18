@@ -1,5 +1,30 @@
 @import 'tailwindcss';
 
+@font-face {
+  font-family: 'Instrument Sans';
+  src: url('/fonts/instrument-sans-var-latin.woff2') format('woff2');
+  font-weight: 400 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Instrument Sans Fallback';
+  src: local('Helvetica Neue');
+  size-adjust: 100.8%;
+  ascent-override: 97%;
+  descent-override: 25%;
+  line-gap-override: normal;
+}
+
+@font-face {
+  font-family: 'Instrument Sans Heading';
+  src: url('/fonts/instrument-sans-var-latin.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 @theme {
   --color-canvas: #ffffff;
   --color-paper: #fcfcfb;
@@ -20,8 +45,9 @@
   --color-dark-muted: #a3a3a3;
 
   --font-sans:
-    'Instrument Sans', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'PingFang SC',
-    'Hiragino Sans GB', 'Noto Sans SC', 'Microsoft YaHei', system-ui, sans-serif;
+    'Instrument Sans', 'Instrument Sans Fallback', -apple-system, BlinkMacSystemFont,
+    'Helvetica Neue', 'PingFang SC', 'Hiragino Sans GB', 'Noto Sans SC', 'Microsoft YaHei',
+    system-ui, sans-serif;
   --font-mono: 'SF Mono', 'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace;
 
   --container-site: 1280px;
@@ -62,6 +88,11 @@
   --type-legal-h2-line: 1.4;
   --type-legal-h3-size: 18px;
   --type-legal-h3-line: 1.5;
+
+  --font-heading:
+    'Instrument Sans Heading', 'Instrument Sans Fallback', -apple-system, BlinkMacSystemFont,
+    'Helvetica Neue', 'PingFang SC', 'Hiragino Sans GB', 'Noto Sans SC', 'Microsoft YaHei',
+    system-ui, sans-serif;
 }
 
 @media (max-width: 1279px) {
@@ -191,6 +222,7 @@
   }
 
   .type-h1 {
+    font-family: var(--font-heading);
     font-size: var(--type-h1-size);
     font-weight: 400;
     line-height: var(--type-h1-line);
@@ -198,10 +230,16 @@
   }
 
   .type-h2 {
+    font-family: var(--font-heading);
     font-size: var(--type-h2-size);
     font-weight: 400;
     line-height: var(--type-h2-line);
     letter-spacing: var(--type-h2-track);
+  }
+
+  .type-h1:lang(zh),
+  .type-h2:lang(zh) {
+    font-weight: 500;
   }
 
   .type-h3 {
