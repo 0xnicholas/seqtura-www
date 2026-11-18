@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Response } from '@playwright/test';
 
 test('home states the positioning and routes both hero actions', async ({ page }) => {
   const response = await page.goto('/');
@@ -20,6 +20,56 @@ test('home states the positioning and routes both hero actions', async ({ page }
   await expect(facts).toHaveCount(3);
   await expect(facts).toHaveText(['8 个交付阶段', '5 层能力栈', '3 条控制面']);
   await expect(page.getByRole('img', { name: /五层能力栈的等距示意图/ })).toBeVisible();
+});
+
+test('loads the self-hosted Instrument Sans webfont once within the font budget', async ({
+  page,
+}) => {
+  const fontResponses: Response[] = [];
+  page.on('response', (response) => {
+    if (response.url().endsWith('.woff2')) {
+      fontResponses.push(response);
+    }
+  });
+
+  await page.goto('/', { waitUntil: 'networkidle' });
+  await page.evaluate(async () => {
+    await document.fonts.ready;
+  });
+
+  expect(fontResponses).toHaveLength(1);
+  expect(fontResponses[0].url()).toContain('/fonts/');
+  const fontBody = await fontResponses[0].body();
+  expect(fontBody.byteLength).toBeLessThanOrEqual(100 * 1024);
+
+  await expect(page.locator('head link[rel="preload"][as="font"]')).toHaveCount(1);
+
+  const faces = await page.evaluate(() => ({
+    regular: document.fonts.check('16px "Instrument Sans"'),
+    semibold: document.fonts.check('600 19px "Instrument Sans"'),
+  }));
+  expect(faces.regular).toBe(true);
+  expect(faces.semibold).toBe(true);
+});
+
+test('renders Chinese headings at weight 500 on the Instrument Sans heading stack', async ({
+  page,
+}) => {
+  await page.goto('/');
+  await page.evaluate(async () => {
+    await document.fonts.ready;
+  });
+
+  const heroTitle = page.locator('h1.type-h1');
+  const heroType = await heroTitle.evaluate((element) => {
+    const style = getComputedStyle(element);
+    return { weight: style.fontWeight, family: style.fontFamily };
+  });
+  expect(heroType.weight).toBe('500');
+  expect(heroType.family).toContain('Instrument Sans');
+
+  await expect(page.locator('h2.type-h2').first()).toHaveCSS('font-weight', '500');
+  await expect(page.locator('.trace-title')).toHaveCSS('font-weight', '500');
 });
 
 test('home shows the four delivery facts in the proof strip', async ({ page }) => {

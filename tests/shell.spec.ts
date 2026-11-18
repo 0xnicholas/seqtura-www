@@ -80,6 +80,25 @@ test('footer provides site, delivery and contact columns plus legal links', asyn
   await expect(footer.getByRole('link', { name: /ICP/ })).toHaveCount(0);
 });
 
+test('keeps the wordmark and footer mark at their locked weights on Instrument Sans', async ({
+  page,
+}) => {
+  await page.goto('/');
+  await page.evaluate(async () => {
+    await document.fonts.ready;
+  });
+
+  const brandName = page.getByRole('banner').locator('.brand-name');
+  const brandType = await brandName.evaluate((element) => {
+    const style = getComputedStyle(element);
+    return { weight: style.fontWeight, family: style.fontFamily };
+  });
+  expect(brandType.weight).toBe('600');
+  expect(brandType.family).toContain('Instrument Sans');
+
+  await expect(page.locator('[data-footer-mark]')).toHaveCSS('font-weight', '500');
+});
+
 test('skip link moves focus to the main content', async ({ page }) => {
   await page.goto('/');
 
