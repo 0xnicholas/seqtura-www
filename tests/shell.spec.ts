@@ -27,6 +27,19 @@ test('header carries the four-section navigation and a persistent booking action
   await expect(header).toBeVisible();
 });
 
+test('body enables CJK autospace and punctuation trim', async ({ page }) => {
+  await page.goto('/');
+
+  const spacing = await page.evaluate(() => {
+    const style = getComputedStyle(document.body);
+    return {
+      textAutospace: style.getPropertyValue('text-autospace'),
+      textSpacingTrim: style.getPropertyValue('text-spacing-trim'),
+    };
+  });
+  expect(spacing).toEqual({ textAutospace: 'normal', textSpacingTrim: 'normal' });
+});
+
 test('current page is highlighted in the header', async ({ page }) => {
   await page.goto('/architecture');
 
@@ -47,7 +60,7 @@ test('footer provides site, delivery and contact columns plus legal links', asyn
   await expect(footer.getByRole('heading', { name: '站点' })).toBeVisible();
   await expect(footer.getByRole('heading', { name: '交付' })).toBeVisible();
   await expect(footer.getByRole('heading', { name: '联系' })).toBeVisible();
-  await expect(footer.getByRole('link', { name: '8 阶段交付' })).toHaveAttribute(
+  await expect(footer.getByRole('link', { name: '8阶段交付' })).toHaveAttribute(
     'href',
     '/methodology#stages',
   );
@@ -78,6 +91,25 @@ test('footer provides site, delivery and contact columns plus legal links', asyn
   await expect(wordmark).toContainText('Seqtura');
 
   await expect(footer.getByRole('link', { name: /ICP/ })).toHaveCount(0);
+});
+
+test('keeps the wordmark and footer mark at their locked weights on Instrument Sans', async ({
+  page,
+}) => {
+  await page.goto('/');
+  await page.evaluate(async () => {
+    await document.fonts.ready;
+  });
+
+  const brandName = page.getByRole('banner').locator('.brand-name');
+  const brandType = await brandName.evaluate((element) => {
+    const style = getComputedStyle(element);
+    return { weight: style.fontWeight, family: style.fontFamily };
+  });
+  expect(brandType.weight).toBe('600');
+  expect(brandType.family).toContain('Instrument Sans');
+
+  await expect(page.locator('[data-footer-mark]')).toHaveCSS('font-weight', '500');
 });
 
 test('skip link moves focus to the main content', async ({ page }) => {
@@ -221,3 +253,44 @@ test('200% zoom approximation stays usable without page-level overflow', async (
   const box = await cta.boundingBox();
   expect(box?.height ?? 0).toBeGreaterThanOrEqual(44);
 });
+
+// §6.3: every hand-written CJK-Latin space is gone, so autospace is the only
+// thing widening the gap. `.visually-hidden` copy is addressed to assistive
+// tech (autospace cannot double it up) and stays as written.
+const renderedRoutes = [
+  '/',
+  '/methodology',
+  '/architecture',
+  '/process',
+  '/contact',
+  '/legal/privacy',
+  '/legal/terms',
+  '/this-page-does-not-exist',
+];
+
+for (const route of renderedRoutes) {
+  test(`${route} renders no hand-written CJK-Latin spaces`, async ({ page }) => {
+    await page.goto(route);
+
+    const leftovers = await page.evaluate(() => {
+      const hidden = [...document.querySelectorAll('.visually-hidden')];
+      const previous = hidden.map((element) => element.getAttribute('style'));
+      for (const element of hidden) element.setAttribute('style', 'display: none !important');
+      const text = document.body.innerText;
+      hidden.forEach((element, index) => {
+        const style = previous[index];
+        if (style === null) element.removeAttribute('style');
+        else element.setAttribute('style', style);
+      });
+
+      const spacing =
+        /(?<=[\p{Script=Han}]) (?=[A-Za-z0-9])|(?<=[A-Za-z0-9]) (?=[\p{Script=Han}])/gu;
+      return [...text.matchAll(spacing)].map((match) => {
+        const start = Math.max(0, (match.index ?? 0) - 20);
+        return text.slice(start, start + 40).replace(/\n/g, ' / ');
+      });
+    });
+
+    expect(leftovers, `${route} hand-writes spaces that autospace widens again`).toEqual([]);
+  });
+}

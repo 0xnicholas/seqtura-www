@@ -1,12 +1,12 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Response } from '@playwright/test';
 
 test('home states the positioning and routes both hero actions', async ({ page }) => {
   const response = await page.goto('/');
 
   expect(response?.status()).toBe(200);
   await expect(page.locator('h1')).toHaveCount(1);
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText('企业 AI Agent 的工程化交付');
-  await expect(page.getByText('把业务场景做成可验收、可私有化、可维护的 AI Agent。')).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('企业AI Agent的工程化交付');
+  await expect(page.getByText('把业务场景做成可验收、可私有化、可维护的AI Agent。')).toBeVisible();
   await expect(page.getByRole('link', { name: '预约沟通' }).first()).toHaveAttribute(
     'href',
     '/contact#channels',
@@ -18,16 +18,66 @@ test('home states the positioning and routes both hero actions', async ({ page }
 
   const facts = page.locator('[data-hero-fact]');
   await expect(facts).toHaveCount(3);
-  await expect(facts).toHaveText(['8 个交付阶段', '5 层能力栈', '3 条控制面']);
+  await expect(facts).toHaveText(['8个交付阶段', '5层能力栈', '3条控制面']);
   await expect(page.getByRole('img', { name: /五层能力栈的等距示意图/ })).toBeVisible();
+});
+
+test('loads the self-hosted Instrument Sans webfont once within the font budget', async ({
+  page,
+}) => {
+  const fontResponses: Response[] = [];
+  page.on('response', (response) => {
+    if (response.url().endsWith('.woff2')) {
+      fontResponses.push(response);
+    }
+  });
+
+  await page.goto('/', { waitUntil: 'networkidle' });
+  await page.evaluate(async () => {
+    await document.fonts.ready;
+  });
+
+  expect(fontResponses).toHaveLength(1);
+  expect(fontResponses[0].url()).toContain('/fonts/');
+  const fontBody = await fontResponses[0].body();
+  expect(fontBody.byteLength).toBeLessThanOrEqual(100 * 1024);
+
+  await expect(page.locator('head link[rel="preload"][as="font"]')).toHaveCount(1);
+
+  const faces = await page.evaluate(() => ({
+    regular: document.fonts.check('16px "Instrument Sans"'),
+    semibold: document.fonts.check('600 19px "Instrument Sans"'),
+  }));
+  expect(faces.regular).toBe(true);
+  expect(faces.semibold).toBe(true);
+});
+
+test('renders Chinese headings at weight 500 on the Instrument Sans heading stack', async ({
+  page,
+}) => {
+  await page.goto('/');
+  await page.evaluate(async () => {
+    await document.fonts.ready;
+  });
+
+  const heroTitle = page.locator('h1.type-h1');
+  const heroType = await heroTitle.evaluate((element) => {
+    const style = getComputedStyle(element);
+    return { weight: style.fontWeight, family: style.fontFamily };
+  });
+  expect(heroType.weight).toBe('500');
+  expect(heroType.family).toContain('Instrument Sans');
+
+  await expect(page.locator('h2.type-h2').first()).toHaveCSS('font-weight', '500');
+  await expect(page.locator('.trace-title')).toHaveCSS('font-weight', '500');
 });
 
 test('home shows the four delivery facts in the proof strip', async ({ page }) => {
   await page.goto('/');
 
-  const facts = page.locator('[data-proof-fact]');
+  const facts = page.locator('.proof-strip .proof-cell');
   await expect(facts).toHaveCount(4);
-  await expect(facts).toContainText(['8 个交付阶段', '5 层能力栈', '3 条控制面', '1 个主转化']);
+  await expect(facts).toContainText(['8个交付阶段', '5层能力栈', '3条控制面', '1个主转化']);
 });
 
 test('methodology preview states the method, its checkpoints and every stage group', async ({
@@ -41,7 +91,7 @@ test('methodology preview states the method, its checkpoints and every stage gro
   );
   await expect(
     section.getByText(
-      '8 个交付阶段，4 组推进。Define / Validate / Deploy 不可跳过；每个阶段都有产出物和过关条件。',
+      '8个交付阶段，4组推进。Define / Validate / Deploy不可跳过；每个阶段都有产出物和过关条件。',
     ),
   ).toBeVisible();
   for (const checkpoint of ['问题定义：', '验收标准：', '评测集：', '生产上线：']) {
@@ -54,7 +104,7 @@ test('methodology preview states the method, its checkpoints and every stage gro
 
   for (const phrase of [
     '问题定义不是需求清单',
-    'Agent 规格卡写清职责',
+    'Agent规格卡写清职责',
     '在沙箱或预发环境跑真实任务',
     '接入生产系统，完成权限',
   ]) {
@@ -72,10 +122,10 @@ test('methodology preview states the method, its checkpoints and every stage gro
 
   await expect(section.locator('[data-method-group]')).toHaveCount(4);
   for (const [title, label] of [
-    ['Discover / Diagnose', '看阶段 01–02'],
-    ['Define / Design', '看阶段 03–04'],
-    ['Build / Validate', '看阶段 05–06'],
-    ['Deploy / Optimize', '看阶段 07–08'],
+    ['Discover / Diagnose', '看阶段01–02'],
+    ['Define / Design', '看阶段03–04'],
+    ['Build / Validate', '看阶段05–06'],
+    ['Deploy / Optimize', '看阶段07–08'],
   ] as const) {
     const group = section.locator('[data-method-group]', {
       has: page.getByRole('heading', { name: title }),
@@ -101,17 +151,17 @@ test('methodology code panel switches files by click and arrow keys', async ({ p
   await expect(section.getByText('READ ONLY')).toBeVisible();
 
   await expect(delivery).toHaveAttribute('aria-selected', 'true');
-  await expect(section.getByRole('tabpanel')).toContainText('8 阶段 / 3 个门禁');
+  await expect(section.getByRole('tabpanel')).toContainText('8阶段 / 3个门禁');
 
   await validate.click();
   await expect(validate).toHaveAttribute('aria-selected', 'true');
   await expect(delivery).toHaveAttribute('aria-selected', 'false');
-  await expect(section.getByRole('tabpanel')).toContainText('能否进入 Deploy');
+  await expect(section.getByRole('tabpanel')).toContainText('能否进入Deploy');
 
   await validate.press('ArrowLeft');
   await expect(delivery).toBeFocused();
   await expect(delivery).toHaveAttribute('aria-selected', 'true');
-  await expect(section.getByRole('tabpanel')).toContainText('8 阶段 / 3 个门禁');
+  await expect(section.getByRole('tabpanel')).toContainText('8阶段 / 3个门禁');
 
   const focusRing = await delivery.evaluate((element) => {
     const style = getComputedStyle(element);
@@ -132,7 +182,7 @@ test('architecture bento shows the capability stack, trace and control planes', 
 
   const section = page.locator('section#architecture');
   await expect(section.getByRole('heading', { level: 2 })).toHaveText(
-    '一个能上生产的 Agent 系统，由什么构成。',
+    '一个能上生产的Agent系统，由什么构成。',
   );
 
   for (const layer of ['运行时与部署', '知识与记忆', '工具与系统集成', '模型', '接入与编排']) {
@@ -191,7 +241,7 @@ test('delivery section states four conditional commitments and the first three p
   for (const [name, detail] of [
     ['源码交付（按合同）', '以合同为准'],
     ['私有化', '按项目评估'],
-    ['验收标准前置', 'Define 阶段'],
+    ['验收标准前置', 'Define阶段'],
     ['支持范围先说清', '按次或按项目'],
   ] as const) {
     const card = section.locator('[data-commitment]', { has: page.getByRole('heading', { name }) });
@@ -218,7 +268,7 @@ test('fit situations describe who the delivery model suits and link to the proce
   for (const heading of [
     '有明确、重复发生的业务流程',
     '愿意开放必要的系统与数据',
-    '有业务侧 sponsor',
+    '有业务侧sponsor',
   ]) {
     await expect(section.getByRole('heading', { name: heading })).toBeVisible();
   }
@@ -259,6 +309,29 @@ test('every primary CTA on the home page lands on the contact channels', async (
   }
 });
 
+test('brand red tokens render the §3.1 target values in computed styles', async ({ page }) => {
+  await page.goto('/');
+
+  const tick = await page
+    .locator('[data-fit-situation]')
+    .first()
+    .evaluate((element) => {
+      const style = getComputedStyle(element, '::before');
+      return { background: style.backgroundColor, width: style.width, height: style.height };
+    });
+  expect(tick.width).toBe('7px');
+  expect(tick.height).toBe('7px');
+  expect(tick.background).toBe('rgb(255, 45, 32)');
+
+  const primaryCta = page.locator('main [data-primary-cta]').first();
+  await expect(primaryCta).toHaveCSS('background-color', 'rgb(205, 35, 24)');
+  await primaryCta.hover();
+  await expect(primaryCta).toHaveCSS('background-color', 'rgb(170, 27, 18)');
+
+  await expect(page.locator('main .kicker').first()).toHaveCSS('color', 'rgb(205, 35, 24)');
+  await expect(page.locator('main .text-link').first()).toHaveCSS('color', 'rgb(205, 35, 24)');
+});
+
 test('structural illustrations are labelled as non-client data', async ({ page }) => {
   await page.goto('/');
 
@@ -266,6 +339,59 @@ test('structural illustrations are labelled as non-client data', async ({ page }
   await expect(notes).toHaveCount(4);
   for (const note of await notes.all()) {
     await expect(note).toHaveText('结构示意，非客户项目数据');
+  }
+});
+
+test('section headings render the mini isometric stack as a static inline SVG', async ({
+  page,
+}) => {
+  await page.goto('/');
+
+  const stacks = page.locator('.section-heading svg.mini-stack');
+  await expect(stacks).toHaveCount(4);
+  await expect(page.locator('.mini-stack')).toHaveCount(4);
+  await expect(page.locator('.section-heading img')).toHaveCount(0);
+
+  const expectedRed = await page.evaluate(() => {
+    const probe = document.createElement('div');
+    probe.style.color = 'var(--color-red)';
+    document.body.append(probe);
+    const value = getComputedStyle(probe).color;
+    probe.remove();
+    return value;
+  });
+
+  for (const stack of await stacks.all()) {
+    await expect(stack).toHaveAttribute('aria-hidden', 'true');
+
+    const state = await stack.evaluate((node) => {
+      const style = getComputedStyle(node);
+      const redSlab = node.querySelector('.mini-stack-red');
+      return {
+        height: style.height,
+        animationName: style.animationName,
+        transitionDuration: style.transitionDuration,
+        polygons: node.querySelectorAll('polygon').length,
+        redSlabs: node.querySelectorAll('.mini-stack-red').length,
+        redFill: redSlab ? getComputedStyle(redSlab).fill : null,
+        externalRefs: node.querySelectorAll('image, use, foreignObject').length,
+      };
+    });
+    expect(state.height).toBe('120px');
+    expect(state.animationName).toBe('none');
+    expect(state.transitionDuration).toBe('0s');
+    expect(state.polygons).toBe(9);
+    expect(state.redSlabs).toBe(3);
+    expect(state.redFill).toBe(expectedRed);
+    expect(state.externalRefs).toBe(0);
+
+    const stackBox = await stack.boundingBox();
+    const kickerBox = await stack
+      .locator('xpath=following-sibling::p[contains(@class,"kicker")]')
+      .boundingBox();
+    expect(
+      Math.abs(stackBox!.x + stackBox!.width / 2 - (kickerBox!.x + kickerBox!.width / 2)),
+    ).toBeLessThanOrEqual(1);
   }
 });
 
@@ -285,7 +411,7 @@ test('proof strip keeps its four facts on one row on desktop', async ({ page }) 
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('/');
 
-  const boxes = await page.locator('[data-proof-fact]').evaluateAll((elements) =>
+  const boxes = await page.locator('.proof-strip .proof-cell').evaluateAll((elements) =>
     elements.map((element) => {
       const rect = element.getBoundingClientRect();
       return { x: Math.round(rect.x), y: Math.round(rect.y) };
@@ -340,6 +466,77 @@ test('reduced motion leaves section content fully visible without entrance effec
   }
 });
 
+test('below-fold reveal sections enter once on scroll and stay revealed', async ({ page }) => {
+  await page.goto('/');
+
+  const target = page.locator('section#next-step .cta-inner');
+
+  const initial = await target.evaluate((node) => getComputedStyle(node).opacity);
+  expect(initial).toBe('0');
+
+  await target.scrollIntoViewIfNeeded();
+  await expect
+    .poll(async () => target.evaluate((node) => getComputedStyle(node).opacity), {
+      timeout: 3000,
+    })
+    .toBe('1');
+
+  const timing = await target.evaluate((node) => {
+    const style = getComputedStyle(node);
+    return { duration: style.animationDuration, delay: style.animationDelay };
+  });
+  expect(timing.duration).toBe('0.6s');
+  expect(timing.delay).toBe('0s');
+
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await target.scrollIntoViewIfNeeded();
+  const reentered = await target.evaluate((node) => getComputedStyle(node).opacity);
+  expect(reentered).toBe('1');
+  await page.waitForTimeout(300);
+  const settled = await target.evaluate((node) => getComputedStyle(node).opacity);
+  expect(settled).toBe('1');
+});
+
+test('proof strip participates in the scroll reveal', async ({ page }) => {
+  await page.goto('/');
+
+  const grid = page.locator('.proof-strip .proof-grid');
+  await expect(grid).toHaveClass(/reveal/);
+
+  const before = await grid.evaluate((node) => getComputedStyle(node).opacity);
+  expect(before).toBe('0');
+
+  await grid.scrollIntoViewIfNeeded();
+  await expect
+    .poll(async () => grid.evaluate((node) => getComputedStyle(node).opacity), {
+      timeout: 3000,
+    })
+    .toBe('1');
+});
+
+test('interactive transitions resolve to the shared micro duration and easing', async ({
+  page,
+}) => {
+  await page.goto('/');
+
+  for (const selector of ['.btn', '[data-fit-situation]']) {
+    const timing = await page
+      .locator(selector)
+      .first()
+      .evaluate((node) => {
+        const style = getComputedStyle(node);
+        return {
+          durations: style.transitionDuration.split(', '),
+          easing: style.transitionTimingFunction,
+        };
+      });
+    expect(new Set(timing.durations), selector).toEqual(new Set(['0.15s']));
+    expect(timing.easing, selector).toBe(
+      timing.durations.map(() => 'cubic-bezier(0.22, 0.61, 0.36, 1)').join(', '),
+    );
+  }
+});
+
 test.describe('home at 390px', () => {
   test.use({ viewport: { width: 390, height: 844 } });
 
@@ -348,13 +545,13 @@ test.describe('home at 390px', () => {
 
     await expect(page.locator('[data-hero-art]')).toBeHidden();
 
-    const facts = await page.locator('[data-proof-fact]').evaluateAll((elements) =>
+    const facts = await page.locator('.proof-strip .proof-cell').evaluateAll((elements) =>
       elements.map((element) => {
         const rect = element.getBoundingClientRect();
         return { x: Math.round(rect.x), y: Math.round(rect.y), width: Math.round(rect.width) };
       }),
     );
-    const intro = await page.locator('[data-proof-intro]').boundingBox();
+    const intro = await page.locator('.proof-strip .proof-intro').boundingBox();
 
     expect(facts[0].x).toBe(facts[2].x);
     expect(facts[1].x).toBe(facts[3].x);
@@ -423,4 +620,72 @@ test.describe('home at 320px', () => {
     );
     expect(pageOverflow).toBeLessThanOrEqual(0);
   });
+});
+
+test('hero copy enters on the 0/200/400/600/800ms ladder with the art closing at 1000ms', async ({
+  page,
+}) => {
+  await page.goto('/');
+
+  const children = page.locator('.hero-copy > *');
+  await expect(children).toHaveCount(5);
+
+  const expectedDelays = ['0s', '0.2s', '0.4s', '0.6s', '0.8s'];
+  for (const [index, delay] of expectedDelays.entries()) {
+    const child = children.nth(index);
+    await expect(child).toHaveCSS('animation-name', 'blur-up');
+    await expect(child).toHaveCSS('animation-delay', delay);
+    await expect(child).toHaveCSS('animation-duration', '1s');
+    await expect(child).toHaveCSS('animation-timing-function', 'cubic-bezier(0.22, 0.61, 0.36, 1)');
+  }
+
+  const art = page.locator('.hero-art');
+  await expect(art).toHaveCSS('animation-name', 'blur-up');
+  await expect(art).toHaveCSS('animation-delay', '1s');
+  await expect(art).toHaveCSS('animation-duration', '1s');
+});
+
+test('hero stack dashed guides drift on the 24s ambient loop', async ({ page }) => {
+  await page.goto('/');
+
+  const flows = page.locator('.stack-art .stack-flow');
+  await expect(flows).toHaveCount(3);
+  for (const flow of await flows.all()) {
+    await expect(flow).toHaveCSS('animation-name', 'stack-flow-dash');
+    await expect(flow).toHaveCSS('animation-duration', '24s');
+    await expect(flow).toHaveCSS('animation-timing-function', 'linear');
+    await expect(flow).toHaveCSS('animation-iteration-count', 'infinite');
+  }
+
+  const hitl = page.locator('.stack-art .stack-flow-path');
+  await expect(hitl).toHaveCount(1);
+  await expect(hitl).toHaveCSS('animation-name', 'stack-flow-dash-path');
+  await expect(hitl).toHaveCSS('animation-duration', '24s');
+  await expect(hitl).toHaveCSS('animation-timing-function', 'linear');
+  await expect(hitl).toHaveCSS('animation-iteration-count', 'infinite');
+});
+
+test('reduced motion stills the hero ambient stroke drift', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/');
+
+  for (const flow of await page.locator('.stack-art .stack-flow').all()) {
+    await expect(flow).toHaveCSS('animation-name', 'none');
+  }
+  await expect(page.locator('.stack-art .stack-flow-path')).toHaveCSS('animation-name', 'none');
+});
+
+test('mobile keeps the copy entrance ladder while the stack art stays absent', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/');
+
+  await expect(page.locator('.hero-art')).toBeHidden();
+
+  const children = page.locator('.hero-copy > *');
+  await expect(children).toHaveCount(5);
+  const expectedDelays = ['0s', '0.2s', '0.4s', '0.6s', '0.8s'];
+  for (const [index, delay] of expectedDelays.entries()) {
+    await expect(children.nth(index)).toHaveCSS('animation-delay', delay);
+    await expect(children.nth(index)).toHaveCSS('animation-duration', '1s');
+  }
 });

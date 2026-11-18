@@ -10,6 +10,21 @@ const { id, kicker, title, lead } = Astro.props;
 ---
 
 <header class="section-heading reveal">
+  {/* Neutral slab faces + stroke keep the literal #171717 on purpose, mirroring the hero master
+      (IsometricCapabilityStack.astro) and --color-ink: #171717; only the red faces take the token. */}
+  <svg class="mini-stack" viewBox="0 0 72 56" aria-hidden="true">
+    <g stroke="#171717" stroke-opacity=".18">
+      <polygon points="36,8 62,18 36,28 10,18" fill="#171717" fill-opacity=".1" />
+      <polygon points="10,18 36,28 36,32 10,22" fill="#171717" fill-opacity=".06" />
+      <polygon points="36,28 62,18 62,22 36,32" fill="#171717" fill-opacity=".08" />
+      <polygon class="mini-stack-red" points="36,20 62,30 36,40 10,30" fill-opacity=".85" />
+      <polygon class="mini-stack-red" points="10,30 36,40 36,44 10,34" fill-opacity=".5" />
+      <polygon class="mini-stack-red" points="36,40 62,30 62,34 36,44" fill-opacity=".65" />
+      <polygon points="36,32 62,42 36,52 10,42" fill="#171717" fill-opacity=".1" />
+      <polygon points="10,42 36,52 36,56 10,46" fill="#171717" fill-opacity=".06" />
+      <polygon points="36,52 62,42 62,46 36,56" fill="#171717" fill-opacity=".08" />
+    </g>
+  </svg>
   <p class="kicker">{kicker}</p>
   <h2 id={id} class="type-h2 section-title">
     {title}
@@ -22,6 +37,17 @@ const { id, kicker, title, lead } = Astro.props;
     max-width: 960px;
     margin: 0 auto 68px;
     text-align: center;
+  }
+
+  .mini-stack {
+    display: block;
+    width: auto;
+    height: 120px;
+    margin: 0 auto 18px;
+  }
+
+  .mini-stack-red {
+    fill: var(--color-red);
   }
 
   .section-title {

@@ -33,6 +33,9 @@ jobs:
       - name: Type check
         run: pnpm check
 
+      - name: Check §6.3 visual-polish consistency rules
+        run: pnpm check:consistency
+
       - name: Build
         run: pnpm build
 

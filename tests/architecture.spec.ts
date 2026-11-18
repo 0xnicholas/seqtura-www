@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 
 const conclusions = [
-  'Agent 不是一个模型调用，而是一条有状态的执行链：接入 → 编排 → 模型 → 工具 / 知识 → 人 → 输出。',
+  'Agent不是一个模型调用，而是一条有状态的执行链：接入 → 编排 → 模型 → 工具 / 知识 → 人 → 输出。',
   '敢上线靠三条横切控制面：身份与权限、评测与可观测、策略与审计；安全不是最后一层。',
   '架构按交付边界划分：我们交付组件与模式，客户保留系统、数据、身份与审批权。',
 ];
@@ -12,8 +12,8 @@ const layerRows = [
     name: '接入与编排',
     label: 'Ingress & Orchestration',
     responsibility: '任务从哪来',
-    constraint: 'Workflow 可预测但覆盖有限',
-    practice: '先 workflow 后 agent',
+    constraint: 'Workflow可预测但覆盖有限',
+    practice: '先workflow后agent',
   },
   {
     id: 'models',
@@ -27,7 +27,7 @@ const layerRows = [
     id: 'tools',
     name: '工具与系统集成',
     label: 'Tools & Integration',
-    responsibility: '把客户系统暴露为 Agent 可调用的工具',
+    responsibility: '把客户系统暴露为Agent可调用的工具',
     constraint: '工具是权限边界',
     practice: '按标准协议接入',
   },
@@ -35,7 +35,7 @@ const layerRows = [
     id: 'knowledge',
     name: '知识与记忆',
     label: 'Knowledge & Memory',
-    responsibility: '让 Agent 拿到正确的业务知识',
+    responsibility: '让Agent拿到正确的业务知识',
     constraint: '检索必须带权限过滤',
     practice: '短期会话状态与长期记忆分开',
   },
@@ -43,7 +43,7 @@ const layerRows = [
     id: 'runtime',
     name: '运行时与部署',
     label: 'Runtime & Deployment',
-    responsibility: 'Agent 跑在哪',
+    responsibility: 'Agent跑在哪',
     constraint: '部署形态决定数据边界',
     practice: '按三档部署模型',
   },
@@ -58,7 +58,7 @@ test('architecture hero frames the reference architecture and routes both action
   const main = page.getByRole('main');
   await expect(main.locator('h1')).toHaveCount(1);
   await expect(main.getByRole('heading', { level: 1 })).toHaveText(
-    '一个能上生产的 Agent 系统，由什么构成',
+    '一个能上生产的Agent系统，由什么构成',
   );
   await expect(main.getByText('技术架构 / 交付参考架构')).toBeVisible();
   await expect(
@@ -119,7 +119,7 @@ test('overview states the three conclusions and draws a readable layered schemat
     '人 = HITL gate',
     '点线 = trace',
     '记录 = audit',
-    '虚线框 = Seqtura 交付边界',
+    '虚线框 = Seqtura交付边界',
   ]) {
     await expect(section.getByText(label, { exact: true })).toBeVisible();
   }
@@ -178,7 +178,7 @@ test('lifecycle walks six nodes with trace, audit marks and an iteration loop', 
   }
 
   await expect(section.locator('[data-trace-span]')).toHaveCount(1);
-  await expect(section.locator('[data-trace-span]')).toContainText('一条 trace 贯穿全部节点');
+  await expect(section.locator('[data-trace-span]')).toContainText('一条trace贯穿全部节点');
 
   const auditMarks = section.locator('[data-audit-mark]');
   await expect(auditMarks).toHaveCount(3);
@@ -199,9 +199,9 @@ test('lifecycle walks six nodes with trace, audit marks and an iteration loop', 
 
   const constraints = section.locator('[data-lifecycle-constraint]');
   await expect(constraints).toHaveCount(3);
-  await expect(constraints.nth(0)).toContainText('Workflow 可预测');
-  await expect(constraints.nth(1)).toContainText('Agent 更灵活');
-  await expect(constraints.nth(2)).toContainText('HITL 增加时延');
+  await expect(constraints.nth(0)).toContainText('Workflow可预测');
+  await expect(constraints.nth(1)).toContainText('Agent更灵活');
+  await expect(constraints.nth(2)).toContainText('HITL增加时延');
 });
 
 test('five capability layers carry responsibility, constraint, practice and chips', async ({
@@ -256,9 +256,9 @@ test('three control planes show what they govern, where they land and how to ver
   expect(ids).toEqual(['identity', 'evaluation', 'policy']);
 
   for (const [id, name, manages, lands, verifies] of [
-    ['identity', '身份与权限', 'Agent 独立身份', '每次工具调用', '越权测试'],
-    ['evaluation', '评测与可观测', '三层指标', '发布门禁', 'trace 回放'],
-    ['policy', '策略与审计', '审批 gate', '输入 / 输出 / 工具调用', '审计导出'],
+    ['identity', '身份与权限', 'Agent独立身份', '每次工具调用', '越权测试'],
+    ['evaluation', '评测与可观测', '三层指标', '发布门禁', 'trace回放'],
+    ['policy', '策略与审计', '审批gate', '输入 / 输出 / 工具调用', '审计导出'],
   ] as const) {
     const row = section.locator(`[data-control-plane="${id}"]`);
     await expect(row, id).toContainText(name);
@@ -306,7 +306,7 @@ test('five enterprise concerns follow question, mechanism and boundary', async (
   );
   await expect(section.locator('[data-concern="cost"]')).toContainText('路由受最小模型限制');
   await expect(section.locator('[data-concern="evaluation"]')).toContainText(
-    'trace 用于排障，audit 用于合规，不能互替',
+    'trace用于排障，audit用于合规，不能互替',
   );
 });
 
@@ -369,7 +369,7 @@ test('metrics explain what is measured and how it is used without publishing num
     '任务成功率',
     '工具调用正确率',
     '检索质量',
-    'P95 时延',
+    'P95时延',
     '单任务成本',
   ]);
 
@@ -384,7 +384,7 @@ test('closing connects the architecture to method, process and booking', async (
 
   const section = page.locator('[data-arch-closing]');
   await expect(section.getByRole('heading', { level: 2 })).toHaveText(
-    '方法论讲怎么把 Agent 做对；这页讲系统长什么样、凭什么敢上线。',
+    '方法论讲怎么把Agent做对；这页讲系统长什么样、凭什么敢上线。',
   );
   await expect(section.getByRole('link', { name: '和架构师聊聊' })).toHaveAttribute(
     'href',
@@ -462,7 +462,7 @@ test('architecture keeps the public red lines and the default wording for unconf
     '检索必须带权限过滤',
     '短期',
     '长期',
-    'trace 用于排障',
+    'trace用于排障',
     '不报未经验证的数字',
     '由合同约定',
     '具体档位',
@@ -602,7 +602,7 @@ test.describe('reference architecture overview diagram', () => {
     }
 
     const boundary = diagram.locator('[data-boundary-frame]');
-    await expect(boundary).toContainText('Seqtura 交付边界');
+    await expect(boundary).toContainText('Seqtura交付边界');
     await expect(boundary).toContainText('组件与模式');
     expect(await boundary.evaluate((element) => getComputedStyle(element).borderTopStyle)).toBe(
       'dashed',
@@ -890,4 +890,35 @@ test('self-hosted offline capability stays conditional', async ({ page }) => {
 
   await expect(offline).toContainText('按所选模型与部署条件确认');
   await expect(offline).not.toContainText('可以；');
+});
+
+test('every section heading renders the mini isometric stack', async ({ page }) => {
+  await page.goto('/architecture');
+
+  const stacks = page.locator('.section-heading svg.mini-stack');
+  await expect(stacks).toHaveCount(7);
+  await expect(page.locator('.mini-stack')).toHaveCount(7);
+
+  for (const stack of await stacks.all()) {
+    await expect(stack).toHaveAttribute('aria-hidden', 'true');
+    await expect(stack).toHaveCSS('height', '120px');
+  }
+});
+
+test('metric numbers keep proportional figures (E6 negative)', async ({ page }) => {
+  await page.goto('/architecture');
+
+  for (const no of await page.locator('.metric-no').all()) {
+    await expect(no).toHaveCSS('font-variant-numeric', 'normal');
+  }
+});
+
+test('architecture keeps its §5.2 reveal inventory and never reveals diagram internals', async ({
+  page,
+}) => {
+  await page.goto('/architecture');
+
+  await expect(page.locator('.reveal')).toHaveCount(18);
+  await expect(page.locator('[data-arch-diagram] .reveal')).toHaveCount(0);
+  await expect(page.locator('[data-lifecycle-diagram] .reveal')).toHaveCount(0);
 });

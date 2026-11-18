@@ -9,9 +9,9 @@ test('methodology hero states the FDE method and routes both actions', async ({ 
   await expect(main.getByRole('heading', { level: 1 })).toHaveText(
     '从业务结果出发，而不是从技术方案出发。',
   );
-  await expect(main.getByText('FDE 8 阶段交付方法论')).toBeVisible();
+  await expect(main.getByText('FDE 8阶段交付方法论')).toBeVisible();
   await expect(
-    main.getByText('8 个交付阶段，3 条原则；把 AI Agent 从业务问题做到生产上线。'),
+    main.getByText('8个交付阶段，3条原则；把AI Agent从业务问题做到生产上线。'),
   ).toBeVisible();
   await expect(main.getByRole('link', { name: '聊聊你的场景' }).first()).toHaveAttribute(
     'href',
@@ -39,7 +39,7 @@ test('methodology states the three principles that constrain every stage', async
   await expect(section.locator('[data-principle]')).toHaveCount(3);
 
   for (const [title, label, phrase] of [
-    ['结果导向', 'Outcome-driven', '按 Define 阶段定下的验收标准验收；做不出来就早说'],
+    ['结果导向', 'Outcome-driven', '按Define阶段定下的验收标准验收；做不出来就早说'],
     ['共同构建', 'Co-building', '关键产出物由客户拍板'],
     ['产品化沉淀', 'Productization', '客户专属的业务逻辑、数据、本体与配置留在客户环境'],
   ] as const) {
@@ -56,7 +56,7 @@ test('methodology groups the eight stages into the four delivery groups', async 
   await page.goto('/methodology');
 
   const section = page.locator('section#stages');
-  await expect(section.getByRole('heading', { level: 2 })).toHaveText('8 个交付阶段，4 组推进。');
+  await expect(section.getByRole('heading', { level: 2 })).toHaveText('8个交付阶段，4组推进。');
   await expect(section.locator('[data-stage-group]')).toHaveCount(4);
   await expect(section.locator('[data-stage-link]')).toHaveCount(8);
 
@@ -93,9 +93,9 @@ test('methodology groups the eight stages into the four delivery groups', async 
 
   await expect(section.getByRole('heading', { name: '阶段裁剪规则' })).toBeVisible();
   await expect(
-    section.getByText(/Discover \/ Diagnose \/ Design \/ Build \/ Optimize 可以合并/),
+    section.getByText(/Discover \/ Diagnose \/ Design \/ Build \/ Optimize可以合并/),
   ).toBeVisible();
-  await expect(section.getByText(/Define、Validate、Deploy 不跳过/)).toBeVisible();
+  await expect(section.getByText(/Define、Validate、Deploy不跳过/)).toBeVisible();
   await expect(section.locator('[data-loopback]')).toHaveCount(2);
   await expect(section.getByText('Validate → Build / Design')).toBeVisible();
   await expect(section.getByText('Optimize → Build / Knowledge')).toBeVisible();
@@ -124,26 +124,26 @@ test('every stage card carries the six delivery fields', async ({ page }) => {
       id: 'diagnose',
       name: 'Diagnose',
       cn: '诊断',
-      copy: '不是所有痛点都值得用 Agent 解决',
-      purpose: '找到真正值得用 Agent 解决的业务问题',
+      copy: '不是所有痛点都值得用Agent解决',
+      purpose: '找到真正值得用Agent解决的业务问题',
       artifact: '问题定义（Problem Statement）',
-      exit: '问题定义经 sponsor 确认',
+      exit: '问题定义经sponsor确认',
     },
     {
       id: 'define',
       name: 'Define',
       cn: '定义',
       copy: '验收标准和评测集在这一步就定下来',
-      purpose: '明确 Agent 的职责、目标、边界、权限和成功指标',
-      artifact: 'Agent 规格卡（Agent Specification）',
-      exit: '权限边界经 IT / 安全确认',
+      purpose: '明确Agent的职责、目标、边界、权限和成功指标',
+      artifact: 'Agent规格卡（Agent Specification）',
+      exit: '权限边界经IT / 安全确认',
     },
     {
       id: 'design',
       name: 'Design',
       cn: '设计',
       copy: '而不是一张概念图',
-      purpose: '设计 Agent 架构、Workflow、Tools、Knowledge、Ontology',
+      purpose: '设计Agent架构、Workflow、Tools、Knowledge、Ontology',
       artifact: '方案架构（Solution Architecture）',
       exit: '集成、权限、数据流无阻断',
     },
@@ -152,7 +152,7 @@ test('every stage card carries the six delivery fields', async ({ page }) => {
       name: 'Build',
       cn: '构建',
       copy: '我们不做一次性演示',
-      purpose: '复用平台组件、开源项目和已有 Skills',
+      purpose: '复用平台组件、开源项目和已有Skills',
       artifact: '可运行原型（Working Prototype）',
       exit: '原型跑通核心任务',
     },
@@ -171,14 +171,14 @@ test('every stage card carries the six delivery fields', async ({ page }) => {
       cn: '部署',
       copy: '上线不是把原型换个地址',
       purpose: '接入客户生产系统',
-      artifact: '生产 Agent（Production Agent）',
+      artifact: '生产Agent（Production Agent）',
       exit: '上线检查清单全绿',
     },
     {
       id: 'optimize',
       name: 'Optimize',
       cn: '优化',
-      copy: 'Agent 会暴露真实世界里的长尾问题',
+      copy: 'Agent会暴露真实世界里的长尾问题',
       purpose: '根据实际使用数据迭代',
       artifact: '运营报告',
       exit: '评测集随迭代更新',
@@ -214,11 +214,11 @@ test('artifact chain and Agent spec card make the handoffs inspectable', async (
   for (const [stage, artifact] of [
     ['Discover', '客户业务画像'],
     ['Diagnose', '问题定义'],
-    ['Define', 'Agent 规格卡 + 验收标准 + 评测集 v0'],
+    ['Define', 'Agent规格卡 + 验收标准 + 评测集v0'],
     ['Design', '方案架构'],
     ['Build', '可运行原型'],
     ['Validate', '评测报告'],
-    ['Deploy', '生产 Agent + 上线检查清单 + 运行手册'],
+    ['Deploy', '生产Agent + 上线检查清单 + 运行手册'],
     ['Optimize', '运营报告 + 迭代清单 + 更新后的评测集 / 知识库'],
   ] as const) {
     const step = steps.filter({ hasText: stage });
@@ -227,7 +227,7 @@ test('artifact chain and Agent spec card make the handoffs inspectable', async (
   }
 
   const specCard = section.locator('[data-spec-card]');
-  await expect(specCard.getByRole('heading', { name: 'Agent 规格卡' })).toBeVisible();
+  await expect(specCard.getByRole('heading', { name: 'Agent规格卡' })).toBeVisible();
   await expect(specCard.locator('[data-spec-item]')).toHaveCount(9);
   for (const item of [
     '目标 / 非目标',
@@ -238,7 +238,7 @@ test('artifact chain and Agent spec card make the handoffs inspectable', async (
     '人工交接点',
     '失败模式与兜底',
     '成功指标与验收标准',
-    '评测集 v0',
+    '评测集v0',
   ]) {
     await expect(specCard.getByText(item, { exact: true })).toBeVisible();
   }
@@ -258,7 +258,7 @@ test('methodology explains its division of labor and closes with the booking CTA
   await expect(division.locator('[data-division]')).toHaveCount(2);
 
   const thisPage = division.locator('[data-division="methodology"]');
-  await expect(thisPage).toContainText('8 个阶段的工程活动、产出物、客户参与点与过关条件');
+  await expect(thisPage).toContainText('8个阶段的工程活动、产出物、客户参与点与过关条件');
 
   const processPage = division.locator('[data-division="process"]');
   await expect(processPage).toContainText('合作如何开始');
@@ -417,4 +417,23 @@ test('methodology keeps one H1 and never skips a heading level', async ({ page }
       `heading jumps from h${levels[index - 1]} to h${levels[index]}`,
     ).toBeLessThanOrEqual(1);
   }
+});
+
+test('every section heading renders the mini isometric stack', async ({ page }) => {
+  await page.goto('/methodology');
+
+  const stacks = page.locator('.section-heading svg.mini-stack');
+  await expect(stacks).toHaveCount(5);
+  await expect(page.locator('.mini-stack')).toHaveCount(5);
+
+  for (const stack of await stacks.all()) {
+    await expect(stack).toHaveAttribute('aria-hidden', 'true');
+    await expect(stack).toHaveCSS('height', '120px');
+  }
+});
+
+test('methodology keeps its §5.2 reveal inventory', async ({ page }) => {
+  await page.goto('/methodology');
+
+  await expect(page.locator('.reveal')).toHaveCount(12);
 });

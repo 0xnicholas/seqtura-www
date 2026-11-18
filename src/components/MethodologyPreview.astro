@@ -148,7 +148,7 @@ const { methodology } = homeSections;
     content: '';
     position: absolute;
     inset: 4% 0 -8% 8%;
-    background: radial-gradient(closest-side, rgb(245 48 3 / 13%), rgb(245 48 3 / 0%) 72%);
+    background: radial-gradient(closest-side, rgb(255 45 32 / 13%), rgb(255 45 32 / 0%) 72%);
     pointer-events: none;
   }
 
@@ -167,7 +167,7 @@ const { methodology } = homeSections;
     padding: 40px 44px 36px;
     border-right: 1px solid var(--color-line);
     border-bottom: 1px solid var(--color-line);
-    transition: background-color 150ms var(--ease-site);
+    transition: background-color var(--duration-micro) var(--ease-site);
   }
 
   .method-group:hover {
@@ -219,7 +219,7 @@ const { methodology } = homeSections;
   }
 
   .method-group-link svg {
-    transition: transform 150ms var(--ease-site);
+    transition: transform var(--duration-micro) var(--ease-site);
   }
 
   .method-group:hover .method-group-link svg {

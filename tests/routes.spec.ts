@@ -63,3 +63,33 @@ test('unknown routes return 404 with a noindex page', async ({ page }) => {
     '/contact#channels',
   );
 });
+
+test('the 404 page stays free of scroll reveals', async ({ page }) => {
+  await page.goto('/does-not-exist');
+
+  await expect(page.locator('.reveal')).toHaveCount(0);
+});
+
+// §6.3 density re-check: the home page's only illustration is the hero stack;
+// the architecture page is the single documented home of the reference-map and
+// lifecycle diagrams (§5.3-E5); every other page carries neither.
+const diagramDensity = [
+  { route: '/', heroArt: 1, archMap: 0, lifecycle: 0 },
+  { route: '/architecture', heroArt: 0, archMap: 1, lifecycle: 1 },
+  { route: '/methodology', heroArt: 0, archMap: 0, lifecycle: 0 },
+  { route: '/process', heroArt: 0, archMap: 0, lifecycle: 0 },
+  { route: '/contact', heroArt: 0, archMap: 0, lifecycle: 0 },
+  { route: '/legal/privacy', heroArt: 0, archMap: 0, lifecycle: 0 },
+  { route: '/legal/terms', heroArt: 0, archMap: 0, lifecycle: 0 },
+  { route: '/this-page-does-not-exist', heroArt: 0, archMap: 0, lifecycle: 0 },
+];
+
+for (const { route, heroArt, archMap, lifecycle } of diagramDensity) {
+  test(`${route} keeps the §6.3 illustration density`, async ({ page }) => {
+    await page.goto(route);
+
+    await expect(page.locator('[data-hero-art]')).toHaveCount(heroArt);
+    await expect(page.locator('[data-arch-diagram]')).toHaveCount(archMap);
+    await expect(page.locator('[data-lifecycle-diagram]')).toHaveCount(lifecycle);
+  });
+}

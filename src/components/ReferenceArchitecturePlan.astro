@@ -18,7 +18,8 @@ import { capabilityLayers, controlPlanes, structuralNote } from '../data/archite
     <div class="plane-labels" aria-hidden="true">
       {controlPlanes.map((plane) => (
         <span class="plane-label">
-          {plane.short} {plane.name}
+          {plane.short}
+          {plane.name}
         </span>
       ))}
     </div>
@@ -45,7 +46,7 @@ import { capabilityLayers, controlPlanes, structuralNote } from '../data/archite
     </div>
 
     <p class="arch-boundary">
-      <span>SEQTURA 交付边界：组件与模式</span>
+      <span>SEQTURA交付边界：组件与模式</span>
       <span>客户环境：系统 · 数据 · 身份 · 审批</span>
     </p>
     <p class="arch-structural" data-structural-note>
@@ -64,7 +65,7 @@ import { capabilityLayers, controlPlanes, structuralNote } from '../data/archite
     border-radius: var(--radius-site-lg);
     background: var(--color-canvas);
     box-shadow: var(--shadow-site-xs);
-    transition: border-color 150ms var(--ease-site);
+    transition: border-color var(--duration-micro) var(--ease-site);
   }
 
   .arch-top {
@@ -146,7 +147,7 @@ import { capabilityLayers, controlPlanes, structuralNote } from '../data/archite
     bottom: 48px;
     z-index: 2;
     width: 1px;
-    border-left: 1px dashed rgb(245 48 3 / 38%);
+    border-left: 1px dashed rgb(255 45 32 / 38%);
     pointer-events: none;
   }
 

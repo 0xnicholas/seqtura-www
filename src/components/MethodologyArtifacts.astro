@@ -17,7 +17,7 @@ const { artifacts } = methodologyCopy;
 
     <div class="artifact-layout reveal">
       <div class="chain-col">
-        <p class="chain-label mono-label">8 个阶段 / 8 项产出</p>
+        <p class="chain-label mono-label">8个阶段 / 8项产出</p>
         <ol class="artifact-chain">
           {artifactChain.map((step) => (
             <li class="artifact-step" data-artifact-step={step.stageAnchor}>
@@ -90,7 +90,7 @@ const { artifacts } = methodologyCopy;
     gap: 14px;
     align-items: baseline;
     padding: 17px 18px;
-    transition: background-color 150ms var(--ease-site);
+    transition: background-color var(--duration-micro) var(--ease-site);
   }
 
   .artifact-step a:hover {
@@ -122,8 +122,8 @@ const { artifacts } = methodologyCopy;
     align-self: center;
     color: var(--color-faint);
     transition:
-      color 150ms var(--ease-site),
-      transform 150ms var(--ease-site);
+      color var(--duration-micro) var(--ease-site),
+      transform var(--duration-micro) var(--ease-site);
   }
 
   .artifact-step a:hover .artifact-arrow {

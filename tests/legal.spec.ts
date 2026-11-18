@@ -14,7 +14,7 @@ const privacySections = [
   '存储地点与期限',
   '委托处理与第三方',
   '跨境传输',
-  'Cookie 与统计',
+  'Cookie与统计',
   '你的权利',
   '信息安全',
   '未成年人保护',
@@ -52,10 +52,10 @@ test('privacy policy carries the twelve canonical sections and disclosures', asy
     '姓名、公司名称、联系方式、需求描述',
     '企业微信（腾讯）',
     '飞书（字节跳动）',
-    'IP 地址、访问时间、请求页面',
-    '不使用 Cookie、像素标签、第三方统计或广告脚本',
-    '自最后一次联系之日起 12 个月内删除',
-    '15 个工作日内答复',
+    'IP地址、访问时间、请求页面',
+    '不使用Cookie、像素标签、第三方统计或广告脚本',
+    '自最后一次联系之日起12个月内删除',
+    '15个工作日内答复',
     'privacy@seqtura.ai',
     '中华人民共和国境内',
   ]) {
@@ -163,7 +163,7 @@ test('privacy policy table of contents collapses to one column on mobile', async
     const style = getComputedStyle(element);
     return { size: style.fontSize, line: style.lineHeight, weight: style.fontWeight };
   });
-  expect(h1Type).toEqual({ size: '40px', line: '48px', weight: '400' });
+  expect(h1Type).toEqual({ size: '40px', line: '48px', weight: '500' });
 
   const overflow = await page.evaluate(
     () => document.documentElement.scrollWidth - window.innerWidth,
@@ -203,7 +203,7 @@ test('legal article uses the 720px measure and legal type scale', async ({ page 
   });
   expect(h1Type.size).toBe('40px');
   expect(lineHeightInPx(h1Type.line)).toBeCloseTo(48, 1);
-  expect(h1Type.weight).toBe('400');
+  expect(h1Type.weight).toBe('500');
 
   const h2Type = await main
     .locator('h2')
@@ -431,4 +431,11 @@ test.describe('configured filing and operator values', () => {
     await expect(page.locator('[data-placeholder-badge]')).toHaveCount(0);
     await expect(page.locator('body')).not.toContainText('暂未公开');
   });
+});
+
+test('legal pages stay free of scroll reveals', async ({ page }) => {
+  for (const route of ['/legal/privacy', '/legal/terms']) {
+    await page.goto(route);
+    await expect(page.locator('.reveal')).toHaveCount(0);
+  }
 });

@@ -40,7 +40,7 @@ test.describe('contact page structure', () => {
     const about = page.locator('#about');
     await expect(about.getByRole('heading', { level: 2 })).toHaveText('关于我们');
     await expect(about).toContainText(
-      'Seqtura AI（序构 AI）为企业定制 AI Agent，把业务场景从评估做到生产上线。',
+      'Seqtura AI（序构AI）为企业定制AI Agent，把业务场景从评估做到生产上线。',
     );
     await expect(about).toContainText('我们相信：先把验收标准定下来，再开始构建。');
     await expect(about.getByText('运营主体', { exact: true })).toBeVisible();
@@ -161,4 +161,10 @@ test.describe('contact channels mobile layout', () => {
       expect(overflow).toBeLessThanOrEqual(0);
     });
   }
+});
+
+test('contact page stays free of scroll reveals (E7)', async ({ page }) => {
+  await page.goto('/contact');
+
+  await expect(page.locator('.reveal')).toHaveCount(0);
 });

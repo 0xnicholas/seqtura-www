@@ -4,7 +4,7 @@
 
 - 默认文案来源：`src/data/delivery.ts`、`src/data/process.ts`、`src/data/architecture.ts`、`src/data/homepage.ts`、`src/data/contact.ts`、`src/config/placeholders.ts`、`src/config/legal.ts`。
 - 环境变量清单：`.env.example`。
-- 自动化门禁：`pnpm lint`、`pnpm check`、`pnpm build`、`pnpm check:links`、`pnpm check:sentinels`、`pnpm test`、`pnpm lighthouse`。
+- 自动化门禁：`pnpm lint`、`pnpm check`、`pnpm build`、`pnpm check:links`、`pnpm check:sentinels`、`pnpm check:consistency`、`pnpm test`、`pnpm lighthouse`。
 - CI 顺序见 `.github/workflows/ci.yml`。`main` 分支保护由仓库设置维护：必须要求 CI 的 `quality` job 通过后才能合并；本仓库代码不修改分支保护。
 
 ## 1. 四条交付承诺
