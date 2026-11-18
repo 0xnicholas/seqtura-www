@@ -621,3 +621,71 @@ test.describe('home at 320px', () => {
     expect(pageOverflow).toBeLessThanOrEqual(0);
   });
 });
+
+test('hero copy enters on the 0/200/400/600/800ms ladder with the art closing at 1000ms', async ({
+  page,
+}) => {
+  await page.goto('/');
+
+  const children = page.locator('.hero-copy > *');
+  await expect(children).toHaveCount(5);
+
+  const expectedDelays = ['0s', '0.2s', '0.4s', '0.6s', '0.8s'];
+  for (const [index, delay] of expectedDelays.entries()) {
+    const child = children.nth(index);
+    await expect(child).toHaveCSS('animation-name', 'blur-up');
+    await expect(child).toHaveCSS('animation-delay', delay);
+    await expect(child).toHaveCSS('animation-duration', '1s');
+    await expect(child).toHaveCSS('animation-timing-function', 'cubic-bezier(0.22, 0.61, 0.36, 1)');
+  }
+
+  const art = page.locator('.hero-art');
+  await expect(art).toHaveCSS('animation-name', 'blur-up');
+  await expect(art).toHaveCSS('animation-delay', '1s');
+  await expect(art).toHaveCSS('animation-duration', '1s');
+});
+
+test('hero stack dashed guides drift on the 24s ambient loop', async ({ page }) => {
+  await page.goto('/');
+
+  const flows = page.locator('.stack-art .stack-flow');
+  await expect(flows).toHaveCount(3);
+  for (const flow of await flows.all()) {
+    await expect(flow).toHaveCSS('animation-name', 'stack-flow-dash');
+    await expect(flow).toHaveCSS('animation-duration', '24s');
+    await expect(flow).toHaveCSS('animation-timing-function', 'linear');
+    await expect(flow).toHaveCSS('animation-iteration-count', 'infinite');
+  }
+
+  const hitl = page.locator('.stack-art .stack-flow-path');
+  await expect(hitl).toHaveCount(1);
+  await expect(hitl).toHaveCSS('animation-name', 'stack-flow-dash-path');
+  await expect(hitl).toHaveCSS('animation-duration', '24s');
+  await expect(hitl).toHaveCSS('animation-timing-function', 'linear');
+  await expect(hitl).toHaveCSS('animation-iteration-count', 'infinite');
+});
+
+test('reduced motion stills the hero ambient stroke drift', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/');
+
+  for (const flow of await page.locator('.stack-art .stack-flow').all()) {
+    await expect(flow).toHaveCSS('animation-name', 'none');
+  }
+  await expect(page.locator('.stack-art .stack-flow-path')).toHaveCSS('animation-name', 'none');
+});
+
+test('mobile keeps the copy entrance ladder while the stack art stays absent', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/');
+
+  await expect(page.locator('.hero-art')).toBeHidden();
+
+  const children = page.locator('.hero-copy > *');
+  await expect(children).toHaveCount(5);
+  const expectedDelays = ['0s', '0.2s', '0.4s', '0.6s', '0.8s'];
+  for (const [index, delay] of expectedDelays.entries()) {
+    await expect(children.nth(index)).toHaveCSS('animation-delay', delay);
+    await expect(children.nth(index)).toHaveCSS('animation-duration', '1s');
+  }
+});
