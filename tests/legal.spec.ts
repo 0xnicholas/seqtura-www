@@ -163,7 +163,7 @@ test('privacy policy table of contents collapses to one column on mobile', async
     const style = getComputedStyle(element);
     return { size: style.fontSize, line: style.lineHeight, weight: style.fontWeight };
   });
-  expect(h1Type).toEqual({ size: '40px', line: '48px', weight: '400' });
+  expect(h1Type).toEqual({ size: '40px', line: '48px', weight: '500' });
 
   const overflow = await page.evaluate(
     () => document.documentElement.scrollWidth - window.innerWidth,
@@ -203,7 +203,7 @@ test('legal article uses the 720px measure and legal type scale', async ({ page 
   });
   expect(h1Type.size).toBe('40px');
   expect(lineHeightInPx(h1Type.line)).toBeCloseTo(48, 1);
-  expect(h1Type.weight).toBe('400');
+  expect(h1Type.weight).toBe('500');
 
   const h2Type = await main
     .locator('h2')

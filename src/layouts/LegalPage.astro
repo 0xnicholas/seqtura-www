@@ -107,10 +107,15 @@ const sectionLabel = (text: string) => text.replace(/^\d+\.\s*/, '');
 
   .legal-title {
     margin-top: 20px;
+    font-family: var(--font-heading);
     font-size: var(--type-legal-h1-size);
     font-weight: 400;
     line-height: var(--type-legal-h1-line);
     letter-spacing: -0.02em;
+  }
+
+  .legal-title:lang(zh) {
+    font-weight: 500;
   }
 
   .legal-meta {
