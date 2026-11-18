@@ -10,7 +10,7 @@ toc: true
 
 import { legal } from '../../config/legal';
 
-{legal.operatorName}（{legal.registeredAddress && `注册地址：${legal.registeredAddress}，`}以下简称“我们”）是本站的个人信息处理者，运营Seqtura AI（序构AI）官网{legal.siteDomain ? ` ${legal.siteDomain}` : ''}（以下简称“本站”）。我们重视你的个人信息保护。本政策说明我们如何收集、使用、存储和保护你通过本站公布的联系渠道提供的信息，以及你享有的权利。请在联系我们前阅读本政策。
+{legal.operatorName}（{legal.registeredAddress && `注册地址：${legal.registeredAddress}，`}以下简称“我们”）是本站的个人信息处理者，运营Seqtura AI（序构AI）官网{legal.siteDomain ?? ''}（以下简称“本站”）。我们重视你的个人信息保护。本政策说明我们如何收集、使用、存储和保护你通过本站公布的联系渠道提供的信息，以及你享有的权利。请在联系我们前阅读本政策。
 
 ## 1. 适用范围
 
@@ -74,7 +74,7 @@ import { legal } from '../../config/legal';
 
 8.1你有权查阅、复制、更正、补充、删除你的个人信息，撤回同意，要求我们解释处理规则，或向我们投诉。
 
-8.2你可以通过 <a href={`mailto:${legal.privacyEmail}`}>{legal.privacyEmail}</a> 联系我们。为保护你的信息安全，我们可能需要验证你的身份。我们将在收到请求后15个工作日内答复。
+8.2你可以通过<a href={`mailto:${legal.privacyEmail}`}>{legal.privacyEmail}</a>联系我们。为保护你的信息安全，我们可能需要验证你的身份。我们将在收到请求后15个工作日内答复。
 
 8.3撤回同意不影响撤回前基于同意进行的处理；撤回后我们可能无法继续回复你的咨询。
 
