@@ -6,21 +6,23 @@ import { site } from '../config/site';
 
 <section class="process-hero" aria-labelledby="process-hero-title">
   <div class="container-site">
-    <p class="kicker">{processHero.kicker}</p>
-    <h1 id="process-hero-title" class="type-h1 hero-title">
-      <span class="hero-title-nowrap">{processHero.titleLead}</span>
-      {processHero.titleTail}
-    </h1>
-    <p class="type-lead hero-lead">{processHero.lead}</p>
+    <div class="hero-copy">
+      <p class="kicker">{processHero.kicker}</p>
+      <h1 id="process-hero-title" class="type-h1 hero-title">
+        <span class="hero-title-nowrap">{processHero.titleLead}</span>
+        {processHero.titleTail}
+      </h1>
+      <p class="type-lead hero-lead">{processHero.lead}</p>
 
-    <div class="cta-row hero-actions">
-      <a class="btn btn-primary" href={site.contactPath} data-primary-cta>
-        {processHero.primaryCta}
-        <ArrowIcon />
-      </a>
-      <a class="btn btn-ghost" href="/architecture">
-        {processHero.secondaryCta}
-      </a>
+      <div class="cta-row hero-actions">
+        <a class="btn btn-primary" href={site.contactPath} data-primary-cta>
+          {processHero.primaryCta}
+          <ArrowIcon />
+        </a>
+        <a class="btn btn-ghost" href="/architecture">
+          {processHero.secondaryCta}
+        </a>
+      </div>
     </div>
   </div>
 </section>
@@ -82,6 +84,22 @@ import { site } from '../config/site';
     margin-top: 34px;
   }
 
+  .hero-copy {
+    animation: hero-in var(--duration-enter) var(--ease-site) both;
+  }
+
+  @keyframes hero-in {
+    from {
+      opacity: 0;
+      transform: translateY(16px);
+    }
+
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
   @media (max-width: 767px) {
     .process-hero {
       padding: 64px 0 56px;
@@ -99,6 +117,12 @@ import { site } from '../config/site';
 
     .hero-actions .btn {
       width: 100%;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-copy {
+      animation: none;
     }
   }
 </style>

@@ -324,3 +324,43 @@ test('every section heading renders the mini isometric stack', async ({ page }) 
     await expect(stack).toHaveCSS('height', '120px');
   }
 });
+
+test('process hero enters with the shared hero-in motion and stills under reduced motion', async ({
+  page,
+}) => {
+  await page.goto('/process');
+
+  const copy = page.locator('.process-hero .hero-copy');
+  await expect(copy).toHaveCSS('animation-name', 'hero-in');
+  await expect(copy).toHaveCSS('animation-duration', '0.6s');
+  await expect(copy).toHaveCSS('animation-timing-function', 'cubic-bezier(0.22, 0.61, 0.36, 1)');
+
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.reload();
+  await expect(copy).toHaveCSS('animation-name', 'none');
+});
+
+test('tabular numerals stay scoped to the cycle column and flow durations (E6)', async ({
+  page,
+}) => {
+  await page.goto('/process');
+
+  for (const cell of await page.locator('.stage-duration').all()) {
+    await expect(cell).toHaveCSS('font-variant-numeric', 'tabular-nums');
+  }
+  for (const cell of await page.locator('.flow-duration').all()) {
+    await expect(cell).toHaveCSS('font-variant-numeric', 'tabular-nums');
+  }
+  for (const no of await page.locator('.stage-no, .flow-no').all()) {
+    await expect(no).toHaveCSS('font-variant-numeric', 'normal');
+  }
+});
+
+test('process page keeps reveal limited to its two section headings', async ({ page }) => {
+  await page.goto('/process');
+
+  await expect(page.locator('.section-heading.reveal')).toHaveCount(2);
+  await expect(page.locator('.reveal')).toHaveCount(2);
+  await expect(page.locator('.process-flow.reveal')).toHaveCount(0);
+  await expect(page.locator('[data-deployment-bar].reveal')).toHaveCount(0);
+});

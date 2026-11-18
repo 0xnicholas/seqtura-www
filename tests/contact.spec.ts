@@ -162,3 +162,9 @@ test.describe('contact channels mobile layout', () => {
     });
   }
 });
+
+test('contact page stays free of scroll reveals (E7)', async ({ page }) => {
+  await page.goto('/contact');
+
+  await expect(page.locator('.reveal')).toHaveCount(0);
+});
