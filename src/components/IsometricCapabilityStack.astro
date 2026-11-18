@@ -35,6 +35,7 @@
     <rect x="372" y="80" width="16" height="524" fill="#FF2D20" opacity=".045"></rect>
     <rect x="452" y="80" width="16" height="524" fill="#FF2D20" opacity=".045"></rect>
     <line
+      class="stack-flow"
       x1="300"
       y1="82"
       x2="300"
@@ -44,6 +45,7 @@
       stroke-dasharray="3 6"
     ></line>
     <line
+      class="stack-flow"
       x1="380"
       y1="82"
       x2="380"
@@ -53,6 +55,7 @@
       stroke-dasharray="3 6"
     ></line>
     <line
+      class="stack-flow"
       x1="460"
       y1="82"
       x2="460"
@@ -246,6 +249,7 @@
     </text>
 
     <path
+      class="stack-flow-path"
       d="M88 550 H142 L176 532"
       fill="none"
       stroke="#FF2D20"
@@ -297,5 +301,34 @@
     height: auto;
     margin-left: -4%;
     overflow: visible;
+  }
+
+  /* Ambient stroke drift (spec §4 区块 1): the only site-wide ambient motion.
+     Dashoffset shift equals the dash period (3+6 / 3+4) so the 24s loop is seamless. */
+  .stack-flow {
+    animation: stack-flow-dash var(--duration-ambient) linear infinite;
+  }
+
+  .stack-flow-path {
+    animation: stack-flow-dash-path var(--duration-ambient) linear infinite;
+  }
+
+  @keyframes stack-flow-dash {
+    to {
+      stroke-dashoffset: -9;
+    }
+  }
+
+  @keyframes stack-flow-dash-path {
+    to {
+      stroke-dashoffset: -7;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .stack-flow,
+    .stack-flow-path {
+      animation: none;
+    }
   }
 </style>

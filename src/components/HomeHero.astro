@@ -163,31 +163,31 @@ import { structuralNote } from '../data/architecture';
   }
 
   .hero-copy > * {
-    animation: blur-up 900ms var(--ease-site) both;
+    animation: blur-up var(--duration-hero) var(--ease-site) both;
   }
 
   .hero-copy > *:nth-child(1) {
-    animation-delay: 60ms;
+    animation-delay: 0ms;
   }
 
   .hero-copy > *:nth-child(2) {
-    animation-delay: 140ms;
+    animation-delay: 200ms;
   }
 
   .hero-copy > *:nth-child(3) {
-    animation-delay: 220ms;
+    animation-delay: 400ms;
   }
 
   .hero-copy > *:nth-child(4) {
-    animation-delay: 300ms;
+    animation-delay: 600ms;
   }
 
   .hero-copy > *:nth-child(5) {
-    animation-delay: 380ms;
+    animation-delay: 800ms;
   }
 
   .hero-art {
-    animation: blur-up 1000ms var(--ease-site) 180ms both;
+    animation: blur-up var(--duration-hero) var(--ease-site) 1000ms both;
   }
 
   @keyframes blur-up {
