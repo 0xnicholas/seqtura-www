@@ -75,7 +75,7 @@ test('renders Chinese headings at weight 500 on the Instrument Sans heading stac
 test('home shows the four delivery facts in the proof strip', async ({ page }) => {
   await page.goto('/');
 
-  const facts = page.locator('[data-proof-fact]');
+  const facts = page.locator('.proof-strip .proof-cell');
   await expect(facts).toHaveCount(4);
   await expect(facts).toContainText(['8个交付阶段', '5层能力栈', '3条控制面', '1个主转化']);
 });
@@ -411,7 +411,7 @@ test('proof strip keeps its four facts on one row on desktop', async ({ page }) 
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('/');
 
-  const boxes = await page.locator('[data-proof-fact]').evaluateAll((elements) =>
+  const boxes = await page.locator('.proof-strip .proof-cell').evaluateAll((elements) =>
     elements.map((element) => {
       const rect = element.getBoundingClientRect();
       return { x: Math.round(rect.x), y: Math.round(rect.y) };
@@ -466,6 +466,77 @@ test('reduced motion leaves section content fully visible without entrance effec
   }
 });
 
+test('below-fold reveal sections enter once on scroll and stay revealed', async ({ page }) => {
+  await page.goto('/');
+
+  const target = page.locator('section#next-step .cta-inner');
+
+  const initial = await target.evaluate((node) => getComputedStyle(node).opacity);
+  expect(initial).toBe('0');
+
+  await target.scrollIntoViewIfNeeded();
+  await expect
+    .poll(async () => target.evaluate((node) => getComputedStyle(node).opacity), {
+      timeout: 3000,
+    })
+    .toBe('1');
+
+  const timing = await target.evaluate((node) => {
+    const style = getComputedStyle(node);
+    return { duration: style.animationDuration, delay: style.animationDelay };
+  });
+  expect(timing.duration).toBe('0.6s');
+  expect(timing.delay).toBe('0s');
+
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await target.scrollIntoViewIfNeeded();
+  const reentered = await target.evaluate((node) => getComputedStyle(node).opacity);
+  expect(reentered).toBe('1');
+  await page.waitForTimeout(300);
+  const settled = await target.evaluate((node) => getComputedStyle(node).opacity);
+  expect(settled).toBe('1');
+});
+
+test('proof strip participates in the scroll reveal', async ({ page }) => {
+  await page.goto('/');
+
+  const grid = page.locator('.proof-strip .proof-grid');
+  await expect(grid).toHaveClass(/reveal/);
+
+  const before = await grid.evaluate((node) => getComputedStyle(node).opacity);
+  expect(before).toBe('0');
+
+  await grid.scrollIntoViewIfNeeded();
+  await expect
+    .poll(async () => grid.evaluate((node) => getComputedStyle(node).opacity), {
+      timeout: 3000,
+    })
+    .toBe('1');
+});
+
+test('interactive transitions resolve to the shared micro duration and easing', async ({
+  page,
+}) => {
+  await page.goto('/');
+
+  for (const selector of ['.btn', '[data-fit-situation]']) {
+    const timing = await page
+      .locator(selector)
+      .first()
+      .evaluate((node) => {
+        const style = getComputedStyle(node);
+        return {
+          durations: style.transitionDuration.split(', '),
+          easings: style.transitionTimingFunction.split(', '),
+        };
+      });
+    expect(new Set(timing.durations), selector).toEqual(new Set(['0.15s']));
+    expect(new Set(timing.easings), selector).toEqual(
+      new Set(['cubic-bezier(0.22, 0.61, 0.36, 1)']),
+    );
+  }
+});
+
 test.describe('home at 390px', () => {
   test.use({ viewport: { width: 390, height: 844 } });
 
@@ -474,13 +545,13 @@ test.describe('home at 390px', () => {
 
     await expect(page.locator('[data-hero-art]')).toBeHidden();
 
-    const facts = await page.locator('[data-proof-fact]').evaluateAll((elements) =>
+    const facts = await page.locator('.proof-strip .proof-cell').evaluateAll((elements) =>
       elements.map((element) => {
         const rect = element.getBoundingClientRect();
         return { x: Math.round(rect.x), y: Math.round(rect.y), width: Math.round(rect.width) };
       }),
     );
-    const intro = await page.locator('[data-proof-intro]').boundingBox();
+    const intro = await page.locator('.proof-strip .proof-intro').boundingBox();
 
     expect(facts[0].x).toBe(facts[2].x);
     expect(facts[1].x).toBe(facts[3].x);

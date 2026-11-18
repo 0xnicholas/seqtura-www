@@ -113,7 +113,7 @@ const { architecture } = homeSections;
       radial-gradient(90% 80% at 100% 0%, rgb(255 45 32 / 16%), transparent 62%), var(--color-dark);
     box-shadow: var(--shadow-site-sm);
     color: #fff;
-    transition: box-shadow 150ms var(--ease-site);
+    transition: box-shadow var(--duration-micro) var(--ease-site);
   }
 
   .trace-card:hover {
@@ -239,7 +239,7 @@ const { architecture } = homeSections;
     border-radius: var(--radius-site-lg);
     background: var(--color-canvas);
     box-shadow: var(--shadow-site-xs);
-    transition: border-color 150ms var(--ease-site);
+    transition: border-color var(--duration-micro) var(--ease-site);
   }
 
   .control-card::before {

@@ -45,8 +45,8 @@ const { fit } = homeSections;
     background: var(--color-canvas);
     color: inherit;
     transition:
-      border-color 150ms var(--ease-site),
-      background-color 150ms var(--ease-site);
+      border-color var(--duration-micro) var(--ease-site),
+      background-color var(--duration-micro) var(--ease-site);
   }
 
   .fit-card::before {
@@ -101,7 +101,7 @@ const { fit } = homeSections;
   }
 
   .fit-link svg {
-    transition: transform 150ms var(--ease-site);
+    transition: transform var(--duration-micro) var(--ease-site);
   }
 
   .fit-card:hover .fit-link svg {

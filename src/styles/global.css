@@ -55,6 +55,10 @@
   --radius-site: 8px;
   --radius-site-lg: 12px;
   --ease-site: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --duration-micro: 150ms;
+  --duration-enter: 600ms;
+  --duration-hero: 1000ms;
+  --duration-ambient: 24s;
   --shadow-site-xs: 0 0 1px rgb(0 0 0 / 3%), 0 1px 2px rgb(0 0 0 / 6%);
   --shadow-site-sm: 0 1px 3px rgb(0 0 0 / 10%), 0 1px 2px -1px rgb(0 0 0 / 10%);
 }
@@ -328,9 +332,9 @@
     white-space: nowrap;
     cursor: pointer;
     transition:
-      background-color 50ms ease-out,
-      color 50ms ease-out,
-      border-color 50ms ease-out;
+      background-color var(--duration-micro) var(--ease-site),
+      color var(--duration-micro) var(--ease-site),
+      border-color var(--duration-micro) var(--ease-site);
   }
 
   .btn svg {
@@ -381,11 +385,11 @@
     font-weight: 500;
     line-height: 1.5;
     color: var(--color-red-dark);
-    transition: border-color 150ms var(--ease-site);
+    transition: border-color var(--duration-micro) var(--ease-site);
   }
 
   .text-link svg {
-    transition: transform 150ms var(--ease-site);
+    transition: transform var(--duration-micro) var(--ease-site);
   }
 
   .text-link:hover {
@@ -408,7 +412,7 @@
     font-size: 14px;
     line-height: 1.5;
     transform: translateY(-150%);
-    transition: transform 150ms var(--ease-site);
+    transition: transform var(--duration-micro) var(--ease-site);
   }
 
   .skip-link:focus {
@@ -440,8 +444,12 @@
     right: max(var(--gutter), calc((100vw - var(--container-site)) / 2));
   }
 
-  .reveal {
-    animation: section-in 600ms var(--ease-site) both;
+  .reveal.is-revealed {
+    animation: section-in var(--duration-enter) var(--ease-site) both;
+  }
+
+  html.js .reveal:not(.is-revealed) {
+    opacity: 0;
   }
 
   @keyframes section-in {
