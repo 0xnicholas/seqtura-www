@@ -17,6 +17,7 @@
     "test": "playwright test",
     "check:links": "node scripts/check-links.mjs",
     "check:sentinels": "node scripts/check-sentinels.mjs",
+    "check:consistency": "node scripts/check-consistency.mjs",
     "lighthouse": "lhci autorun"
   },
   "dependencies": {
