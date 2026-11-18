@@ -311,3 +311,16 @@ test.describe('process at 390px', () => {
     expect(overflow).toBeLessThanOrEqual(0);
   });
 });
+
+test('every section heading renders the mini isometric stack', async ({ page }) => {
+  await page.goto('/process');
+
+  const stacks = page.locator('.section-heading svg.mini-stack');
+  await expect(stacks).toHaveCount(2);
+  await expect(page.locator('.mini-stack')).toHaveCount(2);
+
+  for (const stack of await stacks.all()) {
+    await expect(stack).toHaveAttribute('aria-hidden', 'true');
+    await expect(stack).toHaveCSS('height', '120px');
+  }
+});
