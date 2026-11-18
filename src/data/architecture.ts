@@ -24,9 +24,9 @@ export const architectureLayers: readonly ArchitectureLayer[] = [
     label: 'Ingress & Orchestration',
     responsibility: '任务从哪来、下一步由代码还是模型决定、何时交给人。',
     constraint:
-      'Workflow 可预测但覆盖有限；Agent 灵活但需要护栏；多 Agent handoff 增加状态与责任边界。',
+      'Workflow可预测但覆盖有限；Agent灵活但需要护栏；多Agent handoff增加状态与责任边界。',
     practice:
-      '先 workflow 后 agent；单 Agent 优先；多 Agent 只在职责边界清楚时用；HITL gate 放在敏感工具调用前。',
+      '先workflow后agent；单Agent优先；多Agent只在职责边界清楚时用；HITL gate放在敏感工具调用前。',
     summary: '任务入口 / Workflow / HITL gate / 状态与重放',
     chips: ['Workflow', 'HITL', '路由'],
     marks: ['human'],
@@ -48,10 +48,9 @@ export const architectureLayers: readonly ArchitectureLayer[] = [
     no: 'L3',
     name: '工具与系统集成',
     label: 'Tools & Integration',
-    responsibility: '把客户系统暴露为 Agent 可调用的工具。',
+    responsibility: '把客户系统暴露为Agent可调用的工具。',
     constraint: '工具是权限边界；每次调用都要校验；写操作需要幂等 / 回滚。',
-    practice:
-      'MCP / OpenAPI 按标准协议接入；工具注册与最小权限；沙箱联调；工具调用处设权限检查点。',
+    practice: 'MCP / OpenAPI按标准协议接入；工具注册与最小权限；沙箱联调；工具调用处设权限检查点。',
     summary: '标准接入 / 最小权限 / 沙箱联调 / 幂等回滚',
     chips: ['MCP', 'OpenAPI', '最小权限'],
     marks: ['lock', 'record'],
@@ -61,10 +60,10 @@ export const architectureLayers: readonly ArchitectureLayer[] = [
     no: 'L4',
     name: '知识与记忆',
     label: 'Knowledge & Memory',
-    responsibility: '让 Agent 拿到正确的业务知识，并在多轮 / 跨会话中保持状态。',
+    responsibility: '让Agent拿到正确的业务知识，并在多轮 / 跨会话中保持状态。',
     constraint: '检索必须带权限过滤；引用要可追溯；长期记忆涉及保留 / 删除 / 合规。',
     practice:
-      'ingestion → 解析 → 索引 → 检索 → 引用；检索时 ACL；短期会话状态与长期记忆分开；记忆策略写入方案架构。',
+      'ingestion → 解析 → 索引 → 检索 → 引用；检索时ACL；短期会话状态与长期记忆分开；记忆策略写入方案架构。',
     summary: '业务本体 / 检索 / 会话记忆 / 权限过滤',
     chips: ['RAG', 'ACL', '引用'],
     marks: ['lock'],
@@ -74,7 +73,7 @@ export const architectureLayers: readonly ArchitectureLayer[] = [
     no: 'L5',
     name: '运行时与部署',
     label: 'Runtime & Deployment',
-    responsibility: 'Agent 跑在哪、如何隔离、如何升级 / 回滚 / 监控。',
+    responsibility: 'Agent跑在哪、如何隔离、如何升级 / 回滚 / 监控。',
     constraint: '部署形态决定数据边界、运维责任与成本；自托管增加客户运维负担。',
     practice:
       '按三档部署模型（SaaS / 专属实例 / 自托管）；会话隔离与沙箱；监控 / 告警 / 回滚；上线检查清单与运行手册。',
@@ -110,11 +109,11 @@ export const controlPlanes: readonly ControlPlane[] = [
     short: 'C1',
     name: '身份与权限',
     label: 'Identity & Access',
-    manages: '架构要求 Agent 独立身份、委派与最小权限。',
+    manages: '架构要求Agent独立身份、委派与最小权限。',
     lands: '每次工具调用、每次数据访问。',
     verifies: '权限矩阵 + 审计记录 + 越权测试。',
     summary:
-      '每次工具调用都应有主体、权限与审批记录；读、写、外发分开授权，敏感操作经过 HITL gate。',
+      '每次工具调用都应有主体、权限与审批记录；读、写、外发分开授权，敏感操作经过HITL gate。',
     chips: ['RBAC', '审批', '最小权限'],
   },
   {
@@ -124,8 +123,8 @@ export const controlPlanes: readonly ControlPlane[] = [
     name: '评测与可观测',
     label: 'Evaluation & Observability',
     manages: '离线 / 在线评测、检索 / 工具 / 任务三层指标、trace。',
-    lands: '评测集、生产 trace、发布门禁。',
-    verifies: '评测报告 + trace 回放。',
+    lands: '评测集、生产trace、发布门禁。',
+    verifies: '评测报告 + trace回放。',
     summary:
       '评测集、trace、成本与失败案例放在同一视图；上线前按同一套标准打分，上线后持续用真实任务回归。',
     chips: ['评测集', 'Trace', '成本'],
@@ -136,7 +135,7 @@ export const controlPlanes: readonly ControlPlane[] = [
     short: 'C3',
     name: '策略与审计',
     label: 'Policy & Audit',
-    manages: 'guardrail、审批 gate、审计字段、保留与数据边界。',
+    manages: 'guardrail、审批gate、审计字段、保留与数据边界。',
     lands: '输入 / 输出 / 工具调用。',
     verifies: '策略清单 + 审计导出 + 审批记录。',
     summary: '策略在工具调用前生效，审计字段覆盖输入、检索、工具调用与输出，可回放到具体一步。',
@@ -168,7 +167,7 @@ export const traceSteps: readonly TraceStep[] = [
 export const architectureCopy = {
   hero: {
     kicker: '技术架构 / 交付参考架构',
-    title: '一个能上生产的 Agent 系统，由什么构成',
+    title: '一个能上生产的Agent系统，由什么构成',
     lead: '可私有化、可审计、模型可替换的交付参考架构；从一次任务的进入，到上线后的迭代。',
     tags: ['可私有化', '可审计', '模型可替换'],
     primaryCta: '和架构师聊聊',
@@ -190,7 +189,7 @@ export const architectureCopy = {
   layers: {
     kicker: '03 / 能力栈',
     title: '五层能力栈，按职责与边界划分。',
-    lead: '每一层都写清负责什么、关键约束与我们的做法；能力 chip 只列机制，不展开具体选型。',
+    lead: '每一层都写清负责什么、关键约束与我们的做法；能力chip只列机制，不展开具体选型。',
     caption: '五层能力栈：负责什么、关键约束、我们的做法与能力。',
   },
   controls: {
@@ -208,7 +207,7 @@ export const architectureCopy = {
   scenarios: {
     kicker: '06 / 典型场景',
     title: '三个典型场景，把架构映射到业务问题。',
-    lead: '每个场景都写清 Agent 做什么、用到哪几层、人在哪里介入、怎么评测。',
+    lead: '每个场景都写清Agent做什么、用到哪几层、人在哪里介入、怎么评测。',
     note: '典型场景示意，非客户案例。',
   },
   metrics: {
@@ -219,7 +218,7 @@ export const architectureCopy = {
   },
   closing: {
     kicker: '下一步',
-    title: '方法论讲怎么把 Agent 做对；这页讲系统长什么样、凭什么敢上线。',
+    title: '方法论讲怎么把Agent做对；这页讲系统长什么样、凭什么敢上线。',
     lead: '带上一个具体场景，我们一起判断它该落在哪几层、哪一档部署，以及第一个验证切片怎么做。',
     primaryCta: '和架构师聊聊',
     secondaryCta: '看工作方法论',
@@ -228,7 +227,7 @@ export const architectureCopy = {
 } as const;
 
 export const overviewConclusions: readonly string[] = [
-  'Agent 不是一个模型调用，而是一条有状态的执行链：接入 → 编排 → 模型 → 工具 / 知识 → 人 → 输出。',
+  'Agent不是一个模型调用，而是一条有状态的执行链：接入 → 编排 → 模型 → 工具 / 知识 → 人 → 输出。',
   '敢上线靠三条横切控制面：身份与权限、评测与可观测、策略与审计；安全不是最后一层。',
   '架构按交付边界划分：我们交付组件与模式，客户保留系统、数据、身份与审批权。',
 ];
@@ -260,7 +259,7 @@ export const overviewZones: readonly OverviewZone[] = [
 
 export const overviewBoundary = {
   tag: 'ZONE B / 交付边界',
-  title: 'Seqtura 交付边界',
+  title: 'Seqtura交付边界',
   sub: '组件与模式',
   flow: '请求 / 数据流穿过五层；控制面横切每一次调用',
 } as const;
@@ -278,7 +277,7 @@ export const architectureLegend: readonly ArchitectureLegendItem[] = [
   { id: 'hitl', marker: 'human', label: '人 = HITL gate' },
   { id: 'trace', marker: 'dotted', label: '点线 = trace' },
   { id: 'audit', marker: 'record', label: '记录 = audit' },
-  { id: 'boundary', marker: 'boundary', label: '虚线框 = Seqtura 交付边界' },
+  { id: 'boundary', marker: 'boundary', label: '虚线框 = Seqtura交付边界' },
 ];
 
 export interface DeploymentTier {
@@ -318,7 +317,7 @@ export const deploymentTiers: readonly DeploymentTier[] = [
     no: 'D3',
     name: '自托管',
     label: '客户环境',
-    operator: '客户运维；Seqtura 提供组件、模式与运行手册。',
+    operator: '客户运维；Seqtura提供组件、模式与运行手册。',
     data: '数据留在客户自有环境，日志与备份由客户控制。',
     offline: '按所选模型与部署条件确认；不默认承诺离线。',
     when: '数据边界或网络隔离要求最高时评估。',
@@ -352,14 +351,14 @@ export const lifecycleNodes: readonly LifecycleNode[] = [
     no: '02',
     name: '编排决策',
     label: 'Orchestrate',
-    description: '由 workflow 决定下一步，或由 agent 在护栏内选择；状态与责任边界写入执行记录。',
+    description: '由workflow决定下一步，或由agent在护栏内选择；状态与责任边界写入执行记录。',
   },
   {
     id: 'model-route',
     no: '03',
     name: '模型选择',
     label: 'Model Route',
-    description: '按任务复杂度与上下文窗口选择模型；失败时按规则 fallback。',
+    description: '按任务复杂度与上下文窗口选择模型；失败时按规则fallback。',
   },
   {
     id: 'tools-knowledge',
@@ -392,17 +391,17 @@ export const lifecycleNodes: readonly LifecycleNode[] = [
 export const lifecycleConstraints = [
   {
     id: 'workflow',
-    title: 'Workflow 可预测，但覆盖有限。',
+    title: 'Workflow可预测，但覆盖有限。',
     body: '固定路径容易验证，遇到长尾就要靠人工兜底与规则补丁。',
   },
   {
     id: 'agent',
-    title: 'Agent 更灵活，但需要护栏与评测。',
+    title: 'Agent更灵活，但需要护栏与评测。',
     body: '自主选择下一步，必须用权限、工具边界与评测集约束。',
   },
   {
     id: 'hitl',
-    title: 'HITL 增加时延，路由受最小模型上下文限制。',
+    title: 'HITL增加时延，路由受最小模型上下文限制。',
     body: '人工审批与模型切换都要计入端到端时延与成本。',
   },
 ] as const;
@@ -437,9 +436,9 @@ export const enterpriseConcerns: readonly EnterpriseConcern[] = [
     id: 'identity',
     no: '03',
     title: '身份、权限与审计',
-    question: 'Agent 会不会拿着过大的权限行动？',
+    question: 'Agent会不会拿着过大的权限行动？',
     mechanism:
-      '架构要求 Agent 使用独立身份、最小权限，并在每次工具调用时校验；审计应能回答“谁 / 什么身份 / 调了什么工具 / 改了什么数据”。',
+      '架构要求Agent使用独立身份、最小权限，并在每次工具调用时校验；审计应能回答“谁 / 什么身份 / 调了什么工具 / 改了什么数据”。',
     boundary: '客户身份源与审批流程仍在客户侧。',
   },
   {
@@ -447,8 +446,7 @@ export const enterpriseConcerns: readonly EnterpriseConcern[] = [
     no: '04',
     title: '模型路由与成本',
     question: '会不会被单一模型锁定，成本失控？',
-    mechanism:
-      '按任务复杂度选模型、fallback、按任务 / Agent 观测 token 与成本；模型层按可替换设计。',
+    mechanism: '按任务复杂度选模型、fallback、按任务 / Agent观测token与成本；模型层按可替换设计。',
     boundary: '路由受最小模型限制，效果需自有评测集验证。',
   },
   {
@@ -456,8 +454,8 @@ export const enterpriseConcerns: readonly EnterpriseConcern[] = [
     no: '05',
     title: '评测与可观测',
     question: '上线后怎么知道它变好还是变坏？',
-    mechanism: '三层指标、离线 / 在线评测、trace 与 audit 分开；评测结果进入发布门禁与迭代。',
-    boundary: '不报未经验证的数字；trace 用于排障，audit 用于合规，不能互替。',
+    mechanism: '三层指标、离线 / 在线评测、trace与audit分开；评测结果进入发布门禁与迭代。',
+    boundary: '不报未经验证的数字；trace用于排障，audit用于合规，不能互替。',
   },
 ];
 
@@ -545,7 +543,7 @@ export const architectureMetrics: readonly ArchitectureMetric[] = [
     id: 'task-success',
     no: '01',
     name: '任务成功率',
-    use: '判断 Agent 是否真正完成任务；用于发布门禁与上线后回归。',
+    use: '判断Agent是否真正完成任务；用于发布门禁与上线后回归。',
   },
   {
     id: 'tool-correctness',
@@ -562,13 +560,13 @@ export const architectureMetrics: readonly ArchitectureMetric[] = [
   {
     id: 'latency',
     no: '04',
-    name: 'P95 时延',
+    name: 'P95时延',
     use: '观察端到端响应；用于容量与体验权衡。',
   },
   {
     id: 'cost',
     no: '05',
     name: '单任务成本',
-    use: '按任务 / Agent 归集 token 与调用成本；用于模型路由与预算。',
+    use: '按任务 / Agent归集token与调用成本；用于模型路由与预算。',
   },
 ];

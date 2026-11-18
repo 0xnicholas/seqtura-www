@@ -25,7 +25,7 @@ export const footerColumns: readonly FooterColumn[] = [
   {
     title: '交付',
     links: [
-      { href: '/methodology#stages', label: '8 阶段交付' },
+      { href: '/methodology#stages', label: '8阶段交付' },
       { href: '/architecture#overview', label: '参考架构' },
       { href: '/process#stages', label: '验证切片' },
       { href: '/process#support', label: '支持期' },
@@ -44,7 +44,7 @@ export const footerColumns: readonly FooterColumn[] = [
 export const site = {
   name: 'Seqtura AI',
   nameCn: '序构 AI',
-  tagline: '把 AI Agent 从演示做到上线。',
+  tagline: '把AI Agent从演示做到上线。',
   defaultTitle: 'Seqtura AI（序构 AI）｜企业 AI Agent 的工程化交付',
   description: '把 AI Agent 从演示做到上线：8 阶段交付方法、可私有化的参考架构、可审计的工程边界。',
   contactPath: '/contact#channels',
