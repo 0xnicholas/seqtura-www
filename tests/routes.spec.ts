@@ -63,3 +63,9 @@ test('unknown routes return 404 with a noindex page', async ({ page }) => {
     '/contact#channels',
   );
 });
+
+test('the 404 page stays free of scroll reveals', async ({ page }) => {
+  await page.goto('/does-not-exist');
+
+  await expect(page.locator('.reveal')).toHaveCount(0);
+});

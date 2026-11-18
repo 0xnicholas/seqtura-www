@@ -432,3 +432,10 @@ test.describe('configured filing and operator values', () => {
     await expect(page.locator('body')).not.toContainText('暂未公开');
   });
 });
+
+test('legal pages stay free of scroll reveals', async ({ page }) => {
+  for (const route of ['/legal/privacy', '/legal/terms']) {
+    await page.goto(route);
+    await expect(page.locator('.reveal')).toHaveCount(0);
+  }
+});

@@ -904,3 +904,11 @@ test('every section heading renders the mini isometric stack', async ({ page }) 
     await expect(stack).toHaveCSS('height', '120px');
   }
 });
+
+test('metric numbers keep proportional figures (E6 negative)', async ({ page }) => {
+  await page.goto('/architecture');
+
+  for (const no of await page.locator('.metric-no').all()) {
+    await expect(no).toHaveCSS('font-variant-numeric', 'normal');
+  }
+});
