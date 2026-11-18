@@ -891,3 +891,16 @@ test('self-hosted offline capability stays conditional', async ({ page }) => {
   await expect(offline).toContainText('按所选模型与部署条件确认');
   await expect(offline).not.toContainText('可以；');
 });
+
+test('every section heading renders the mini isometric stack', async ({ page }) => {
+  await page.goto('/architecture');
+
+  const stacks = page.locator('.section-heading svg.mini-stack');
+  await expect(stacks).toHaveCount(7);
+  await expect(page.locator('.mini-stack')).toHaveCount(7);
+
+  for (const stack of await stacks.all()) {
+    await expect(stack).toHaveAttribute('aria-hidden', 'true');
+    await expect(stack).toHaveCSS('height', '120px');
+  }
+});

@@ -269,6 +269,59 @@ test('structural illustrations are labelled as non-client data', async ({ page }
   }
 });
 
+test('section headings render the mini isometric stack as a static inline SVG', async ({
+  page,
+}) => {
+  await page.goto('/');
+
+  const stacks = page.locator('.section-heading svg.mini-stack');
+  await expect(stacks).toHaveCount(4);
+  await expect(page.locator('.mini-stack')).toHaveCount(4);
+  await expect(page.locator('.section-heading img')).toHaveCount(0);
+
+  const expectedRed = await page.evaluate(() => {
+    const probe = document.createElement('div');
+    probe.style.color = 'var(--color-red)';
+    document.body.append(probe);
+    const value = getComputedStyle(probe).color;
+    probe.remove();
+    return value;
+  });
+
+  for (const stack of await stacks.all()) {
+    await expect(stack).toHaveAttribute('aria-hidden', 'true');
+
+    const state = await stack.evaluate((node) => {
+      const style = getComputedStyle(node);
+      const redSlab = node.querySelector('.mini-stack-red');
+      return {
+        height: style.height,
+        animationName: style.animationName,
+        transitionDuration: style.transitionDuration,
+        polygons: node.querySelectorAll('polygon').length,
+        redSlabs: node.querySelectorAll('.mini-stack-red').length,
+        redFill: redSlab ? getComputedStyle(redSlab).fill : null,
+        externalRefs: node.querySelectorAll('image, use, foreignObject').length,
+      };
+    });
+    expect(state.height).toBe('120px');
+    expect(state.animationName).toBe('none');
+    expect(state.transitionDuration).toBe('0s');
+    expect(state.polygons).toBe(9);
+    expect(state.redSlabs).toBe(3);
+    expect(state.redFill).toBe(expectedRed);
+    expect(state.externalRefs).toBe(0);
+
+    const stackBox = await stack.boundingBox();
+    const kickerBox = await stack
+      .locator('xpath=following-sibling::p[contains(@class,"kicker")]')
+      .boundingBox();
+    expect(
+      Math.abs(stackBox!.x + stackBox!.width / 2 - (kickerBox!.x + kickerBox!.width / 2)),
+    ).toBeLessThanOrEqual(1);
+  }
+});
+
 test('home page makes no customer-proof or certification claims', async ({ page }) => {
   await page.goto('/');
 
