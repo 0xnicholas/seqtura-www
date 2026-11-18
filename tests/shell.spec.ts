@@ -27,6 +27,19 @@ test('header carries the four-section navigation and a persistent booking action
   await expect(header).toBeVisible();
 });
 
+test('body enables CJK autospace and punctuation trim', async ({ page }) => {
+  await page.goto('/');
+
+  const spacing = await page.evaluate(() => {
+    const style = getComputedStyle(document.body);
+    return {
+      textAutospace: style.getPropertyValue('text-autospace'),
+      textSpacingTrim: style.getPropertyValue('text-spacing-trim'),
+    };
+  });
+  expect(spacing).toEqual({ textAutospace: 'normal', textSpacingTrim: 'normal' });
+});
+
 test('current page is highlighted in the header', async ({ page }) => {
   await page.goto('/architecture');
 
@@ -47,7 +60,7 @@ test('footer provides site, delivery and contact columns plus legal links', asyn
   await expect(footer.getByRole('heading', { name: '站点' })).toBeVisible();
   await expect(footer.getByRole('heading', { name: '交付' })).toBeVisible();
   await expect(footer.getByRole('heading', { name: '联系' })).toBeVisible();
-  await expect(footer.getByRole('link', { name: '8 阶段交付' })).toHaveAttribute(
+  await expect(footer.getByRole('link', { name: '8阶段交付' })).toHaveAttribute(
     'href',
     '/methodology#stages',
   );

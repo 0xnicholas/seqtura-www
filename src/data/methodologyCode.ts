@@ -20,7 +20,7 @@ export const codeFiles: readonly CodeFile[] = [
     id: 'delivery',
     name: 'delivery.yml',
     lines: [
-      { tokens: [{ text: '# delivery.yml — 8 阶段 / 3 个门禁', kind: 'comment' }] },
+      { tokens: [{ text: '# delivery.yml — 8阶段 / 3个门禁', kind: 'comment' }] },
       {
         tokens: [
           { text: 'stages', kind: 'key' },
@@ -38,14 +38,14 @@ export const codeFiles: readonly CodeFile[] = [
         tokens: [
           { text: '  diagnose', kind: 'key' },
           { text: ':', kind: 'punct' },
-          { text: '    问题定义 + ROI 假设', kind: 'str' },
+          { text: '    问题定义 + ROI假设', kind: 'str' },
         ],
       },
       {
         tokens: [
           { text: '  define', kind: 'key' },
           { text: ':', kind: 'punct' },
-          { text: '      Agent 规格卡 / 验收标准 / 评测集 v0', kind: 'str' },
+          { text: '      Agent规格卡 / 验收标准 / 评测集v0', kind: 'str' },
         ],
       },
       {
@@ -73,7 +73,7 @@ export const codeFiles: readonly CodeFile[] = [
         tokens: [
           { text: '  deploy', kind: 'key' },
           { text: ':', kind: 'punct' },
-          { text: '      生产 Agent', kind: 'str' },
+          { text: '      生产Agent', kind: 'str' },
         ],
       },
       {
@@ -94,14 +94,14 @@ export const codeFiles: readonly CodeFile[] = [
         tokens: [
           { text: '  define', kind: 'key' },
           { text: ':', kind: 'punct' },
-          { text: '    验收标准未定，不进入 Build', kind: 'comment' },
+          { text: '    验收标准未定，不进入Build', kind: 'comment' },
         ],
       },
       {
         tokens: [
           { text: '  validate', kind: 'key' },
           { text: ':', kind: 'punct' },
-          { text: '  评测集未锁定，不进入 Deploy', kind: 'comment' },
+          { text: '  评测集未锁定，不进入Deploy', kind: 'comment' },
         ],
       },
       {
@@ -117,11 +117,11 @@ export const codeFiles: readonly CodeFile[] = [
     id: 'validate',
     name: 'gate-validate.md',
     lines: [
-      { tokens: [{ text: '# gate-validate.md — 能否进入 Deploy？', kind: 'comment' }] },
+      { tokens: [{ text: '# gate-validate.md — 能否进入Deploy？', kind: 'comment' }] },
       {
         tokens: [
           { text: '- [x]', kind: 'add' },
-          { text: ' 评测集在 Build 前锁定', kind: 'str' },
+          { text: ' 评测集在Build前锁定', kind: 'str' },
         ],
       },
       {
@@ -148,7 +148,7 @@ export const codeFiles: readonly CodeFile[] = [
         tokens: [
           { text: 'decision', kind: 'key' },
           { text: ':', kind: 'punct' },
-          { text: ' 未全部通过，不进入 Deploy', kind: 'str' },
+          { text: ' 未全部通过，不进入Deploy', kind: 'str' },
         ],
       },
       {

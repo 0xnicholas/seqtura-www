@@ -44,7 +44,7 @@ test('process flow shows six nodes with typical durations, client roles and thre
     '交付与验收',
     '上线后支持',
   ];
-  const durations = ['1 次', '1–2 周', '3–5 个工作日', '1–2 周', '4–12 周', '按合同'];
+  const durations = ['1次', '1–2周', '3–5个工作日', '1–2周', '4–12周', '按合同'];
   const roles = [
     '业务发起人',
     '业务专家 + IT + sponsor',
@@ -97,35 +97,35 @@ test('process stage table carries cycle, participants, client input, outputs, bo
     {
       id: 'intro',
       name: '初次沟通',
-      cycle: '1 次沟通',
+      cycle: '1次沟通',
       client: '业务发起人，技术对接人可同来',
       copy: '围绕一个具体业务场景，说明现状、瓶颈与预期结果。沟通结束给出判断：是否值得进入评估。',
     },
     {
       id: 'assessment',
       name: '需求与可行性评估',
-      cycle: '1–2 周',
-      client: '业务专家 + IT / 数据对接人 + 业务 sponsor',
+      cycle: '1–2周',
+      client: '业务专家 + IT / 数据对接人 + 业务sponsor',
       copy: '核定范围、前提与风险，给出结论：做、不做，或先做哪一步。',
     },
     {
       id: 'proposal',
       name: '方案与报价',
-      cycle: '3–5 个工作日',
-      client: '业务 sponsor，采购 / 法务按需',
+      cycle: '3–5个工作日',
+      client: '业务sponsor，采购 / 法务按需',
       copy: '按已确认范围报价，验收标准随报价一并给出。范围变动重新报价；范围未定不出价。',
     },
     {
       id: 'contract',
       name: '合同与启动',
-      cycle: '1–2 周，取决于采购流程',
-      client: '采购 / 法务 + 业务 sponsor + 项目对接人',
+      cycle: '1–2周，取决于采购流程',
+      client: '采购 / 法务 + 业务sponsor + 项目对接人',
       copy: '合同生效后开工。启动会确定对接人、验收人与交付排期；采购周期不计入交付周期。',
     },
     {
       id: 'delivery',
       name: '交付与验收',
-      cycle: '4–12 周，视范围，以报价排期为基准',
+      cycle: '4–12周，视范围，以报价排期为基准',
       client: '业务专家 + IT（环境与权限）+ 验收人',
       copy: '按周交付，按合同的验收标准逐项判定。验收以记录与评测结果为依据，不以演示为准。',
     },
@@ -173,7 +173,7 @@ test('pricing principles state the commercial model and the support boundary', a
     ['范围变更重新报价', ['不按人天追加', '范围未定不报固定总价、不报固定工期']],
     [
       '最小项目规模',
-      ['一个能真正上线的 Agent 场景', '不接只做演示、只评估不上线、或纯人力外包的项目'],
+      ['一个能真正上线的Agent场景', '不接只做演示、只评估不上线、或纯人力外包的项目'],
     ],
     ['上线后支持', ['按次或按项目另行约定，不做年度订阅']],
     ['价格不公开', ['不公开起步价、区间与套餐', '报价随方案给']],
@@ -195,7 +195,7 @@ test('pricing principles state the commercial model and the support boundary', a
   await expect(support.locator('[data-support-boundary]')).toHaveCount(3);
   for (const boundary of [
     '不含新场景开发，按新项目走。',
-    '不含 7×24 值守。',
+    '不含7×24值守。',
     '响应与范围逐次约定。',
   ]) {
     await expect(support.getByText(boundary, { exact: true })).toBeVisible();
@@ -290,7 +290,7 @@ test.describe('process at 390px', () => {
     await first.locator('summary').click();
     await expect(first).toHaveAttribute('open', '');
     await expect(first.getByText('不出方案、不报价、不做技术验证')).toBeVisible();
-    await expect(first.locator('summary').getByText('1 次沟通')).toBeVisible();
+    await expect(first.locator('summary').getByText('1次沟通')).toBeVisible();
 
     const second = cards.nth(1);
     await second.locator('summary').focus();
@@ -310,4 +310,17 @@ test.describe('process at 390px', () => {
     );
     expect(overflow).toBeLessThanOrEqual(0);
   });
+});
+
+test('every section heading renders the mini isometric stack', async ({ page }) => {
+  await page.goto('/process');
+
+  const stacks = page.locator('.section-heading svg.mini-stack');
+  await expect(stacks).toHaveCount(2);
+  await expect(page.locator('.mini-stack')).toHaveCount(2);
+
+  for (const stack of await stacks.all()) {
+    await expect(stack).toHaveAttribute('aria-hidden', 'true');
+    await expect(stack).toHaveCSS('height', '120px');
+  }
 });
