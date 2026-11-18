@@ -253,3 +253,44 @@ test('200% zoom approximation stays usable without page-level overflow', async (
   const box = await cta.boundingBox();
   expect(box?.height ?? 0).toBeGreaterThanOrEqual(44);
 });
+
+// §6.3: every hand-written CJK-Latin space is gone, so autospace is the only
+// thing widening the gap. `.visually-hidden` copy is addressed to assistive
+// tech (autospace cannot double it up) and stays as written.
+const renderedRoutes = [
+  '/',
+  '/methodology',
+  '/architecture',
+  '/process',
+  '/contact',
+  '/legal/privacy',
+  '/legal/terms',
+  '/this-page-does-not-exist',
+];
+
+for (const route of renderedRoutes) {
+  test(`${route} renders no hand-written CJK-Latin spaces`, async ({ page }) => {
+    await page.goto(route);
+
+    const leftovers = await page.evaluate(() => {
+      const hidden = [...document.querySelectorAll('.visually-hidden')];
+      const previous = hidden.map((element) => element.getAttribute('style'));
+      for (const element of hidden) element.setAttribute('style', 'display: none !important');
+      const text = document.body.innerText;
+      hidden.forEach((element, index) => {
+        const style = previous[index];
+        if (style === null) element.removeAttribute('style');
+        else element.setAttribute('style', style);
+      });
+
+      const spacing =
+        /(?<=[\p{Script=Han}]) (?=[A-Za-z0-9])|(?<=[A-Za-z0-9]) (?=[\p{Script=Han}])/gu;
+      return [...text.matchAll(spacing)].map((match) => {
+        const start = Math.max(0, (match.index ?? 0) - 20);
+        return text.slice(start, start + 40).replace(/\n/g, ' / ');
+      });
+    });
+
+    expect(leftovers, `${route} hand-writes spaces that autospace widens again`).toEqual([]);
+  });
+}
