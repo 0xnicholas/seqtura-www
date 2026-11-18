@@ -10,6 +10,8 @@ const { id, kicker, title, lead } = Astro.props;
 ---
 
 <header class="section-heading reveal">
+  {/* Neutral slab faces + stroke keep the literal #171717 on purpose, mirroring the hero master
+      (IsometricCapabilityStack.astro) and --color-ink: #171717; only the red faces take the token. */}
   <svg class="mini-stack" viewBox="0 0 72 56" aria-hidden="true">
     <g stroke="#171717" stroke-opacity=".18">
       <polygon points="36,8 62,18 36,28 10,18" fill="#171717" fill-opacity=".1" />

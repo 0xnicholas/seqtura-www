@@ -431,3 +431,9 @@ test('every section heading renders the mini isometric stack', async ({ page }) 
     await expect(stack).toHaveCSS('height', '120px');
   }
 });
+
+test('methodology keeps its §5.2 reveal inventory', async ({ page }) => {
+  await page.goto('/methodology');
+
+  await expect(page.locator('.reveal')).toHaveCount(12);
+});

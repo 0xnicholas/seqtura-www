@@ -912,3 +912,13 @@ test('metric numbers keep proportional figures (E6 negative)', async ({ page }) 
     await expect(no).toHaveCSS('font-variant-numeric', 'normal');
   }
 });
+
+test('architecture keeps its §5.2 reveal inventory and never reveals diagram internals', async ({
+  page,
+}) => {
+  await page.goto('/architecture');
+
+  await expect(page.locator('.reveal')).toHaveCount(18);
+  await expect(page.locator('[data-arch-diagram] .reveal')).toHaveCount(0);
+  await expect(page.locator('[data-lifecycle-diagram] .reveal')).toHaveCount(0);
+});
