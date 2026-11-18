@@ -259,6 +259,29 @@ test('every primary CTA on the home page lands on the contact channels', async (
   }
 });
 
+test('brand red tokens render the §3.1 target values in computed styles', async ({ page }) => {
+  await page.goto('/');
+
+  const tick = await page
+    .locator('[data-fit-situation]')
+    .first()
+    .evaluate((element) => {
+      const style = getComputedStyle(element, '::before');
+      return { background: style.backgroundColor, width: style.width, height: style.height };
+    });
+  expect(tick.width).toBe('7px');
+  expect(tick.height).toBe('7px');
+  expect(tick.background).toBe('rgb(255, 45, 32)');
+
+  const primaryCta = page.locator('main [data-primary-cta]').first();
+  await expect(primaryCta).toHaveCSS('background-color', 'rgb(205, 35, 24)');
+  await primaryCta.hover();
+  await expect(primaryCta).toHaveCSS('background-color', 'rgb(170, 27, 18)');
+
+  await expect(page.locator('main .kicker').first()).toHaveCSS('color', 'rgb(205, 35, 24)');
+  await expect(page.locator('main .text-link').first()).toHaveCSS('color', 'rgb(205, 35, 24)');
+});
+
 test('structural illustrations are labelled as non-client data', async ({ page }) => {
   await page.goto('/');
 
@@ -266,6 +289,59 @@ test('structural illustrations are labelled as non-client data', async ({ page }
   await expect(notes).toHaveCount(4);
   for (const note of await notes.all()) {
     await expect(note).toHaveText('结构示意，非客户项目数据');
+  }
+});
+
+test('section headings render the mini isometric stack as a static inline SVG', async ({
+  page,
+}) => {
+  await page.goto('/');
+
+  const stacks = page.locator('.section-heading svg.mini-stack');
+  await expect(stacks).toHaveCount(4);
+  await expect(page.locator('.mini-stack')).toHaveCount(4);
+  await expect(page.locator('.section-heading img')).toHaveCount(0);
+
+  const expectedRed = await page.evaluate(() => {
+    const probe = document.createElement('div');
+    probe.style.color = 'var(--color-red)';
+    document.body.append(probe);
+    const value = getComputedStyle(probe).color;
+    probe.remove();
+    return value;
+  });
+
+  for (const stack of await stacks.all()) {
+    await expect(stack).toHaveAttribute('aria-hidden', 'true');
+
+    const state = await stack.evaluate((node) => {
+      const style = getComputedStyle(node);
+      const redSlab = node.querySelector('.mini-stack-red');
+      return {
+        height: style.height,
+        animationName: style.animationName,
+        transitionDuration: style.transitionDuration,
+        polygons: node.querySelectorAll('polygon').length,
+        redSlabs: node.querySelectorAll('.mini-stack-red').length,
+        redFill: redSlab ? getComputedStyle(redSlab).fill : null,
+        externalRefs: node.querySelectorAll('image, use, foreignObject').length,
+      };
+    });
+    expect(state.height).toBe('120px');
+    expect(state.animationName).toBe('none');
+    expect(state.transitionDuration).toBe('0s');
+    expect(state.polygons).toBe(9);
+    expect(state.redSlabs).toBe(3);
+    expect(state.redFill).toBe(expectedRed);
+    expect(state.externalRefs).toBe(0);
+
+    const stackBox = await stack.boundingBox();
+    const kickerBox = await stack
+      .locator('xpath=following-sibling::p[contains(@class,"kicker")]')
+      .boundingBox();
+    expect(
+      Math.abs(stackBox!.x + stackBox!.width / 2 - (kickerBox!.x + kickerBox!.width / 2)),
+    ).toBeLessThanOrEqual(1);
   }
 });
 

@@ -418,3 +418,16 @@ test('methodology keeps one H1 and never skips a heading level', async ({ page }
     ).toBeLessThanOrEqual(1);
   }
 });
+
+test('every section heading renders the mini isometric stack', async ({ page }) => {
+  await page.goto('/methodology');
+
+  const stacks = page.locator('.section-heading svg.mini-stack');
+  await expect(stacks).toHaveCount(5);
+  await expect(page.locator('.mini-stack')).toHaveCount(5);
+
+  for (const stack of await stacks.all()) {
+    await expect(stack).toHaveAttribute('aria-hidden', 'true');
+    await expect(stack).toHaveCSS('height', '120px');
+  }
+});
