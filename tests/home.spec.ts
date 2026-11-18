@@ -5,8 +5,8 @@ test('home states the positioning and routes both hero actions', async ({ page }
 
   expect(response?.status()).toBe(200);
   await expect(page.locator('h1')).toHaveCount(1);
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText('企业 AI Agent 的工程化交付');
-  await expect(page.getByText('把业务场景做成可验收、可私有化、可维护的 AI Agent。')).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('企业AI Agent的工程化交付');
+  await expect(page.getByText('把业务场景做成可验收、可私有化、可维护的AI Agent。')).toBeVisible();
   await expect(page.getByRole('link', { name: '预约沟通' }).first()).toHaveAttribute(
     'href',
     '/contact#channels',
@@ -18,7 +18,7 @@ test('home states the positioning and routes both hero actions', async ({ page }
 
   const facts = page.locator('[data-hero-fact]');
   await expect(facts).toHaveCount(3);
-  await expect(facts).toHaveText(['8 个交付阶段', '5 层能力栈', '3 条控制面']);
+  await expect(facts).toHaveText(['8个交付阶段', '5层能力栈', '3条控制面']);
   await expect(page.getByRole('img', { name: /五层能力栈的等距示意图/ })).toBeVisible();
 });
 
@@ -27,7 +27,7 @@ test('home shows the four delivery facts in the proof strip', async ({ page }) =
 
   const facts = page.locator('[data-proof-fact]');
   await expect(facts).toHaveCount(4);
-  await expect(facts).toContainText(['8 个交付阶段', '5 层能力栈', '3 条控制面', '1 个主转化']);
+  await expect(facts).toContainText(['8个交付阶段', '5层能力栈', '3条控制面', '1个主转化']);
 });
 
 test('methodology preview states the method, its checkpoints and every stage group', async ({
@@ -41,7 +41,7 @@ test('methodology preview states the method, its checkpoints and every stage gro
   );
   await expect(
     section.getByText(
-      '8 个交付阶段，4 组推进。Define / Validate / Deploy 不可跳过；每个阶段都有产出物和过关条件。',
+      '8个交付阶段，4组推进。Define / Validate / Deploy不可跳过；每个阶段都有产出物和过关条件。',
     ),
   ).toBeVisible();
   for (const checkpoint of ['问题定义：', '验收标准：', '评测集：', '生产上线：']) {
@@ -54,7 +54,7 @@ test('methodology preview states the method, its checkpoints and every stage gro
 
   for (const phrase of [
     '问题定义不是需求清单',
-    'Agent 规格卡写清职责',
+    'Agent规格卡写清职责',
     '在沙箱或预发环境跑真实任务',
     '接入生产系统，完成权限',
   ]) {
@@ -72,10 +72,10 @@ test('methodology preview states the method, its checkpoints and every stage gro
 
   await expect(section.locator('[data-method-group]')).toHaveCount(4);
   for (const [title, label] of [
-    ['Discover / Diagnose', '看阶段 01–02'],
-    ['Define / Design', '看阶段 03–04'],
-    ['Build / Validate', '看阶段 05–06'],
-    ['Deploy / Optimize', '看阶段 07–08'],
+    ['Discover / Diagnose', '看阶段01–02'],
+    ['Define / Design', '看阶段03–04'],
+    ['Build / Validate', '看阶段05–06'],
+    ['Deploy / Optimize', '看阶段07–08'],
   ] as const) {
     const group = section.locator('[data-method-group]', {
       has: page.getByRole('heading', { name: title }),
@@ -101,17 +101,17 @@ test('methodology code panel switches files by click and arrow keys', async ({ p
   await expect(section.getByText('READ ONLY')).toBeVisible();
 
   await expect(delivery).toHaveAttribute('aria-selected', 'true');
-  await expect(section.getByRole('tabpanel')).toContainText('8 阶段 / 3 个门禁');
+  await expect(section.getByRole('tabpanel')).toContainText('8阶段 / 3个门禁');
 
   await validate.click();
   await expect(validate).toHaveAttribute('aria-selected', 'true');
   await expect(delivery).toHaveAttribute('aria-selected', 'false');
-  await expect(section.getByRole('tabpanel')).toContainText('能否进入 Deploy');
+  await expect(section.getByRole('tabpanel')).toContainText('能否进入Deploy');
 
   await validate.press('ArrowLeft');
   await expect(delivery).toBeFocused();
   await expect(delivery).toHaveAttribute('aria-selected', 'true');
-  await expect(section.getByRole('tabpanel')).toContainText('8 阶段 / 3 个门禁');
+  await expect(section.getByRole('tabpanel')).toContainText('8阶段 / 3个门禁');
 
   const focusRing = await delivery.evaluate((element) => {
     const style = getComputedStyle(element);
@@ -132,7 +132,7 @@ test('architecture bento shows the capability stack, trace and control planes', 
 
   const section = page.locator('section#architecture');
   await expect(section.getByRole('heading', { level: 2 })).toHaveText(
-    '一个能上生产的 Agent 系统，由什么构成。',
+    '一个能上生产的Agent系统，由什么构成。',
   );
 
   for (const layer of ['运行时与部署', '知识与记忆', '工具与系统集成', '模型', '接入与编排']) {
@@ -191,7 +191,7 @@ test('delivery section states four conditional commitments and the first three p
   for (const [name, detail] of [
     ['源码交付（按合同）', '以合同为准'],
     ['私有化', '按项目评估'],
-    ['验收标准前置', 'Define 阶段'],
+    ['验收标准前置', 'Define阶段'],
     ['支持范围先说清', '按次或按项目'],
   ] as const) {
     const card = section.locator('[data-commitment]', { has: page.getByRole('heading', { name }) });
@@ -218,7 +218,7 @@ test('fit situations describe who the delivery model suits and link to the proce
   for (const heading of [
     '有明确、重复发生的业务流程',
     '愿意开放必要的系统与数据',
-    '有业务侧 sponsor',
+    '有业务侧sponsor',
   ]) {
     await expect(section.getByRole('heading', { name: heading })).toBeVisible();
   }

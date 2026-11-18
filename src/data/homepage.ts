@@ -7,36 +7,36 @@ export interface Commitment {
 }
 
 export const homeHero = {
-  kicker: '企业 AI Agent 定制交付',
-  titleLead: '企业 AI Agent 的',
+  kicker: '企业AI Agent定制交付',
+  titleLead: '企业AI Agent的',
   titleTail: '工程化交付',
-  lead: '把业务场景做成可验收、可私有化、可维护的 AI Agent。',
+  lead: '把业务场景做成可验收、可私有化、可维护的AI Agent。',
   primaryCta: '预约沟通',
   secondaryCta: '看工作方法论',
-  facts: ['8 个交付阶段', '5 层能力栈', '3 条控制面'],
-  caption: '交付参考架构 / 5 层能力栈 + 3 条控制面',
+  facts: ['8个交付阶段', '5层能力栈', '3条控制面'],
+  caption: '交付参考架构 / 5层能力栈 + 3条控制面',
 } as const;
 
 export const homeSections = {
   methodology: {
     kicker: '工作方法论',
     title: '从业务结果出发，而不是从技术方案出发。',
-    lead: '8 个交付阶段，4 组推进。Define / Validate / Deploy 不可跳过；每个阶段都有产出物和过关条件。',
+    lead: '8个交付阶段，4组推进。Define / Validate / Deploy不可跳过；每个阶段都有产出物和过关条件。',
     introTitle: '每个阶段都有可检查的产出物。',
     introBody:
-      '先把问题定义清楚，再定验收标准与评测集，然后才进入构建。Agent 不是一次模型调用，而是一条有状态的执行链；每一环都要能被验证、被审计、被接手。',
+      '先把问题定义清楚，再定验收标准与评测集，然后才进入构建。Agent不是一次模型调用，而是一条有状态的执行链；每一环都要能被验证、被审计、被接手。',
     checks: [
       { label: '问题定义', text: '值得做、不值得做，或先做哪一步，给出结论。' },
-      { label: '验收标准', text: 'Define 阶段前置，逐项可量化、可复核。' },
-      { label: '评测集', text: 'Build 之前锁定，正常 / 边界 / 失败样本齐全。' },
+      { label: '验收标准', text: 'Define阶段前置，逐项可量化、可复核。' },
+      { label: '评测集', text: 'Build之前锁定，正常 / 边界 / 失败样本齐全。' },
       { label: '生产上线', text: '权限、监控、告警与回滚配置完成才算交付。' },
     ],
     linkLabel: '看完整方法论',
   },
   architecture: {
     kicker: '技术架构',
-    title: '一个能上生产的 Agent 系统，由什么构成。',
-    lead: '5 层能力栈，3 条横切控制面。我们交付组件与模式；系统、数据、身份与审批权留在客户环境。',
+    title: '一个能上生产的Agent系统，由什么构成。',
+    lead: '5层能力栈，3条横切控制面。我们交付组件与模式；系统、数据、身份与审批权留在客户环境。',
     footnote: '参考架构描述可复用的能力模型；具体部署形态与实现范围在方案阶段按项目确认。',
   },
   delivery: {
@@ -67,7 +67,7 @@ export const commitments: readonly Commitment[] = [
     id: 'source',
     code: '01 / SOURCE',
     title: '源码交付（按合同）',
-    summary: '是否交付源码、交付范围与 License 以合同为准；未约定部分不作为承诺。',
+    summary: '是否交付源码、交付范围与License以合同为准；未约定部分不作为承诺。',
     tag: '合同约定',
   },
   {
@@ -81,14 +81,14 @@ export const commitments: readonly Commitment[] = [
     id: 'acceptance',
     code: '03 / ACCEPTANCE',
     title: '验收标准前置',
-    summary: 'Define 阶段确认验收标准与评测集 v0，Validate 阶段按同一套标准逐项打分。',
+    summary: 'Define阶段确认验收标准与评测集v0，Validate阶段按同一套标准逐项打分。',
     tag: 'Define → Validate',
   },
   {
     id: 'support',
     code: '04 / SUPPORT',
     title: '支持范围先说清',
-    summary: '上线后支持按次或按项目约定，不含新场景与 7×24 值守。',
+    summary: '上线后支持按次或按项目约定，不含新场景与7×24值守。',
     tag: '按次 / 按项目',
   },
 ];
@@ -127,20 +127,20 @@ export interface FitSituation {
 export const fitSituations: readonly FitSituation[] = [
   {
     id: 'repeatable-process',
-    code: '情境 01',
+    code: '情境01',
     title: '有明确、重复发生的业务流程',
-    summary: '愿意拿它做第一个 Agent，而不是只想看看 AI 能做什么。',
+    summary: '愿意拿它做第一个Agent，而不是只想看看AI能做什么。',
   },
   {
     id: 'open-systems',
-    code: '情境 02',
+    code: '情境02',
     title: '愿意开放必要的系统与数据',
-    summary: '或能安排业务专家对接，让 Agent 能接入真实流程。',
+    summary: '或能安排业务专家对接，让Agent能接入真实流程。',
   },
   {
     id: 'business-sponsor',
-    code: '情境 03',
-    title: '有业务侧 sponsor',
+    code: '情境03',
+    title: '有业务侧sponsor',
     summary: '能一起定义验收标准，并对结果拍板。',
   },
 ];

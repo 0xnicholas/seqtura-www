@@ -40,8 +40,8 @@ export function contactFacts(operatorName: string, operatorLocation?: string) {
   return [
     { label: '运营主体', value: operatorName },
     ...(operatorLocation ? [{ label: '所在地', value: operatorLocation }] : []),
-    { label: '交付方法', value: 'FDE 8 阶段' },
-    { label: '参考架构', value: '5 层能力栈 + 3 条控制面' },
+    { label: '交付方法', value: 'FDE 8阶段' },
+    { label: '参考架构', value: '5层能力栈 + 3条控制面' },
   ] as const;
 }
 
@@ -49,8 +49,8 @@ export const contactAbout = {
   kicker: '关于我们',
   title: '关于我们',
   paragraphs: [
-    'Seqtura AI（序构 AI）为企业定制 AI Agent，把业务场景从评估做到生产上线。',
-    '我们服务技术 / 数字化负责人与业务负责人，按 FDE 8 阶段交付方法工作。',
+    'Seqtura AI（序构AI）为企业定制AI Agent，把业务场景从评估做到生产上线。',
+    '我们服务技术 / 数字化负责人与业务负责人，按FDE 8阶段交付方法工作。',
     '我们相信：先把验收标准定下来，再开始构建。',
   ],
   methodologyLink: '看工作方法论',

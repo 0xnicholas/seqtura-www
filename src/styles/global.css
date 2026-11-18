@@ -116,6 +116,8 @@
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
     font-synthesis: none;
+    text-autospace: normal;
+    text-spacing-trim: normal;
   }
 
   :where([id]) {
