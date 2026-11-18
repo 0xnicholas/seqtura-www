@@ -303,8 +303,8 @@
     overflow: visible;
   }
 
-  /* Ambient stroke drift (spec §4 区块 1): the only site-wide ambient motion.
-     Dashoffset shift equals the dash period (3+6 / 3+4) so the 24s loop is seamless. */
+  /* Ambient stroke drift: the only site-wide ambient motion. The dashoffset
+     shift equals the dash period (3+6 / 3+4) so the 24s loop is seamless. */
   .stack-flow {
     animation: stack-flow-dash var(--duration-ambient) linear infinite;
   }
