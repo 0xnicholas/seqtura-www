@@ -527,12 +527,12 @@ test('interactive transitions resolve to the shared micro duration and easing', 
         const style = getComputedStyle(node);
         return {
           durations: style.transitionDuration.split(', '),
-          easings: style.transitionTimingFunction.split(', '),
+          easing: style.transitionTimingFunction,
         };
       });
     expect(new Set(timing.durations), selector).toEqual(new Set(['0.15s']));
-    expect(new Set(timing.easings), selector).toEqual(
-      new Set(['cubic-bezier(0.22, 0.61, 0.36, 1)']),
+    expect(timing.easing, selector).toBe(
+      timing.durations.map(() => 'cubic-bezier(0.22, 0.61, 0.36, 1)').join(', '),
     );
   }
 });
