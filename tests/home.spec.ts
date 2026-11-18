@@ -259,6 +259,29 @@ test('every primary CTA on the home page lands on the contact channels', async (
   }
 });
 
+test('brand red tokens render the §3.1 target values in computed styles', async ({ page }) => {
+  await page.goto('/');
+
+  const tick = await page
+    .locator('[data-fit-situation]')
+    .first()
+    .evaluate((element) => {
+      const style = getComputedStyle(element, '::before');
+      return { background: style.backgroundColor, width: style.width, height: style.height };
+    });
+  expect(tick.width).toBe('7px');
+  expect(tick.height).toBe('7px');
+  expect(tick.background).toBe('rgb(255, 45, 32)');
+
+  const primaryCta = page.locator('main [data-primary-cta]').first();
+  await expect(primaryCta).toHaveCSS('background-color', 'rgb(205, 35, 24)');
+  await primaryCta.hover();
+  await expect(primaryCta).toHaveCSS('background-color', 'rgb(170, 27, 18)');
+
+  await expect(page.locator('main .kicker').first()).toHaveCSS('color', 'rgb(205, 35, 24)');
+  await expect(page.locator('main .text-link').first()).toHaveCSS('color', 'rgb(205, 35, 24)');
+});
+
 test('structural illustrations are labelled as non-client data', async ({ page }) => {
   await page.goto('/');
 
