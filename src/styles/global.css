@@ -17,6 +17,10 @@
   line-gap-override: normal;
 }
 
+/* Scheme-c mechanism (§3.2, recorded as an implementation deviation in PR #55): a 400-only
+   face of the same woff2 keeps Latin headings at weight 400 while .type-h1/h2:lang(zh) lifts
+   the element to 500; font-synthesis: none stops the 400-700 variable face from synthesizing
+   the missing 500. */
 @font-face {
   font-family: 'Instrument Sans Heading';
   src: url('/fonts/instrument-sans-var-latin.woff2') format('woff2');
@@ -89,6 +93,8 @@
   --type-legal-h3-size: 18px;
   --type-legal-h3-line: 1.5;
 
+  /* Same fallback chain as --font-sans with the 400-only heading face in front;
+     keep the two chains in sync when the CJK fallbacks change. */
   --font-heading:
     'Instrument Sans Heading', 'Instrument Sans Fallback', -apple-system, BlinkMacSystemFont,
     'Helvetica Neue', 'PingFang SC', 'Hiragino Sans GB', 'Noto Sans SC', 'Microsoft YaHei',
@@ -453,6 +459,21 @@
   }
 
   @keyframes section-in {
+    from {
+      opacity: 0;
+      transform: translateY(16px);
+    }
+
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /* Shared entrance for the four inner-page heroes (ArchitectureHero, MethodologyHero,
+     ContactHero, ProcessHero); each component keeps its scoped animation shorthand and
+     reduced-motion override, only the keyframes live here. */
+  @keyframes hero-in {
     from {
       opacity: 0;
       transform: translateY(16px);
