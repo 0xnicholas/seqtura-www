@@ -67,7 +67,7 @@ function isActive(href: string): boolean {
     border-bottom: 1px solid transparent;
     background: rgb(255 255 255 / 88%);
     backdrop-filter: blur(8px);
-    transition: border-color 150ms var(--ease-site);
+    transition: border-color var(--duration-micro) var(--ease-site);
   }
 
   .site-header.is-scrolled {
@@ -94,7 +94,7 @@ function isActive(href: string): boolean {
     font-weight: 500;
     line-height: 1.5;
     color: var(--color-ink-2);
-    transition: color 150ms var(--ease-site);
+    transition: color var(--duration-micro) var(--ease-site);
   }
 
   .desktop-nav a:hover,
@@ -112,7 +112,7 @@ function isActive(href: string): boolean {
     background: var(--color-red);
     transform: scaleX(0);
     transform-origin: left;
-    transition: transform 150ms var(--ease-site);
+    transition: transform var(--duration-micro) var(--ease-site);
   }
 
   .desktop-nav a:hover::after,
@@ -132,7 +132,7 @@ function isActive(href: string): boolean {
     font-size: 11px;
     letter-spacing: 0.03em;
     color: var(--color-muted);
-    transition: color 150ms var(--ease-site);
+    transition: color var(--duration-micro) var(--ease-site);
   }
 
   .header-email:hover {
@@ -173,8 +173,8 @@ function isActive(href: string): boolean {
     height: 1px;
     background: var(--color-ink);
     transition:
-      transform 150ms var(--ease-site),
-      top 150ms var(--ease-site);
+      transform var(--duration-micro) var(--ease-site),
+      top var(--duration-micro) var(--ease-site);
   }
 
   .menu-toggle span::before {

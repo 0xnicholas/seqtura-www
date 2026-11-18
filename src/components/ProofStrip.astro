@@ -8,8 +8,8 @@ const facts = [
 ---
 
 <section class="proof-strip" aria-label="交付事实">
-  <div class="container-site proof-grid">
-    <div class="proof-intro" data-proof-intro>
+  <div class="container-site proof-grid reveal">
+    <div class="proof-intro">
       <p class="proof-label">
         Built for production
         <br />
@@ -17,7 +17,7 @@ const facts = [
       </p>
     </div>
     {facts.map((fact) => (
-      <div class="proof-cell" data-proof-fact>
+      <div class="proof-cell">
         <p class="proof-value" aria-hidden="true">
           {fact.value} <span class="unit">{fact.unit}</span>
         </p>
