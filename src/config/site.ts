@@ -1,26 +1,46 @@
 import { placeholders } from './placeholders';
 
-export interface NavItem {
+export interface NavLink {
   readonly href: string;
   readonly label: string;
 }
 
-export const navItems: readonly NavItem[] = [
-  { href: '/methodology', label: '工作方法论' },
-  { href: '/architecture', label: '技术架构' },
-  { href: '/process', label: '合作流程' },
-  { href: '/contact', label: '联系我们' },
+export interface NavSection {
+  readonly label: string;
+  readonly items: readonly NavLink[];
+}
+
+export type NavEntry = NavLink | NavSection;
+
+export function isNavSection(entry: NavEntry): entry is NavSection {
+  return 'items' in entry;
+}
+
+const workMethod: NavLink = { href: '/methodology', label: '工作方法' };
+const architecture: NavLink = { href: '/architecture', label: '技术架构' };
+const process: NavLink = { href: '/process', label: '合作流程' };
+const contact: NavLink = { href: '/contact', label: '联系我们' };
+
+// 全部站内页面，顺序即页脚「站点」列的展示顺序。
+const pageLinks: readonly NavLink[] = [workMethod, architecture, process, contact];
+
+// 顶部导航按阅读时机分组：「相关资料」收纳先读一读、了解我们怎么做的页面，
+// 「合作流程」「联系我们」回答「准备开始谈」之后的问题，留在顶层。
+export const navItems: readonly NavEntry[] = [
+  process,
+  { label: '相关资料', items: [workMethod, architecture] },
+  contact,
 ];
 
 export interface FooterColumn {
   readonly title: string;
-  readonly links: readonly NavItem[];
+  readonly links: readonly NavLink[];
 }
 
 export const footerColumns: readonly FooterColumn[] = [
   {
     title: '站点',
-    links: [{ href: '/', label: '首页' }, ...navItems],
+    links: [{ href: '/', label: '首页' }, ...pageLinks],
   },
   {
     title: '交付',

@@ -6,6 +6,8 @@
 
 - **#57（2026-11-18）：收窄 7px tick 的角色**。推翻本规格一切「tick 保留 / tick 不动 / tick 换值」类条款（区块 2/5/6 的目标、边界与验收点，§5.2 ArchitectureMetrics 行，§2 原则 3 措辞）：7px tick 仅作为 kicker、`.principle-no` 序号与注记行（`.tick` / `.support-tick` / `.trim-tick` / `.fde-mark` / `.hero-note-mark`）的前缀签名存在；`.section::before/::after` 顶边角标（全站 46 颗）、组件卡片/格点/hero 装饰角标（24 颗）、`.spec-tick`（1 颗）全部删除。效果：全站 7px tick ≈99 → 50，首页 ≈29 → 6。mini 等距栈、brand-mark、光晕、圆点、4–6px 功能符号不受影响。下文被推翻条款以删除线原地标注。
 
+- **导航分组（2026-11-21）：`相关资料` 下拉与「工作方法」改名**。主从导航从 4 个平铺链接改为「2 个链接 + 1 个分组触发器」：`合作流程 / 相关资料 / 联系我们`，`工作方法`、`技术架构` 收进 `相关资料` 下拉（不新建页面）。同批把全站「工作方法论」改称「工作方法」（SEO `<title>` 例外），页脚「站点」列改为平铺真实页面。区块 8 末尾新增该修订的结构、语义、交互与验收条目。
+
 ## 1. 读我
 
 - **范围**：审计覆盖整站；本规格以首页为定标页，逐区块给出 before/after 级决策；其它页不写 before/after，沿用首页规则（第 5 节映射）。实现（代码改造）不在本规格内，定稿后另起 effort。
@@ -360,6 +362,38 @@
 - [ ] Lighthouse CI 与 Playwright（含 a11y）全绿
 
 **决策依据**：[#28](https://github.com/0xnicholas/seqtura-www/issues/28)（红系换值，chrome 零硬编码自动落位；中性色阶锁定）、[#29](https://github.com/0xnicholas/seqtura-www/issues/29)（密度纪律；footer-mark 非图示化判例）、[#30](https://github.com/0xnicholas/seqtura-www/issues/30)（方案 c 与标识类豁免判例；autospace 与手写空格清理）、[#31](https://github.com/0xnicholas/seqtura-www/issues/31)（不新增质感层）、[#32](https://github.com/0xnicholas/seqtura-www/issues/32)（`--duration-micro` 统收；chrome 无入场动效）、[#33](https://github.com/0xnicholas/seqtura-www/issues/33)（六字段模板）；标识类字重豁免、footer-mark 非图示化、mobile menu 瞬时开合三项判例为本节 [#40](https://github.com/0xnicholas/seqtura-www/issues/40) 新立；「 / 」分隔保留与非 SectionHeading 不适用 mini 栈的判例引自区块 2/7（[#37](https://github.com/0xnicholas/seqtura-www/issues/37)、[#39](https://github.com/0xnicholas/seqtura-www/issues/39)）。
+
+**修订 2026-11-21 · 导航分组（下拉菜单）**
+
+**目标**：把主从导航从 4 个平铺链接改成「2 个链接 + 1 个分组触发器」：`合作流程 / 相关资料 / 联系我们`，`工作方法`、`技术架构` 收进 `相关资料` 下拉，不新建页面。分组判据：「相关资料」收纳「先读一读、了解我们怎么做」的页面；「合作流程」「联系我们」回答「准备开始谈」之后的问题，留顶层。同批把全站「工作方法论」改称「工作方法」，唯一例外是 `/methodology` 的 SEO `<title>`（保留「方法论」作搜索词）。URL、路由与页面内容结构不变。
+
+**Before / After**：
+
+| 维度   | Before                                                                                    | After                                                                                                                                                                                                                                                                                                                 | 优先级 |
+| ------ | ----------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| 结构   | `.desktop-nav` 4 个平铺 `<a>`；移动端菜单 4 行平铺                                        | 顶层 `合作流程`(`/process`) / `相关资料`(触发器) / `联系我们`(`/contact`)；面板内 `工作方法`(`/methodology`) → `技术架构`(`/architecture`)。`src/config/site.ts` 的 `navItems` 改由 `NavLink` 与 `NavSection` 的联合类型描述，页脚「站点」列与导航分组解耦                                                            | P0     |
+| 语义   | 当前页 `aria-current="page"` 落在导航链接本身                                             | 触发器为 `button[type=button][aria-expanded][aria-controls]` + 普通 `<ul><a>` 列表，不用 `role="menu"`；当前页 `aria-current="page"` 落在面板子项，触发器另以 `.is-active` 取与 `.desktop-nav > a` 同款的红色下划线（面板收起时子项的 aria-current 不可见，父级必须有视觉表达）                                       | P0     |
+| 交互   | 无分组、无 JS 状态                                                                        | hover 150ms 意图延迟即开；click / Enter / Space 切换；悬停打开后点击「接管」关闭权（再点才收）；Esc 关闭并把焦点还给触发器；外部 `pointerdown` 关闭；`pointerleave` 只关闭悬停打开的实例；焦点离开 `.nav-section` 即收。触发器与面板间 22px 间隙由 `.nav-section-menu::before` 计入热区，保证鼠标可从触发器穿行到子项 | P0     |
+| 动效   | nav 下划线 scaleX 取 `var(--duration-micro) var(--ease-site)`                             | 不变。面板开合沿用 #40 判例：`hidden` 瞬时切换、零过渡（caret 同步瞬时翻转）；面板内链接只过渡 `background-color` / `color`，取 `var(--duration-micro)`，无位移                                                                                                                                                       | P1     |
+| 移动端 | 4 行平铺链接                                                                              | `相关资料` 为手风琴行（`button[aria-expanded]` + 两个缩进子项，子项 15px）；关闭抽屉（Escape / 点链接 / 切到桌面断点）时一律重置为收起，重开回到初始态                                                                                                                                                                | P0     |
+| 页脚   | 「站点」列 = 首页 + `navItems` 自动派生                                                   | 「站点」列平铺真实页面：首页 / 工作方法 / 技术架构 / 合作流程 / 联系我们；「交付」列锚点（`/methodology#stages`、`/architecture#overview`、验证切片、支持期）不变                                                                                                                                                     | P1     |
+| 文案   | 导航、hero kicker、5 处 CTA、`aria-label`、CodePanel 标签、两页分工文案均为「工作方法论」 | 统一「工作方法」；`FDE 8阶段交付方法论` → `FDE 8阶段交付方法`；`GLOSSARY.md`「方法论页」→「工作方法页」；SEO `<title>` 保留「方法论」                                                                                                                                                                                 | P1     |
+
+**边界**：header 高度仍 64px——面板是 header 内的绝对定位浮层，不参与 `.header-inner` 布局；`<1024px` 桌面导航隐藏的现有断点不变，面板随之隐藏；无新增路由，`/methodology`、`/architecture` 的 URL 不变，`scripts/check-links.mjs` 起点路由不变；`check-consistency.mjs` 的 SectionHeading 计数（18）不受影响；`data-menu-toggle` / `data-mobile-menu` 锚点保留，新增 DOM 钩子 `data-nav-section` / `data-nav-section-trigger` / `data-nav-section-menu` / `data-mobile-section-trigger`（`shell.spec.ts` 使用）。
+
+**验收点**：
+
+- [ ] 桌面主导航 `getByRole('link')` 仅 2 项（合作流程、联系我们）；`相关资料` 为 `aria-expanded="false"` 的 button；面板收起时子项不被 role 查询命中
+- [ ] click、hover（150ms）、Enter、Space 均可打开；Esc 关闭并把焦点还给触发器；外部点击关闭；悬停打开后点击不会误关
+- [ ] 鼠标从触发器下移到面板子项时面板保持展开（22px 热区桥接），子项可点击并导航
+- [ ] `/methodology`、`/architecture` 下触发器带 `.is-active` 红色下划线，对应子项取 `aria-current="page"`；其余页面两者皆无
+- [ ] 移动端手风琴可展开 / 收起，关闭抽屉后重置为收起；子项点击后抽屉关闭并导航
+- [ ] 页脚「站点」列为 5 个真实页面链接，交付列锚点不变
+- [ ] 全站渲染文案 grep「方法论」只命中 `/methodology` 的 `<title>`
+- [ ] 5 个断点（320 / 390 / 768 / 1024 / 1440）无横向溢出，header 高度断言仍为 64px
+- [ ] Lighthouse CI 与 Playwright（含 a11y）全绿
+
+**决策依据**：2026-11-21 产品决策（无独立 issue）：资料边界判据、下拉而非汇聚页、改名范围（全站统一、SEO 标题例外）、页脚平铺四项；面板瞬时开合与 `hidden` 语义沿用区块 8 基线（[#40](https://github.com/0xnicholas/seqtura-www/issues/40)）。
 
 ## 5. 其它页沿用规则
 

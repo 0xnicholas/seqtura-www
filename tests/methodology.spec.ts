@@ -9,7 +9,7 @@ test('methodology hero states the FDE method and routes both actions', async ({ 
   await expect(main.getByRole('heading', { level: 1 })).toHaveText(
     '从业务结果出发，而不是从技术方案出发。',
   );
-  await expect(main.getByText('FDE 8阶段交付方法论')).toBeVisible();
+  await expect(main.getByText('FDE 8阶段交付方法')).toBeVisible();
   await expect(
     main.getByText('8个交付阶段，3条原则；把AI Agent从业务问题做到生产上线。'),
   ).toBeVisible();
@@ -253,7 +253,7 @@ test('methodology explains its division of labor and closes with the booking CTA
 
   const division = page.locator('section#division');
   await expect(division.getByRole('heading', { level: 2 })).toHaveText(
-    '方法论讲交付，流程页讲合作。',
+    '工作方法讲交付，流程页讲合作。',
   );
   await expect(division.locator('[data-division]')).toHaveCount(2);
 

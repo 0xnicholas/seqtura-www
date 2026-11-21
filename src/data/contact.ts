@@ -4,7 +4,7 @@ export const contactHero = {
   lead: '围绕一个具体业务场景，给出值不值得做、下一步是什么的判断。',
   note: '扫码添加企业微信、打开飞书，或直接写邮件。',
   primaryCta: '预约沟通',
-  secondaryCta: '看工作方法论',
+  secondaryCta: '看工作方法',
 } as const;
 
 export const contactChannels = {
@@ -53,6 +53,6 @@ export const contactAbout = {
     '我们服务技术 / 数字化负责人与业务负责人，按FDE 8阶段交付方法工作。',
     '我们相信：先把验收标准定下来，再开始构建。',
   ],
-  methodologyLink: '看工作方法论',
+  methodologyLink: '看工作方法',
   architectureLink: '看技术架构',
 } as const;

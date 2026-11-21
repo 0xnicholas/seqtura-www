@@ -75,7 +75,7 @@ test('architecture hero frames the reference architecture and routes both action
     'href',
     '/contact#channels',
   );
-  await expect(main.getByRole('link', { name: '看工作方法论' }).first()).toHaveAttribute(
+  await expect(main.getByRole('link', { name: '看工作方法' }).first()).toHaveAttribute(
     'href',
     '/methodology',
   );
@@ -384,13 +384,13 @@ test('closing connects the architecture to method, process and booking', async (
 
   const section = page.locator('[data-arch-closing]');
   await expect(section.getByRole('heading', { level: 2 })).toHaveText(
-    '方法论讲怎么把Agent做对；这页讲系统长什么样、凭什么敢上线。',
+    '工作方法讲怎么把Agent做对；这页讲系统长什么样、凭什么敢上线。',
   );
   await expect(section.getByRole('link', { name: '和架构师聊聊' })).toHaveAttribute(
     'href',
     '/contact#channels',
   );
-  await expect(section.getByRole('link', { name: '看工作方法论' })).toHaveAttribute(
+  await expect(section.getByRole('link', { name: '看工作方法' })).toHaveAttribute(
     'href',
     '/methodology',
   );
