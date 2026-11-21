@@ -1,6 +1,6 @@
 ---
 import Brand from './Brand.astro';
-import { navItems, site } from '../config/site';
+import { isNavSection, navItems, site } from '../config/site';
 import { placeholders } from '../config/placeholders';
 
 const pathname = Astro.url.pathname;
@@ -15,11 +15,38 @@ function isActive(href: string): boolean {
     <Brand />
 
     <nav class="desktop-nav" aria-label="主导航">
-      {navItems.map((item) => (
-        <a href={item.href} aria-current={isActive(item.href) ? 'page' : undefined}>
-          {item.label}
-        </a>
-      ))}
+      {navItems.map((item, index) =>
+        isNavSection(item) ? (
+          <div class="nav-section" data-nav-section>
+            <button
+              type="button"
+              class:list={[
+                'nav-section-trigger',
+                { 'is-active': item.items.some((link) => isActive(link.href)) },
+              ]}
+              aria-expanded="false"
+              aria-controls={`nav-section-${index}`}
+              data-nav-section-trigger
+            >
+              {item.label}
+              <span class="nav-caret" aria-hidden="true" />
+            </button>
+            <ul class="nav-section-menu" id={`nav-section-${index}`} data-nav-section-menu hidden>
+              {item.items.map((link) => (
+                <li>
+                  <a href={link.href} aria-current={isActive(link.href) ? 'page' : undefined}>
+                    {link.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : (
+          <a href={item.href} aria-current={isActive(item.href) ? 'page' : undefined}>
+            {item.label}
+          </a>
+        ),
+      )}
     </nav>
 
     <div class="header-actions">
@@ -47,11 +74,38 @@ function isActive(href: string): boolean {
 
   <div class="mobile-menu" id="mobile-menu" data-mobile-menu hidden>
     <nav aria-label="移动端主导航">
-      {navItems.map((item) => (
-        <a href={item.href} aria-current={isActive(item.href) ? 'page' : undefined}>
-          {item.label}
-        </a>
-      ))}
+      {navItems.map((item, index) =>
+        isNavSection(item) ? (
+          <div class="mobile-nav-section">
+            <button
+              type="button"
+              class:list={[
+                'mobile-nav-section-trigger',
+                { 'is-active': item.items.some((link) => isActive(link.href)) },
+              ]}
+              aria-expanded="false"
+              aria-controls={`mobile-nav-section-${index}`}
+              data-mobile-section-trigger
+            >
+              {item.label}
+              <span class="nav-caret" aria-hidden="true" />
+            </button>
+            <ul class="mobile-nav-section-menu" id={`mobile-nav-section-${index}`} hidden>
+              {item.items.map((link) => (
+                <li>
+                  <a href={link.href} aria-current={isActive(link.href) ? 'page' : undefined}>
+                    {link.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : (
+          <a href={item.href} aria-current={isActive(item.href) ? 'page' : undefined}>
+            {item.label}
+          </a>
+        ),
+      )}
     </nav>
   </div>
 </header>
@@ -88,7 +142,8 @@ function isActive(href: string): boolean {
     margin-left: 4px;
   }
 
-  .desktop-nav a {
+  .desktop-nav > a,
+  .nav-section-trigger {
     position: relative;
     font-size: 14px;
     font-weight: 500;
@@ -97,12 +152,26 @@ function isActive(href: string): boolean {
     transition: color var(--duration-micro) var(--ease-site);
   }
 
-  .desktop-nav a:hover,
-  .desktop-nav a[aria-current='page'] {
+  .nav-section-trigger {
+    display: inline-flex;
+    align-items: center;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    font-family: inherit;
+    cursor: pointer;
+  }
+
+  .desktop-nav > a:hover,
+  .desktop-nav > a[aria-current='page'],
+  .nav-section-trigger:hover,
+  .nav-section-trigger[aria-expanded='true'],
+  .nav-section-trigger.is-active {
     color: var(--color-ink);
   }
 
-  .desktop-nav a::after {
+  .desktop-nav > a::after,
+  .nav-section-trigger::after {
     content: '';
     position: absolute;
     right: 0;
@@ -115,9 +184,77 @@ function isActive(href: string): boolean {
     transition: transform var(--duration-micro) var(--ease-site);
   }
 
-  .desktop-nav a:hover::after,
-  .desktop-nav a[aria-current='page']::after {
+  .desktop-nav > a:hover::after,
+  .desktop-nav > a[aria-current='page']::after,
+  .nav-section-trigger:hover::after,
+  .nav-section-trigger[aria-expanded='true']::after,
+  .nav-section-trigger.is-active::after {
     transform: scaleX(1);
+  }
+
+  .nav-section {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  .nav-caret {
+    width: 5px;
+    height: 5px;
+    margin-left: 7px;
+    border-right: 1px solid currentColor;
+    border-bottom: 1px solid currentColor;
+    transform: translateY(-2px) rotate(45deg);
+  }
+
+  .nav-section-trigger[aria-expanded='true'] .nav-caret,
+  .mobile-nav-section-trigger[aria-expanded='true'] .nav-caret {
+    transform: translateY(1px) rotate(-135deg);
+  }
+
+  .nav-section-menu {
+    position: absolute;
+    top: calc(100% + 22px);
+    left: 50%;
+    min-width: 168px;
+    padding: 6px;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-site-sm);
+    background: var(--color-canvas);
+    box-shadow: 0 12px 24px rgb(0 0 0 / 6%);
+    transform: translateX(-50%);
+    list-style: none;
+  }
+
+  /* 触发器与面板之间 22px 的间隙必须算在悬停区内，否则鼠标下移即关闭。 */
+  .nav-section-menu::before {
+    content: '';
+    position: absolute;
+    top: -22px;
+    right: 0;
+    left: 0;
+    height: 22px;
+  }
+
+  .nav-section-menu a {
+    display: flex;
+    align-items: center;
+    height: 40px;
+    padding: 0 12px;
+    border-radius: var(--radius-site-sm);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-ink-2);
+    white-space: nowrap;
+    transition:
+      background-color var(--duration-micro) var(--ease-site),
+      color var(--duration-micro) var(--ease-site);
+  }
+
+  .nav-section-menu a:hover,
+  .nav-section-menu a:focus-visible {
+    background: rgb(0 0 0 / 4%);
+    color: var(--color-ink);
   }
 
   .header-actions {
@@ -221,6 +358,32 @@ function isActive(href: string): boolean {
 
   .mobile-menu a[aria-current='page'] {
     color: var(--color-red-dark);
+  }
+
+  .mobile-nav-section-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    height: 48px;
+    padding: 0;
+    border: 0;
+    border-bottom: 1px solid var(--color-line);
+    background: transparent;
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: 500;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .mobile-nav-section-trigger.is-active {
+    color: var(--color-red-dark);
+  }
+
+  .mobile-nav-section-menu a {
+    padding-left: 16px;
+    font-size: 15px;
   }
 
   @media (max-width: 1023px) {

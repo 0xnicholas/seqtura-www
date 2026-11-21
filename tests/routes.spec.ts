@@ -45,8 +45,13 @@ for (const [route, heading] of [
     await page.goto(route);
 
     await expect(page.getByRole('heading', { level: 1 })).toHaveText(heading);
-    await expect(page.getByRole('navigation', { name: '主导航' }).getByRole('link')).toHaveCount(4);
-    await expect(page.getByRole('link', { name: '工作方法论' })).toHaveCount(2);
+
+    const nav = page.getByRole('navigation', { name: '主导航' });
+    await expect(nav.getByRole('link')).toHaveCount(2);
+    await expect(nav.getByRole('button', { name: '相关资料' })).toHaveCount(1);
+    await expect(
+      page.getByRole('contentinfo').getByRole('link', { name: '工作方法' }),
+    ).toHaveAttribute('href', '/methodology');
   });
 }
 

@@ -12,14 +12,14 @@ export const homeHero = {
   titleTail: '工程化交付',
   lead: '把业务场景做成可验收、可私有化、可维护的AI Agent。',
   primaryCta: '预约沟通',
-  secondaryCta: '看工作方法论',
+  secondaryCta: '看工作方法',
   facts: ['8个交付阶段', '5层能力栈', '3条控制面'],
   caption: '交付参考架构 / 5层能力栈 + 3条控制面',
 } as const;
 
 export const homeSections = {
   methodology: {
-    kicker: '工作方法论',
+    kicker: '工作方法',
     title: '从业务结果出发，而不是从技术方案出发。',
     lead: '8个交付阶段，4组推进。Define / Validate / Deploy不可跳过；每个阶段都有产出物和过关条件。',
     introTitle: '每个阶段都有可检查的产出物。',
@@ -31,7 +31,7 @@ export const homeSections = {
       { label: '评测集', text: 'Build之前锁定，正常 / 边界 / 失败样本齐全。' },
       { label: '生产上线', text: '权限、监控、告警与回滚配置完成才算交付。' },
     ],
-    linkLabel: '看完整方法论',
+    linkLabel: '看完整工作方法',
   },
   architecture: {
     kicker: '技术架构',

@@ -171,7 +171,7 @@ export const architectureCopy = {
     lead: '可私有化、可审计、模型可替换的交付参考架构；从一次任务的进入，到上线后的迭代。',
     tags: ['可私有化', '可审计', '模型可替换'],
     primaryCta: '和架构师聊聊',
-    secondaryCta: '看工作方法论',
+    secondaryCta: '看工作方法',
   },
   overview: {
     kicker: '01 / 总览',
@@ -218,10 +218,10 @@ export const architectureCopy = {
   },
   closing: {
     kicker: '下一步',
-    title: '方法论讲怎么把Agent做对；这页讲系统长什么样、凭什么敢上线。',
+    title: '工作方法讲怎么把Agent做对；这页讲系统长什么样、凭什么敢上线。',
     lead: '带上一个具体场景，我们一起判断它该落在哪几层、哪一档部署，以及第一个验证切片怎么做。',
     primaryCta: '和架构师聊聊',
-    secondaryCta: '看工作方法论',
+    secondaryCta: '看工作方法',
     processCta: '看合作流程',
   },
 } as const;

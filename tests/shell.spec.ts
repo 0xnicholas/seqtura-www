@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-test('header carries the four-section navigation and a persistent booking action', async ({
+test('header groups the delivery material under 相关资料 and keeps a persistent booking action', async ({
   page,
 }) => {
   await page.goto('/');
@@ -8,12 +8,13 @@ test('header carries the four-section navigation and a persistent booking action
   const header = page.getByRole('banner');
   const nav = header.getByRole('navigation', { name: '主导航' });
 
-  await expect(nav.getByRole('link')).toHaveText([
-    '工作方法论',
-    '技术架构',
-    '合作流程',
-    '联系我们',
-  ]);
+  await expect(nav.getByRole('link')).toHaveText(['合作流程', '联系我们']);
+  await expect(nav.getByRole('button', { name: '相关资料' })).toHaveAttribute(
+    'aria-expanded',
+    'false',
+  );
+  await expect(nav.getByRole('link', { name: '工作方法' })).toHaveCount(0);
+  await expect(nav.getByRole('link', { name: '技术架构' })).toHaveCount(0);
   await expect(header.getByRole('link', { name: '预约沟通' })).toHaveAttribute(
     'href',
     '/contact#channels',
@@ -25,6 +26,44 @@ test('header carries the four-section navigation and a persistent booking action
   await page.evaluate(() => window.scrollTo(0, 1600));
   await expect.poll(async () => Math.round((await header.boundingBox())?.y ?? -1)).toBe(0);
   await expect(header).toBeVisible();
+});
+
+test('相关资料 discloses the material by click, hover and Escape', async ({ page }) => {
+  await page.goto('/');
+
+  const nav = page.getByRole('banner').getByRole('navigation', { name: '主导航' });
+  const trigger = nav.getByRole('button', { name: '相关资料' });
+
+  await trigger.click();
+  await expect(trigger).toHaveAttribute('aria-expanded', 'true');
+  await expect(nav.getByRole('link', { name: '工作方法' })).toHaveAttribute('href', '/methodology');
+  await expect(nav.getByRole('link', { name: '技术架构' })).toHaveAttribute(
+    'href',
+    '/architecture',
+  );
+
+  await page.mouse.click(8, 400);
+  await expect(trigger).toHaveAttribute('aria-expanded', 'false');
+
+  await trigger.hover();
+  await expect(trigger).toHaveAttribute('aria-expanded', 'true');
+
+  await nav.getByRole('link', { name: '工作方法' }).hover();
+  await expect(trigger).toHaveAttribute('aria-expanded', 'true');
+  await nav.getByRole('link', { name: '工作方法' }).click();
+  await expect(page).toHaveURL('/methodology');
+
+  await page.goto('/');
+  await trigger.hover();
+  await page.mouse.move(8, 400);
+  await expect(trigger).toHaveAttribute('aria-expanded', 'false');
+
+  await trigger.focus();
+  await page.keyboard.press('Enter');
+  await expect(trigger).toHaveAttribute('aria-expanded', 'true');
+  await page.keyboard.press('Escape');
+  await expect(trigger).toHaveAttribute('aria-expanded', 'false');
+  await expect(trigger).toBeFocused();
 });
 
 test('body enables CJK autospace and punctuation trim', async ({ page }) => {
@@ -40,13 +79,15 @@ test('body enables CJK autospace and punctuation trim', async ({ page }) => {
   expect(spacing).toEqual({ textAutospace: 'normal', textSpacingTrim: 'normal' });
 });
 
-test('current page is highlighted in the header', async ({ page }) => {
+test('current page is highlighted on the section and inside its menu', async ({ page }) => {
   await page.goto('/architecture');
 
   const nav = page.getByRole('banner').getByRole('navigation', { name: '主导航' });
 
-  await expect(nav.getByRole('link', { name: '技术架构' })).toHaveAttribute('aria-current', 'page');
-  await expect(nav.getByRole('link', { name: '工作方法论' })).not.toHaveAttribute(
+  await expect(nav.getByRole('button', { name: '相关资料' })).toHaveClass(/is-active/);
+  await expect(nav.locator('a[href="/architecture"]')).toHaveAttribute('aria-current', 'page');
+  await expect(nav.locator('a[href="/methodology"]')).not.toHaveAttribute('aria-current', 'page');
+  await expect(nav.getByRole('link', { name: '合作流程' })).not.toHaveAttribute(
     'aria-current',
     'page',
   );
@@ -60,6 +101,14 @@ test('footer provides site, delivery and contact columns plus legal links', asyn
   await expect(footer.getByRole('heading', { name: '站点' })).toBeVisible();
   await expect(footer.getByRole('heading', { name: '交付' })).toBeVisible();
   await expect(footer.getByRole('heading', { name: '联系' })).toBeVisible();
+  await expect(footer.getByRole('link', { name: '工作方法' })).toHaveAttribute(
+    'href',
+    '/methodology',
+  );
+  await expect(footer.getByRole('link', { name: '技术架构' })).toHaveAttribute(
+    'href',
+    '/architecture',
+  );
   await expect(footer.getByRole('link', { name: '8阶段交付' })).toHaveAttribute(
     'href',
     '/methodology#stages',
@@ -143,9 +192,18 @@ test.describe('mobile menu', () => {
     await expect(menu).toBeVisible();
     await expect(
       menu.getByRole('navigation', { name: '移动端主导航' }).getByRole('link'),
-    ).toHaveText(['工作方法论', '技术架构', '合作流程', '联系我们']);
+    ).toHaveText(['合作流程', '联系我们']);
 
-    await menu.getByRole('link', { name: '工作方法论' }).click();
+    const material = menu.getByRole('button', { name: '相关资料' });
+    await expect(material).toHaveAttribute('aria-expanded', 'false');
+    await expect(menu.getByRole('link', { name: '工作方法' })).toHaveCount(0);
+
+    await material.click();
+    await expect(material).toHaveAttribute('aria-expanded', 'true');
+    await expect(menu.getByRole('link', { name: '工作方法' })).toBeVisible();
+    await expect(menu.getByRole('link', { name: '技术架构' })).toBeVisible();
+
+    await menu.getByRole('link', { name: '工作方法' }).click();
     await expect(page).toHaveURL('/methodology');
     await expect(page.locator('#mobile-menu')).toBeHidden();
   });
@@ -163,6 +221,12 @@ test.describe('mobile menu', () => {
     await expect(page.locator('#mobile-menu')).toBeHidden();
     await expect(toggle).toHaveAttribute('aria-expanded', 'false');
     await expect(toggle).toBeFocused();
+
+    await toggle.click();
+    await expect(page.getByRole('button', { name: '相关资料' })).toHaveAttribute(
+      'aria-expanded',
+      'false',
+    );
   });
 });
 

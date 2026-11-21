@@ -151,7 +151,7 @@ test('process stage table carries cycle, participants, client input, outputs, bo
   }
 
   await expect(section.locator('[data-process-stage-card]')).toHaveCount(6);
-  await expect(section.getByRole('link', { name: '工作方法论' })).toHaveAttribute(
+  await expect(section.getByRole('link', { name: '工作方法' })).toHaveAttribute(
     'href',
     '/methodology#stages',
   );
@@ -239,7 +239,7 @@ test('process page stays within its scope and resolves all three anchors', async
   for (const id of ['stages', 'pricing', 'support']) {
     await expect(page.locator(`#${id}`)).toHaveCount(1);
   }
-  await expect(main.getByRole('link', { name: '工作方法论' })).toHaveAttribute(
+  await expect(main.getByRole('link', { name: '工作方法' })).toHaveAttribute(
     'href',
     '/methodology#stages',
   );

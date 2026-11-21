@@ -305,7 +305,7 @@ export const agentSpecCardItems: readonly string[] = [
 
 export const methodologyCopy = {
   hero: {
-    kicker: 'FDE 8阶段交付方法论',
+    kicker: 'FDE 8阶段交付方法',
     title: '从业务结果出发，而不是从技术方案出发。',
     lead: '8个交付阶段，3条原则；把AI Agent从业务问题做到生产上线。',
     primaryCta: '聊聊你的场景',
@@ -341,7 +341,7 @@ export const methodologyCopy = {
   },
   division: {
     kicker: '两页怎么分工',
-    title: '方法论讲交付，流程页讲合作。',
+    title: '工作方法讲交付，流程页讲合作。',
     lead: '一个回答“怎么把Agent做对”，一个回答“合作怎么开始、怎么推进”。',
     cards: [
       {

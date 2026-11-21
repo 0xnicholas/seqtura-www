@@ -11,7 +11,7 @@ test('home states the positioning and routes both hero actions', async ({ page }
     'href',
     '/contact#channels',
   );
-  await expect(page.getByRole('link', { name: '看工作方法论' }).first()).toHaveAttribute(
+  await expect(page.getByRole('link', { name: '看工作方法' }).first()).toHaveAttribute(
     'href',
     '/methodology',
   );
@@ -97,7 +97,7 @@ test('methodology preview states the method, its checkpoints and every stage gro
   for (const checkpoint of ['问题定义：', '验收标准：', '评测集：', '生产上线：']) {
     await expect(section.getByText(checkpoint).first()).toBeVisible();
   }
-  await expect(section.getByRole('link', { name: '看完整方法论' })).toHaveAttribute(
+  await expect(section.getByRole('link', { name: '看完整工作方法' })).toHaveAttribute(
     'href',
     '/methodology',
   );
@@ -140,7 +140,7 @@ test('methodology code panel switches files by click and arrow keys', async ({ p
   await page.goto('/');
 
   const section = page.locator('section#methodology');
-  const tablist = section.getByRole('tablist', { name: '方法论文件' });
+  const tablist = section.getByRole('tablist', { name: '工作方法文件' });
   const delivery = tablist.getByRole('tab', { name: 'delivery.yml' });
   const validate = tablist.getByRole('tab', { name: 'gate-validate.md' });
 

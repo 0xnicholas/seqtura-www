@@ -126,7 +126,7 @@ export const processStagesCopy = {
   tableTitle: '每段做什么、需要你投入什么、到哪里为止。',
   tableLead: '周期、参与人、客户投入、产出与边界，逐项写清。',
   methodologyRef: '交付期内部的工程阶段、产出物与过关条件，见',
-  methodologyLink: '工作方法论',
+  methodologyLink: '工作方法',
 } as const;
 
 export interface ProcessBranch {
