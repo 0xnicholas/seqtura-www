@@ -43,6 +43,8 @@
   --color-red-hover: #aa1b12;
   --color-red-faded: #ffe2dd;
   --color-red-wash: #fff7f5;
+  /* 导航选中态的两档填充底（#60）：hover/展开 5%，当前页复用上方 --color-red-faded 的 14%。 */
+  --color-red-tint: color-mix(in srgb, var(--color-red) 5%, transparent);
   --color-dark: #171717;
   --color-dark-2: #0f0f0f;
   --color-dark-line: #333333;
