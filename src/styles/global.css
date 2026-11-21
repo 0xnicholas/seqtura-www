@@ -432,24 +432,6 @@
     background: var(--color-canvas);
   }
 
-  .section::before,
-  .section::after {
-    content: '';
-    position: absolute;
-    top: -4px;
-    width: 7px;
-    height: 7px;
-    background: var(--color-red);
-  }
-
-  .section::before {
-    left: max(var(--gutter), calc((100vw - var(--container-site)) / 2));
-  }
-
-  .section::after {
-    right: max(var(--gutter), calc((100vw - var(--container-site)) / 2));
-  }
-
   .reveal.is-revealed {
     animation: section-in var(--duration-enter) var(--ease-site) both;
   }

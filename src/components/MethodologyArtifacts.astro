@@ -37,7 +37,6 @@ const { artifacts } = methodologyCopy;
       <aside class="spec-card" data-spec-card aria-labelledby="spec-title">
         <div class="spec-head">
           <span class="spec-code">AGENT SPEC / {agentSpecCardItems.length} FIELDS</span>
-          <span class="spec-tick" aria-hidden="true"></span>
         </div>
         <h3 id="spec-title" class="spec-title">
           {artifacts.specTitle}
@@ -154,12 +153,6 @@ const { artifacts } = methodologyCopy;
     line-height: 1.5;
     letter-spacing: 0.08em;
     color: var(--color-red-dark);
-  }
-
-  .spec-tick {
-    width: 7px;
-    height: 7px;
-    background: var(--color-red);
   }
 
   .spec-title {

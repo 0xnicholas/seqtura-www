@@ -313,7 +313,7 @@ test('brand red tokens render the §3.1 target values in computed styles', async
   await page.goto('/');
 
   const tick = await page
-    .locator('[data-fit-situation]')
+    .locator('main .kicker')
     .first()
     .evaluate((element) => {
       const style = getComputedStyle(element, '::before');
