@@ -172,7 +172,13 @@ const consistencyBaseline: Record<string, string> = {
 `,
 };
 
-for (const hero of ['ArchitectureHero', 'MethodologyHero', 'ContactHero', 'ProcessHero']) {
+for (const hero of [
+  'ArchitectureHero',
+  'MethodologyHero',
+  'ContactHero',
+  'ProcessHero',
+  'ProductHero',
+]) {
   consistencyBaseline[`src/components/${hero}.astro`] = `<style>
   .hero-copy > * {
     animation: hero-in var(--duration-enter) var(--ease-site) both;
@@ -182,7 +188,7 @@ for (const hero of ['ArchitectureHero', 'MethodologyHero', 'ContactHero', 'Proce
 }
 
 consistencyBaseline['src/pages/home.astro'] = Array.from(
-  { length: 18 },
+  { length: 20 },
   (_, index) => `<SectionHeading id="s${index}" kicker="k" title="t" />`,
 ).join('\n');
 
@@ -285,10 +291,10 @@ test('the mini stack must stay a single-point implementation', () => {
   expect(result.stderr).toContain('src/components/Stray.astro');
 });
 
-test('the mini stack must render at all 18 section headings', () => {
+test('the mini stack must render at all 20 section headings', () => {
   const root = consistencyFixture({
     'src/pages/home.astro': Array.from(
-      { length: 17 },
+      { length: 19 },
       (_, index) => `<SectionHeading id="s${index}" kicker="k" title="t" />`,
     ).join('\n'),
   });
@@ -296,7 +302,7 @@ test('the mini stack must render at all 18 section headings', () => {
   const result = runConsistencyCheck('--root', root);
 
   expect(result.status).toBe(1);
-  expect(result.stderr).toContain('18');
+  expect(result.stderr).toContain('20');
 });
 
 test('the six test anchors must survive and the dead ones stay gone', () => {

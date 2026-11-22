@@ -4,12 +4,23 @@
   var menu = document.querySelector('[data-mobile-menu]');
   var mobileSections = document.querySelectorAll('[data-mobile-section-trigger]');
 
-  var section = document.querySelector('[data-nav-section]');
-  var sectionTrigger = section && section.querySelector('[data-nav-section-trigger]');
-  var sectionMenu = section && section.querySelector('[data-nav-section-menu]');
   var hoverIntent = 150;
-  var hoverTimer = null;
-  var openedByHover = false;
+  // 桌面下拉从单分组泛化为 N 组（#62）：每组持有自己的开关状态与 hover 计时器，
+  // 打开一组即收起其余组，保证同一时刻只有一个面板可操作。
+  var sections = Array.prototype.slice
+    .call(document.querySelectorAll('[data-nav-section]'))
+    .map(function (root) {
+      return {
+        root: root,
+        trigger: root.querySelector('[data-nav-section-trigger]'),
+        menu: root.querySelector('[data-nav-section-menu]'),
+        timer: null,
+        openedByHover: false,
+      };
+    })
+    .filter(function (state) {
+      return state.trigger && state.menu;
+    });
 
   function collapseMobileSections() {
     mobileSections.forEach(function (trigger) {
@@ -31,15 +42,27 @@
     return toggle?.getAttribute('aria-expanded') === 'true';
   }
 
-  function setSection(open, byHover) {
-    if (!sectionTrigger || !sectionMenu) return;
-    sectionMenu.hidden = !open;
-    sectionTrigger.setAttribute('aria-expanded', String(open));
-    openedByHover = Boolean(open && byHover);
+  function sectionIsOpen(state) {
+    return state.trigger.getAttribute('aria-expanded') === 'true';
   }
 
-  function sectionIsOpen() {
-    return sectionTrigger?.getAttribute('aria-expanded') === 'true';
+  function setSection(state, open, byHover) {
+    window.clearTimeout(state.timer);
+    state.menu.hidden = !open;
+    state.trigger.setAttribute('aria-expanded', String(open));
+    state.openedByHover = Boolean(open && byHover);
+  }
+
+  function closeOtherSections(except) {
+    sections.forEach(function (state) {
+      if (state !== except && sectionIsOpen(state)) setSection(state, false, false);
+    });
+  }
+
+  function closeAllSections() {
+    sections.forEach(function (state) {
+      if (sectionIsOpen(state)) setSection(state, false, false);
+    });
   }
 
   mobileSections.forEach(function (trigger) {
@@ -52,45 +75,56 @@
     });
   });
 
-  // 悬停先开；点一下把关闭权接管过来，再点才收。
-  sectionTrigger?.addEventListener('click', function () {
-    if (!sectionIsOpen()) {
-      setSection(true, false);
-      return;
-    }
-    if (openedByHover) {
-      openedByHover = false;
-      return;
-    }
-    setSection(false, false);
-  });
+  sections.forEach(function (state) {
+    // 悬停先开；点一下把关闭权接管过来，再点才收。
+    state.trigger.addEventListener('click', function () {
+      if (!sectionIsOpen(state)) {
+        closeOtherSections(state);
+        setSection(state, true, false);
+        return;
+      }
+      if (state.openedByHover) {
+        state.openedByHover = false;
+        return;
+      }
+      setSection(state, false, false);
+    });
 
-  section?.addEventListener('pointerenter', function () {
-    window.clearTimeout(hoverTimer);
-    if (sectionIsOpen()) return;
-    hoverTimer = window.setTimeout(function () {
-      setSection(true, true);
-    }, hoverIntent);
-  });
+    state.root.addEventListener('pointerenter', function () {
+      window.clearTimeout(state.timer);
+      if (sectionIsOpen(state)) return;
+      state.timer = window.setTimeout(function () {
+        closeOtherSections(state);
+        setSection(state, true, true);
+      }, hoverIntent);
+    });
 
-  section?.addEventListener('pointerleave', function () {
-    window.clearTimeout(hoverTimer);
-    if (openedByHover) setSection(false, false);
-  });
+    state.root.addEventListener('pointerleave', function () {
+      window.clearTimeout(state.timer);
+      if (state.openedByHover) setSection(state, false, false);
+    });
 
-  section?.addEventListener('focusout', function (event) {
-    if (!section.contains(event.relatedTarget)) setSection(false, false);
+    state.root.addEventListener('focusout', function (event) {
+      if (!state.root.contains(event.relatedTarget)) setSection(state, false, false);
+    });
   });
 
   document.addEventListener('pointerdown', function (event) {
-    if (sectionIsOpen() && !section.contains(event.target)) setSection(false, false);
+    sections.forEach(function (state) {
+      if (sectionIsOpen(state) && !state.root.contains(event.target)) {
+        setSection(state, false, false);
+      }
+    });
   });
 
   document.addEventListener('keydown', function (event) {
     if (event.key !== 'Escape') return;
-    if (sectionIsOpen()) {
-      setSection(false, false);
-      sectionTrigger?.focus();
+    var open = sections.filter(sectionIsOpen);
+    if (open.length > 0) {
+      open.forEach(function (state) {
+        setSection(state, false, false);
+      });
+      open[0].trigger.focus();
       return;
     }
     if (menuIsOpen()) {
@@ -109,7 +143,7 @@
 
   window.matchMedia('(min-width: 1024px)').addEventListener('change', function (event) {
     if (event.matches) setMenu(false);
-    else setSection(false, false);
+    else closeAllSections();
   });
 
   function syncHeaderBorder() {

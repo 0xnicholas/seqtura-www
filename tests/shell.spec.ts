@@ -9,10 +9,15 @@ test('header groups the delivery material under 相关资料 and keeps a persist
   const nav = header.getByRole('navigation', { name: '主导航' });
 
   await expect(nav.getByRole('link')).toHaveText(['合作流程', '联系我们']);
+  await expect(nav.getByRole('button', { name: '产品和服务' })).toHaveAttribute(
+    'aria-expanded',
+    'false',
+  );
   await expect(nav.getByRole('button', { name: '相关资料' })).toHaveAttribute(
     'aria-expanded',
     'false',
   );
+  await expect(nav.getByRole('link', { name: 'Oribos' })).toHaveCount(0);
   await expect(nav.getByRole('link', { name: '工作方法' })).toHaveCount(0);
   await expect(nav.getByRole('link', { name: '技术架构' })).toHaveCount(0);
   await expect(header.getByRole('link', { name: '预约沟通' })).toHaveAttribute(
@@ -64,6 +69,46 @@ test('相关资料 discloses the material by click, hover and Escape', async ({ 
   await page.keyboard.press('Escape');
   await expect(trigger).toHaveAttribute('aria-expanded', 'false');
   await expect(trigger).toBeFocused();
+});
+
+test('产品和服务 discloses the three product pages and collapses the other group', async ({
+  page,
+}) => {
+  await page.goto('/');
+
+  const nav = page.getByRole('banner').getByRole('navigation', { name: '主导航' });
+  const products = nav.getByRole('button', { name: '产品和服务' });
+  const resources = nav.getByRole('button', { name: '相关资料' });
+
+  await products.click();
+  await expect(products).toHaveAttribute('aria-expanded', 'true');
+  await expect(nav.getByRole('link', { name: 'Oribos' })).toHaveAttribute(
+    'href',
+    '/products/oribos',
+  );
+  await expect(nav.getByRole('link', { name: 'Fdesforce' })).toHaveAttribute(
+    'href',
+    '/products/fdesforce',
+  );
+  await expect(nav.getByRole('link', { name: 'Heirloom' })).toHaveAttribute(
+    'href',
+    '/products/heirloom',
+  );
+
+  // 同一时刻只有一个面板：打开另一组时前一组收起。
+  await resources.hover();
+  await expect(resources).toHaveAttribute('aria-expanded', 'true');
+  await expect(products).toHaveAttribute('aria-expanded', 'false');
+
+  await page.keyboard.press('Escape');
+  await expect(resources).toHaveAttribute('aria-expanded', 'false');
+  await expect(resources).toBeFocused();
+
+  // 产品页：触发器常驻填充块，子项带 aria-current。
+  await page.goto('/products/oribos');
+  await expect(nav.getByRole('button', { name: '产品和服务' })).toHaveClass(/is-active/);
+  await expect(nav.getByRole('link', { name: 'Oribos' })).toHaveCount(0);
+  await expect(nav.locator('a[href="/products/oribos"]')).toHaveAttribute('aria-current', 'page');
 });
 
 test('body enables CJK autospace and punctuation trim', async ({ page }) => {
@@ -161,7 +206,9 @@ test('selection renders as a red tint pill and the caret is the laravel chevron'
   // 首个标签仍与品牌字标保持 40px 节奏（填充块内边距不吃掉间距）。
   const offset = await page.evaluate(() => {
     const brand = document.querySelector('header .brand');
-    const label = document.querySelector('.desktop-nav > a');
+    const label = document.querySelector(
+      '.desktop-nav > *:first-child > a, .desktop-nav > *:first-child > button',
+    );
     if (!brand || !label) return -1;
     const range = document.createRange();
     range.selectNodeContents(label);
@@ -299,7 +346,7 @@ test.describe('mobile menu', () => {
     await expect(plain).toHaveCSS('border-bottom-width', '0px');
 
     // 箭头随 laravel.com 的 <lg 档降到 16px。
-    const caret = menu.locator('[data-mobile-section-trigger] .nav-caret');
+    const caret = menu.locator('[data-mobile-section-trigger] .nav-caret').first();
     const box = await caret.boundingBox();
     expect(Math.round(box?.width ?? 0)).toBe(16);
     expect(Math.round(box?.height ?? 0)).toBe(16);
@@ -424,6 +471,9 @@ const renderedRoutes = [
   '/architecture',
   '/process',
   '/contact',
+  '/products/oribos',
+  '/products/fdesforce',
+  '/products/heirloom',
   '/legal/privacy',
   '/legal/terms',
   '/this-page-does-not-exist',

@@ -27,7 +27,13 @@ const sourceExtensions = new Set([
 ]);
 const skippedDirectories = new Set(['.git', 'node_modules']);
 
-const heroComponents = ['ArchitectureHero', 'MethodologyHero', 'ContactHero', 'ProcessHero'];
+const heroComponents = [
+  'ArchitectureHero',
+  'MethodologyHero',
+  'ContactHero',
+  'ProcessHero',
+  'ProductHero',
+];
 const heroEntrance = 'var(--duration-enter) var(--ease-site) both';
 // §4 区块 1: the hero entrance ladder is a deliberate one-off, not tokenised.
 const heroLadderDelays = new Set(['0ms', '200ms', '400ms', '600ms', '800ms', '1000ms']);
@@ -37,7 +43,8 @@ const miniStackRedFaces = [
   '10,30 36,40 36,44 10,34',
   '36,40 62,30 62,34 36,44',
 ];
-const sectionHeadingCount = 18; // spec §6.3: home 4 + inner pages 14
+// spec §6.3: home 4 + inner pages 14 + product pages 2 (shared ProductBody × 3 routes, #62)
+const sectionHeadingCount = 20;
 const requiredAnchors = [
   'data-fit-situation',
   'data-primary-cta',
@@ -179,7 +186,7 @@ function checkHeroEntrance(context, report) {
   for (const file of context.sourceFiles) {
     if (heroComponents.some((hero) => file.path === `src/components/${hero}.astro`)) continue;
     for (const match of file.text.matchAll(/animation\s*:\s*hero-in/g)) {
-      report(file, match.index, 'hero-in is reserved for the four inner-page heroes');
+      report(file, match.index, 'hero-in is reserved for the inner-page heroes');
     }
   }
 }

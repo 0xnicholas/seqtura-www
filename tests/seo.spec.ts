@@ -7,6 +7,9 @@ const indexablePages = [
   '/architecture',
   '/process',
   '/contact',
+  '/products/oribos',
+  '/products/fdesforce',
+  '/products/heirloom',
   '/legal/privacy',
   '/legal/terms',
 ];

@@ -11,7 +11,7 @@
 _Avoid_: 智能体（仅首次出现与 SEO 的中文别名）, AI 助手, Bot
 
 **FDE（Forward Deployed Engineering，前置交付）**:
-一种前置交付工程师（Forward Deployed Engineer）与客户业务人员共同设计、构建、验证的交付模式。
+一种前置交付工程师（Forward Deployed Engineer）与客户业务人员共同设计、构建、验证的交付模式。产品线上的 FDE 工作台指 Fdesforce，与这个交付模式区分。
 _Avoid_: 外包, 远程交付
 
 ### 联系
@@ -52,8 +52,8 @@ Define 阶段与客户确认、Validate 阶段逐项执行的一组可量化标�
 _Avoid_: 过关条件（阶段退出标准）
 
 **业务本体（Ontology）**:
-对业务对象、关系与动作的定义，Agent 依据它理解业务规则并行动。
-_Avoid_: 知识图谱
+对业务对象、关系与动作的定义，Agent 依据它理解业务规则并行动。产品线上的本体层指 Heirloom。
+_Avoid_: 知识图谱, 语义层
 
 **Skills（技能）**:
 可复用的 Agent 能力单元，例如查询订单、生成工单摘要。
@@ -118,6 +118,24 @@ _Avoid_: 技术栈, 架构层
 **控制面（Control Plane）**:
 横切能力栈的治理能力：身份与权限、评测与可观测、策略与审计。
 _Avoid_: 安全层, 治理层
+
+### 产品线
+
+**产品线（Product Line）**:
+官网列出、与交付服务并列的独立产品品牌；每条有各自的定位、能力边界与形态，不绑定 8 阶段交付方法。
+_Avoid_: 业务线, 子品牌, 产品矩阵
+
+**Oribos**:
+TypeScript 的 Agent 框架，提供 Agent、记忆、Workflow 与运行时能力（长跑 Agent、信号、定时任务），零运行时依赖，Apache-2.0 开源、pre-1.0。
+_Avoid_: Agent 平台, 智能体平台
+
+**Fdesforce（FDE 工作台）**:
+面向 FDE 与交付团队的构建器：把 Customer 的 Solution Spec 编译成可独立部署的 Bundle，以固定输入、失败即拒的门禁与可复现摘要保证构建可核对。内部工具，不对外提供账号。
+_Avoid_: FdeForce, FDE Force, FDE 交付平台
+
+**Heirloom（本体层）**:
+把企业领域模型写成代码的开源、自托管本体层：数据、动作、逻辑与权限在一处定义；处于设计阶段。
+_Avoid_: 语义层, 知识图谱, 图数据库
 
 ### 原则
 
