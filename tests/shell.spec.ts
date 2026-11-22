@@ -91,6 +91,83 @@ test('current page is highlighted on the section and inside its menu', async ({ 
     'aria-current',
     'page',
   );
+
+  // #60：当前页子项常驻 14% 填充块，其余为透明（展开态才看得到）。
+  await nav.getByRole('button', { name: '相关资料' }).click();
+  await expect(nav.locator('a[href="/architecture"]')).toHaveCSS(
+    'background-color',
+    'rgb(255, 226, 221)',
+  );
+  await expect(nav.locator('a[href="/methodology"]')).toHaveCSS(
+    'background-color',
+    'rgba(0, 0, 0, 0)',
+  );
+});
+
+test('selection renders as a red tint pill and the caret is the laravel chevron', async ({
+  page,
+}) => {
+  await page.goto('/architecture');
+
+  const nav = page.getByRole('banner').getByRole('navigation', { name: '主导航' });
+  const trigger = nav.getByRole('button', { name: '相关资料' });
+  const plain = nav.getByRole('link', { name: '合作流程' });
+
+  // 红下划线已删除（#60）。
+  expect(await plain.evaluate((el) => getComputedStyle(el, '::after').content)).toBe('none');
+
+  // 填充块几何照 laravel.com：36px 高、8px 圆角。
+  await expect(plain).toHaveCSS('height', '36px');
+  await expect(plain).toHaveCSS('border-radius', '8px');
+
+  // 当前页 = 常驻 14% 填充块；静止的非当前页 = 透明。
+  await expect(trigger).toHaveCSS('background-color', 'rgb(255, 226, 221)');
+  await expect(plain).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)');
+
+  // hover = 5% 填充块，与 --color-red-tint 同值。
+  const tint = await page.evaluate(() => {
+    const probe = document.createElement('div');
+    probe.style.background = 'var(--color-red-tint)';
+    document.body.append(probe);
+    const value = getComputedStyle(probe).backgroundColor;
+    probe.remove();
+    return value;
+  });
+  await plain.hover();
+  await expect(plain).toHaveCSS('background-color', tint);
+
+  // 箭头 = laravel.com 的红色 20px chevron。
+  const caret = trigger.locator('.nav-caret');
+  await expect(caret).toHaveCSS('color', 'rgb(255, 45, 32)');
+  const caretBox = await caret.boundingBox();
+  expect(Math.round(caretBox?.width ?? 0)).toBe(20);
+  expect(Math.round(caretBox?.height ?? 0)).toBe(20);
+
+  // 展开后 ∨ 收成 ∧：<g> 上提 5.25px、两臂各绕 (10px,13px) 旋转 ∓90°。
+  await trigger.click();
+  await expect(trigger).toHaveAttribute('aria-expanded', 'true');
+  await expect
+    .poll(() => caret.evaluate((el) => getComputedStyle(el.querySelector('g') ?? el).transform))
+    .toBe('matrix(1, 0, 0, 1, 0, -5.25)');
+  await expect
+    .poll(() =>
+      caret.evaluate((el) => {
+        const arms = [...el.querySelectorAll('path')];
+        return arms.map((arm) => getComputedStyle(arm).transform).join(' | ');
+      }),
+    )
+    .toBe('matrix(0, -1, 1, 0, 0, 0) | matrix(0, 1, -1, 0, 0, 0)');
+
+  // 首个标签仍与品牌字标保持 40px 节奏（填充块内边距不吃掉间距）。
+  const offset = await page.evaluate(() => {
+    const brand = document.querySelector('header .brand');
+    const label = document.querySelector('.desktop-nav > a');
+    if (!brand || !label) return -1;
+    const range = document.createRange();
+    range.selectNodeContents(label);
+    return range.getBoundingClientRect().left - brand.getBoundingClientRect().right;
+  });
+  expect(Math.round(offset)).toBe(40);
 });
 
 test('footer provides site, delivery and contact columns plus legal links', async ({ page }) => {
@@ -206,6 +283,26 @@ test.describe('mobile menu', () => {
     await menu.getByRole('link', { name: '工作方法' }).click();
     await expect(page).toHaveURL('/methodology');
     await expect(page.locator('#mobile-menu')).toBeHidden();
+  });
+
+  test('marks the current row as a tint pill without hairlines', async ({ page }) => {
+    await page.goto('/architecture');
+    await page.locator('[data-menu-toggle]').click();
+
+    const menu = page.locator('#mobile-menu');
+    const section = menu.getByRole('button', { name: '相关资料' });
+    const plain = menu.getByRole('link', { name: '合作流程' });
+
+    await expect(section).toHaveCSS('background-color', 'rgb(255, 226, 221)');
+    await expect(plain).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)');
+    await expect(section).toHaveCSS('border-bottom-width', '0px');
+    await expect(plain).toHaveCSS('border-bottom-width', '0px');
+
+    // 箭头随 laravel.com 的 <lg 档降到 16px。
+    const caret = menu.locator('[data-mobile-section-trigger] .nav-caret');
+    const box = await caret.boundingBox();
+    expect(Math.round(box?.width ?? 0)).toBe(16);
+    expect(Math.round(box?.height ?? 0)).toBe(16);
   });
 
   test('Escape closes the menu and returns focus to the toggle', async ({ page }) => {
