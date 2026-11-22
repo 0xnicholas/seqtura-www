@@ -454,9 +454,9 @@
     }
   }
 
-  /* Shared entrance for the four inner-page heroes (ArchitectureHero, MethodologyHero,
-     ContactHero, ProcessHero); each component keeps its scoped animation shorthand and
-     reduced-motion override, only the keyframes live here. */
+  /* Shared entrance for the inner-page heroes (ArchitectureHero, MethodologyHero,
+     ContactHero, ProcessHero, ProductHero); each component keeps its scoped animation
+     shorthand and reduced-motion override, only the keyframes live here. */
   @keyframes hero-in {
     from {
       opacity: 0;

@@ -10,6 +10,8 @@
 
 - **[#60](https://github.com/0xnicholas/seqtura-www/issues/60)（2026-11-21）：导航选中改为红淡填充块，箭头换 laravel.com 同款 SVG**。推翻导航分组修订里的一切「红色下划线」条款：选中 / 悬停表达改为圆角红淡填充块（hover / 展开 5%、当前页 14%），下拉箭头由 5px border 折角改为 laravel.com 的红色内联 SVG chevron（展开时 150ms 变 ∧）。`#40` 判例的「caret 瞬时翻转」豁免给箭头这一个 transform，面板本体仍瞬时开合。区块 8 末尾新增该修订的 Before / After 与验收条目。
 
+- **[#62](https://github.com/0xnicholas/seqtura-www/issues/62)（2026-11-22）：顶层新增「产品和服务」分组与三条产品线页面**。导航从「2 个链接 + 1 个触发器」变为「2 个链接 + 2 个触发器」（产品和服务 / 相关资料），并泛化 `site.js` 支持 N 组；新增 `/products/oribos`、`/products/fdesforce`、`/products/heirloom` 三页与页脚「产品」列。产品页不做产品级转化、不放站外链接（ADR-0002）。区块 8 末尾新增该修订的结构、语义与验收条目；§6.3 的 mini 等距栈处数由 18 升到 20。
+
 ## 1. 读我
 
 - **范围**：审计覆盖整站；本规格以首页为定标页，逐区块给出 before/after 级决策；其它页不写 before/after，沿用首页规则（第 5 节映射）。实现（代码改造）不在本规格内，定稿后另起 effort。
@@ -427,6 +429,34 @@
 - [ ] 首个导航标签文字左边缘 = `a.brand` 右边缘 + 40px；320 / 390 / 768 / 1024 / 1440 五个断点无横向溢出
 - [ ] `shell.spec.ts` 的 `.is-active` / `aria-current` 断言、`check:consistency`、`lint`、`a11y` 全绿
 
+**修订 2026-11-22 · 产品和服务导航与三条产品线（[#62](https://github.com/0xnicholas/seqtura-www/issues/62)）**
+
+**目标**：把三条独立产品线纳入官网 IA：顶层第一项「产品和服务」收 Oribos（Agent 框架）、Fdesforce（FDE 工作台）、Heirloom（本体层），各建一页站内页面。决策与取舍见 `docs/adr/0002-product-lines-in-the-site-navigation.md`，术语见 `GLOSSARY.md`「产品线」。第 8 区块的「2 个链接 + 1 个触发器」基线由此被取代，其余 chrome 规则不变。
+
+| 面     | Before                                                                                          | After                                                                                                                                                                                                                           | 优先级 |
+| ------ | ----------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| 结构   | 顶层 `合作流程` / `相关资料`（触发器）/ `联系我们`；`site.js` 用 `querySelector` 只认第一个分组 | 顶层 `产品和服务`（触发器）/ `合作流程` / `相关资料`（触发器）/ `联系我们`；`site.js` 改为扫全部 `[data-nav-section]`，每组独立状态与 hover 计时器，打开一组即收起其余组，纯函数 `closeOtherSections` / `closeAllSections` 收口 | P0     |
+| 语义   | 单个分组可用 `aria-expanded` / `hidden` 表达                                                    | 不变；两个分组各自沿用 `button[aria-expanded][aria-controls]` + `<ul>` 列表，`aria-current` 仍落在面板子项，触发器 `.is-active` 仍取 14% 填充块                                                                                 | P0     |
+| 路由   | 5 张内容页                                                                                      | 新增 `/products/*` 三页；不建 `/products` 汇总页。`src/content/entry.ts` 的 `PageId` 同步扩展                                                                                                                                   | P0     |
+| 页面   | —                                                                                               | `ProductHero`（进 hero-in 名单）+ `ProductBody`（两段 `SectionHeading`）。hero 不带红色光晕——§4 的光晕「全站 5 处」不增加                                                                                                       | P0     |
+| 转化   | 内页 hero 带主次 CTA                                                                            | 产品页零 CTA 按钮、零站外链接；唯一出口是页尾一条 `.text-link` 回指 `/architecture`                                                                                                                                             | P0     |
+| 页脚   | `.footer-main` 1.9fr + 3 列                                                                     | 新增「产品」列：桌面 `1.9fr repeat(4, 1fr)`、`<1024px` 四等列、`<768px` 两列；「站点」列不重复产品页                                                                                                                            | P1     |
+| 计数   | SectionHeading 18 处（首页 4 + 内页 14）；hero 内页 4 个                                        | 20 处（+ `ProductBody` 2 处，渲染到 3 条路由）；hero 名单 4 → 5（`ProductHero`）                                                                                                                                                | P0     |
+| 对比度 | 导航当前页 14% 底，字取 `--color-ink`                                                           | 产品线格同理；填充底上的 `.line-no` 与 `.line-category` 换 `--color-ink-2`——红 `#cd2318` 在 `#ffe2dd` 上只有 4.46:1、灰 `#737373` 只有 3.87:1，过不了 axe 的 4.5:1                                                              | P1     |
+
+**边界**：header 高度仍 64px；顶栏四项在 1024px 实测余量 ≈147px，不溢出；`<1024px` 桌面导航隐藏的断点不变；分组面板的几何、开合、caret morph、Esc / 焦点归还全部沿用 #60 判例；产品页不新增 token、不新增图示化、不新增光晕；`data-nav-section*` / `data-mobile-section-trigger` 钩子继续有效，新增 `data-product-link` 供产品线格断言。
+
+**验收点**：
+
+- [ ] 桌面主导航 2 个链接（合作流程、联系我们）+ 2 个触发器（产品和服务、相关资料）；收起时子项不被 role 查询命中
+- [ ] 产品和服务面板含 Oribos / Fdesforce / Heirloom，分别指向 `/products/oribos`、`/products/fdesforce`、`/products/heirloom`
+- [ ] 打开一组时另一组收起；click / hover / Esc / 外部点击 / 焦点离开的行为与 #60 一致，Esc 后焦点回到该组触发器
+- [ ] 三条产品路由 200，各 1 个 h1、2 个 `SectionHeading`、`#what` 与 `#place` 锚点；页尾 `看技术架构` → `/architecture`
+- [ ] 产品页内零 `a[href^="http"]`、零 `a[target="_blank"]`、零 `button`、零 `a.btn`
+- [ ] 产品线格当前项 `aria-current="page"`，其 `.line-no` / `.line-category` 计算色 = `#404040`
+- [ ] 页脚出现「产品」列且「站点」列不含产品页
+- [ ] `check:consistency`（hero 名单 5、SectionHeading 20）、`check:links`（起点路由 10）、`lint`、`a11y`、`shell/routes/products` 全绿
+
 ## 5. 其它页沿用规则
 
 锁定原则（#33）：其它页不写 before/after，沿用首页定标区块规则 + 例外清单。本节输入 = #41 整站区块审计（区块清单、份额数字与例外候选的采集口径见[审计清单](https://github.com/0xnicholas/seqtura-www/issues/41#issuecomment-6948014292)）；审计所列份额数字供实现定位用，验收以 §3.2 的 276 台账与 §6 总口径为准。
@@ -549,7 +579,7 @@
 - [ ] 手写空格 342 处清零（276 `src/data` + 60 legal mdx + 6 chrome）；autospace 下无双重加宽；「 / 」「 · 」分隔符保留（区块 2/7 判例）
 - [ ] `text-autospace: normal` 与 `text-spacing-trim: normal` body 级声明存在；`.type-h1` / `.type-h2` 的 `:lang(zh)` 500 规则存在；`.legal-title:lang(zh)` 500 单独规则存在（5.3-E4）
 - [ ] reveal 全站一致：IO 触发、once-only、600ms `var(--duration-enter)`、`var(--ease-site)`、无组内 stagger；contact / legal / 404 维持零 reveal；ProcessFlow / ProcessStageTable / DeploymentTierBar 维持无 reveal
-- [ ] mini 等距栈 18 处（首页 4 + 内页 14）全部渲染定标形态（三层 slab / 中层 `#FF2D20` / 高 120px / 居中 / 纯 SVG 内联）；非 SH 头部（区块 2/7、contact 三区块、chrome）零 mini 栈
+- [ ] mini 等距栈 ~~18 处（首页 4 + 内页 14）~~ 20 处（+ 产品页 6 处渲染，经 `ProductBody` 单点实现，[#62](https://github.com/0xnicholas/seqtura-www/issues/62)）全部渲染定标形态（三层 slab / 中层 `#FF2D20` / 高 120px / 居中 / 纯 SVG 内联）；非 SH 头部（区块 2/7、contact 三区块、chrome）零 mini 栈
 - [ ] 密度复核：首页图示化仍仅 hero 主图一处；architecture 页 = ArchitectureMap + LifecycleDiagram（5.3-E5 例外记录）；其余页零图示化
 - [ ] 测试锚点保留：`data-fit-situation` / `data-primary-cta` / `data-menu-toggle` / `data-mobile-menu` / `data-footer-mark` / `data-filing`；区块 2 死属性 `data-proof-intro` / `data-proof-fact` 随实现清理
 

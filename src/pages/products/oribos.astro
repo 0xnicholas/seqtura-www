@@ -1,0 +1,15 @@
+---
+import { publishedPage } from '../../content/entry';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ProductHero from '../../components/ProductHero.astro';
+import ProductBody from '../../components/ProductBody.astro';
+import { products } from '../../data/products';
+
+const { data } = await publishedPage('oribos');
+const { title, description } = data;
+---
+
+<BaseLayout title={title} description={description}>
+  <ProductHero product={products.oribos} />
+  <ProductBody product={products.oribos} />
+</BaseLayout>

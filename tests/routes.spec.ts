@@ -5,6 +5,9 @@ const routes = [
   '/architecture',
   '/process',
   '/contact',
+  '/products/oribos',
+  '/products/fdesforce',
+  '/products/heirloom',
   '/legal/privacy',
   '/legal/terms',
 ];
@@ -14,6 +17,9 @@ const anchors = {
   '/architecture': ['overview', 'lifecycle', 'layers', 'controls', 'scenarios'],
   '/process': ['stages', 'pricing', 'support'],
   '/contact': ['channels', 'about'],
+  '/products/oribos': ['what', 'place'],
+  '/products/fdesforce': ['what', 'place'],
+  '/products/heirloom': ['what', 'place'],
 };
 
 for (const route of routes) {
@@ -48,6 +54,7 @@ for (const [route, heading] of [
 
     const nav = page.getByRole('navigation', { name: '主导航' });
     await expect(nav.getByRole('link')).toHaveCount(2);
+    await expect(nav.getByRole('button', { name: '产品和服务' })).toHaveCount(1);
     await expect(nav.getByRole('button', { name: '相关资料' })).toHaveCount(1);
     await expect(
       page.getByRole('contentinfo').getByRole('link', { name: '工作方法' }),

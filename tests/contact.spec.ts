@@ -8,7 +8,7 @@ test.describe('contact page structure', () => {
     const main = page.getByRole('main');
     await expect(main.getByRole('heading', { level: 1 })).toHaveText('先聊一个具体场景。');
     await expect(main).toContainText('围绕一个具体业务场景，给出值不值得做、下一步是什么的判断。');
-    await expect(main).toContainText('扫码添加企业微信、打开飞书，或直接写邮件。');
+    await expect(main).toContainText('扫码添加企业微信或飞书，或直接写邮件。');
 
     await expect(page.locator('#book')).toHaveCount(0);
     await expect(page.locator('#channels')).toHaveCount(1);
@@ -31,11 +31,30 @@ test.describe('contact page structure', () => {
       'href',
       'mailto:hello@seqtura.ai',
     );
-    await expect(channels.locator('img')).toHaveCount(0);
+    const wecomQr = channels.getByRole('img', { name: '企业微信二维码' });
+    await expect(wecomQr).toHaveAttribute('src', '/wecom-qr.png');
+    await expect(channels.locator('[data-channel="wecom"]')).toContainText(
+      '扫码添加企业微信，备注「序构」。',
+    );
+
+    const feishuQr = channels.getByRole('img', { name: '飞书二维码' });
+    await expect(feishuQr).toHaveAttribute('src', '/feishu-qr.png');
+    const feishu = channels.locator('[data-channel="feishu"]');
+    await expect(feishu).toContainText('扫码在飞书中添加联系人，备注「序构」。');
+    // Desktop users can add the contact without scanning.
+    const feishuLink = feishu.getByRole('link', { name: '在电脑上添加' });
+    await expect(feishuLink).toHaveAttribute('target', '_blank');
+    await expect(feishuLink).toHaveAttribute('rel', 'noopener');
+    await expect(feishuLink).toHaveAttribute(
+      'href',
+      /^https:\/\/www\.feishu\.cn\/invitation\/page\/add_contact\//,
+    );
+    await expect(channels.locator('img')).toHaveCount(2);
+
     const channelText = await channels.innerText();
     expect(channelText).not.toContain('获取微信二维码');
     expect(channelText).not.toContain('获取飞书入口');
-    expect(channelText.match(/暂未公开，请先通过邮箱联系/g)).toHaveLength(2);
+    expect(channelText).not.toContain('暂未公开');
 
     const about = page.locator('#about');
     await expect(about.getByRole('heading', { level: 2 })).toHaveText('关于我们');

@@ -417,15 +417,17 @@ test.describe('configured filing and operator values', () => {
     const qr = wecom.getByRole('img', { name: '企业微信二维码' });
     await expect(qr).toBeVisible();
     await expect(qr).toHaveAttribute('src', '/og-default.png');
-    await expect(wecom).toContainText('扫码添加企业微信，备注「预约」。');
+    await expect(wecom).toContainText('扫码添加企业微信，备注「序构」。');
     await expect(wecom).not.toContainText('暂未公开');
 
     const feishu = page.locator('[data-channel="feishu"]');
-    const link = feishu.getByRole('link', { name: '打开飞书' });
+    const feishuQr = feishu.getByRole('img', { name: '飞书二维码' });
+    await expect(feishuQr).toBeVisible();
+    await expect(feishu).toContainText('扫码在飞书中添加联系人，备注「序构」。');
+    const link = feishu.getByRole('link', { name: '在电脑上添加' });
     await expect(link).toHaveAttribute('href', 'https://feishu.example/contact');
     await expect(link).toHaveAttribute('target', '_blank');
     await expect(link).toHaveAttribute('rel', 'noopener');
-    await expect(feishu).toContainText('在飞书中打开联系入口，直接留言。');
     await expect(feishu).not.toContainText('暂未公开');
 
     await expect(page.locator('[data-placeholder-badge]')).toHaveCount(0);
