@@ -6,10 +6,14 @@ import { placeholders, showPlaceholderMarks } from '../config/placeholders';
 const email = placeholders.contactEmail.value;
 const wecomQr = placeholders.wecomQr.value;
 const feishuUrl = placeholders.feishuUrl.value;
+const feishuQr = placeholders.feishuQr.value;
 
 const availability = {
   wecom: { configured: Boolean(wecomQr), placeholder: placeholders.wecomQr.isPlaceholder },
-  feishu: { configured: Boolean(feishuUrl), placeholder: placeholders.feishuUrl.isPlaceholder },
+  feishu: {
+    configured: Boolean(feishuUrl || feishuQr),
+    placeholder: placeholders.feishuUrl.isPlaceholder && placeholders.feishuQr.isPlaceholder,
+  },
   email: { configured: true, placeholder: placeholders.contactEmail.isPlaceholder },
 } as const;
 ---
@@ -46,8 +50,8 @@ const availability = {
                     class="channel-qr"
                     src={wecomQr}
                     alt="企业微信二维码"
-                    width="168"
-                    height="168"
+                    width="220"
+                    height="220"
                     loading="lazy"
                   />
                   <p class="channel-note">{channel.configuredNote}</p>
@@ -60,13 +64,31 @@ const availability = {
               ))}
 
             {channel.id === 'feishu' &&
-              (feishuUrl ? (
+              (feishuQr ? (
+                <>
+                  <img
+                    class="channel-qr"
+                    src={feishuQr}
+                    alt="飞书二维码"
+                    width="220"
+                    height="220"
+                    loading="lazy"
+                  />
+                  {feishuUrl && (
+                    <a class="channel-link" href={feishuUrl} target="_blank" rel="noopener">
+                      在电脑上添加
+                      <ArrowUpRightIcon />
+                    </a>
+                  )}
+                  <p class="channel-note">{channel.qrNote}</p>
+                </>
+              ) : feishuUrl ? (
                 <>
                   <a class="channel-link" href={feishuUrl} target="_blank" rel="noopener">
                     打开飞书
                     <ArrowUpRightIcon />
                   </a>
-                  <p class="channel-note">{channel.configuredNote}</p>
+                  <p class="channel-note">{channel.linkNote}</p>
                 </>
               ) : (
                 <p class="channel-note">
@@ -154,7 +176,7 @@ const availability = {
   }
 
   .channel-qr {
-    width: 168px;
+    width: 220px;
     max-width: 100%;
     height: auto;
     margin-top: 22px;
